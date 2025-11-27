@@ -1,0 +1,156 @@
+"use client";
+
+// Next's Imports
+import Link from "next/link";
+
+// React's Imports
+import { useRef } from "react";
+
+import {
+  Accordion,
+  AccordionItem,
+  AccordionTrigger,
+  AccordionContent,
+} from "@/components/ui/accordion";
+import team from "@/constants/team";
+import { FlipWords } from "@/components/ui/flip-words";
+import { LinkPreview } from "@/components/ui/link-preview";
+import { Icon, EvervaultCard } from "@/components/ui/evervault-card";
+
+// App's External Imports
+import { Mail, Github, Linkedin } from "lucide-react";
+
+const Team = () => {
+  const accordion_ref = useRef({});
+  const container_ref = useRef(null);
+  const words = ["Visionary", "Passionate", "Innovative", "Collaborative"];
+
+  const handle_scroll_to_top = (value) => {
+    const keys = Object.keys(accordion_ref.current);
+    const current_index = keys.indexOf(value);
+
+    if (current_index === 0) {
+      container_ref.current?.scrollIntoView({
+        block: "start",
+        behavior: "smooth",
+      });
+    } else {
+      const previous_value = keys[current_index - 1];
+      const element = accordion_ref.current[previous_value];
+
+      setTimeout(() => {
+        element?.scrollIntoView({
+          block: "start",
+          behavior: "smooth",
+        });
+      }, 100);
+    }
+  };
+
+  return (
+    <div
+      ref={container_ref}
+      className="max-w-[85rem] px-4 py-10 sm:px-6 lg:px-8 lg:py-14 mx-auto"
+    >
+      <div className="mx-auto text-center mb-10 lg:mb-14 pt-24">
+        <div className="text-2xl md:text-3xl mx-auto font-normal text-neutral-400">
+          Meet the&nbsp;
+          <FlipWords words={words} />
+          minds behind QuestIT
+        </div>
+      </div>
+
+      <Accordion
+        type="single"
+        defaultValue="Faculty In-Charges"
+        className="w-full flex flex-col gap-12"
+        onValueChange={handle_scroll_to_top}
+      >
+        {team.map(({ value, title, members }, index) => (
+          <AccordionItem
+            key={index}
+            value={value}
+            className="text-xl"
+            ref={(element) => (accordion_ref.current[value] = element)}
+          >
+            <AccordionTrigger>{title}</AccordionTrigger>
+
+            <AccordionContent className="py-8">
+              <div className="flex flex-col md:grid md:grid-cols-2 gap-y-16">
+                {members
+                  .sort((a, b) =>
+                    value === "Faculty In-Charges"
+                      ? 0
+                      : a.name.localeCompare(b.name)
+                  )
+                  .map(
+                    (
+                      {
+                        name,
+                        image,
+                        designation,
+                        email = "questit@ves.ac.in",
+                        github = "https://github.com/QuestIT-Cell",
+                        linkedin = "https://www.linkedin.com/company/questit-vesit",
+                      },
+                      index
+                    ) => (
+                      <div
+                        key={index}
+                        className="border border-white/[0.2] flex flex-col items-start max-w-[19rem] md:max-w-[22rem] mx-auto p-4 relative h-[30rem]"
+                      >
+                        <Icon className="absolute h-6 w-6 -top-3 -left-3 text-white" />
+                        <Icon className="absolute h-6 w-6 -bottom-3 -left-3 text-white" />
+                        <Icon className="absolute h-6 w-6 -top-3 -right-3 text-white" />
+                        <Icon className="absolute h-6 w-6 -bottom-3 -right-3 text-white" />
+
+                        <EvervaultCard image={image} />
+
+                        <h2 className="text-white mt-4 text-lg font-semibold">
+                          {name}
+                        </h2>
+
+                        <p className="text-sm absolute right-[1.75rem] border font-light border-white/[0.2] rounded-full mt-4 text-white px-2 py-1">
+                          {designation}
+                        </p>
+
+                        <div className="mt-4 flex gap-2">
+                          <Link
+                            aria-label="Email"
+                            href={`mailto:${email}`}
+                            className="inline-flex justify-center items-center size-8 text-sm font-semibold rounded-lg border border-neutral-700 text-neutral-400 hover:bg-neutral-700 focus:outline-none focus:bg-neutral-700 disabled:opacity-50 disabled:pointer-events-none"
+                          >
+                            <Mail className="h-4 w-4 transition text-white" />
+                          </Link>
+
+                          {value != "Faculty In-Charges" && (
+                            <LinkPreview
+                              url={github}
+                              aria-label="GitHub"
+                              className="inline-flex justify-center items-center size-8 text-sm font-semibold rounded-lg border border-neutral-700 text-neutral-400 hover:bg-neutral-700 focus:outline-none focus:bg-neutral-700 disabled:opacity-50 disabled:pointer-events-none"
+                            >
+                              <Github className="h-4 w-4 transition text-white" />
+                            </LinkPreview>
+                          )}
+
+                          <LinkPreview
+                            url={linkedin}
+                            aria-label="LinkedIn"
+                            className="inline-flex justify-center items-center size-8 text-sm font-semibold rounded-lg border border-neutral-700 text-neutral-400 hover:bg-neutral-700 focus:outline-none focus:bg-neutral-700 disabled:opacity-50 disabled:pointer-events-none"
+                          >
+                            <Linkedin className="h-4 w-4 transition text-white" />
+                          </LinkPreview>
+                        </div>
+                      </div>
+                    )
+                  )}
+              </div>
+            </AccordionContent>
+          </AccordionItem>
+        ))}
+      </Accordion>
+    </div>
+  );
+};
+
+export { Team };

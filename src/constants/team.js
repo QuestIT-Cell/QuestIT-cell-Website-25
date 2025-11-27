@@ -1,0 +1,369 @@
+const team = [
+  {
+    value: "Faculty In-Charges",
+    title: "Faculty In-Charges",
+    members: [
+      {
+        name: "Dr. Shalu Chopra",
+        email: "shalu.chopra@ves.ac.in",
+        designation: "Head of Department",
+        linkedin: "https://in.linkedin.com/in/dr-shalu-chopra-45aa0bb4",
+        image:
+          "https://res.cloudinary.com/bytewise0405/image/upload/v1738410344/QuestIT/Team/Faculty%20Advisors/shalu-chopra_jyyyz8.jpg",
+      },
+      {
+        name: "Dr. Manoj Sabnis",
+        designation: "Deputy HOD",
+        email: "manoj.sabnis@ves.ac.in",
+        linkedin: "https://in.linkedin.com/in/manoj-sabnis-36560146",
+        image:
+          "https://res.cloudinary.com/bytewise0405/image/upload/v1738410344/QuestIT/Team/Faculty%20Advisors/manoj-sabnis_yncyqs.jpg",
+      },
+      {
+        name: "Kajal Jewani",
+        designation: "Faculty In-Charge",
+        email: "kajal.jewani@ves.ac.in",
+        linkedin: "https://www.linkedin.com/in/joseph-kajal-bb761a2b",
+        image:
+          "https://res.cloudinary.com/bytewise0405/image/upload/v1738410344/QuestIT/Team/Faculty%20Advisors/kajal-jewani_lbaeml.jpg",
+      },
+      {
+        name: "Charusheela Nehete",
+        designation: "Faculty In-Charge",
+        email: "charusheela.nehete@ves.ac.in",
+        linkedin: "https://in.linkedin.com/in/charusheela-nehete-65436035",
+        image:
+          "https://res.cloudinary.com/bytewise0405/image/upload/v1738410345/QuestIT/Team/Faculty%20Advisors/charusheela-nehete_hli5id.jpg",
+      },
+    ],
+  },
+  {
+    value: "BE Members",
+    title: "BE Members",
+    members: [
+      {
+        name: "Raghav Mundhara",
+        designation: "Technical Head",
+        email: "2021.raghav.mundhara@ves.ac.in",
+        github: "https://github.com/Raghav-Mundhara",
+        linkedin: "https://www.linkedin.com/in/raghav-mundhara",
+        image:
+          "https://res.cloudinary.com/bytewise0405/image/upload/v1736245319/QuestIT/Team/BE/raghav-mundhara_xvser5.jpg",
+      },
+      {
+        name: "Vishal Gori",
+        designation: "Technical Head",
+        email: "2021.vishal.gori@ves.ac.in",
+        github: "https://github.com/Vishal-Gori",
+        linkedin: "https://in.linkedin.com/in/vishal-gori-710106214",
+        image:
+          "https://res.cloudinary.com/bytewise0405/image/upload/v1736258326/QuestIT/Team/BE/vishal-gori_cz7zew.jpg",
+      },
+      {
+        name: "Anket Kadam ",
+        designation: "Technical Head",
+        email: "2021.anket.kadam@ves.ac.in",
+        github: "https://github.com/Anket08042003",
+        linkedin: "https://www.linkedin.com/in/anket-kadam-358b8a260",
+        image:
+          "https://res.cloudinary.com/bytewise0405/image/upload/v1736245320/QuestIT/Team/BE/anket-kadam_lj5i5d.png",
+      },
+      {
+        name: "Siddhant Bhoi",
+        designation: "Secretary",
+        email: "d2021.siddhant.bhoi@ves.ac.in",
+        github: "https://github.com/sidhhu0603",
+        linkedin: "https://www.linkedin.com/in/siddhant-bhoi-3923671a6",
+        image:
+          "https://res.cloudinary.com/bytewise0405/image/upload/v1736258326/QuestIT/Team/BE/siddhant-bhoi_d0hrlu.jpg",
+      },
+      {
+        name: "Ruchita Dalvi",
+        designation: "Graphics Head",
+        email: "d2021.ruchita.dalvi@ves.ac.in",
+        github: "https://github.com/Ruchita-20",
+        linkedin: "https://www.linkedin.com/in/ruchita-dalvi-a11ba7296",
+        image:
+          "https://res.cloudinary.com/bytewise0405/image/upload/v1736258325/QuestIT/Team/BE/ruchita-dalvi_fgnq4p.jpg",
+      },
+      {
+        name: "Siddhi Bhogale",
+        designation: "Technical Head",
+        email: "bhogalesiddhi640@gmail.com",
+        github: "https://github.com/bhogalesiddhi",
+        linkedin: "https://in.linkedin.com/in/bhogalesiddhi",
+        image:
+          "https://res.cloudinary.com/bytewise0405/image/upload/v1736258326/QuestIT/Team/BE/siddhi-bhogale_ekvoig.jpg",
+      },
+      {
+        name: "Soham Phalke",
+        designation: "Content Head",
+        email: "2021.soham.phalke@ves.ac.in",
+        github: "https://github.com/stg2209",
+        linkedin: "https://www.linkedin.com/in/soham-phalke-5084b0261",
+        image:
+          "https://res.cloudinary.com/bytewise0405/image/upload/v1736258326/QuestIT/Team/BE/soham-phalke_m7rgea.jpg",
+      },
+      {
+        name: "Kanak Pendse",
+        email: "kanak.pendse14@gmail.com",
+        designation: "Public Relations Head",
+        linkedin: "https://in.linkedin.com/in/kanak-pendse-832b5a251",
+        image:
+          "https://res.cloudinary.com/bytewise0405/image/upload/v1736258325/QuestIT/Team/BE/kanak-pendse_cwpy2z.jpg",
+      },
+      {
+        name: "Nishtha Joshi",
+        designation: "Secretary",
+        email: "2021.nishtha.joshi@ves.ac.in",
+        github: "https://github.com/joshinishtha99",
+        linkedin: "https://www.linkedin.com/in/joshi-nishtha",
+        image:
+          "https://res.cloudinary.com/bytewise0405/image/upload/v1736258325/QuestIT/Team/BE/nishtha-joshi_rro3yo.jpg",
+      },
+      {
+        name: "Soham Nimbalkar",
+        designation: "Technical Head",
+        github: "https://github.com/NimbalkarSoham",
+        linkedin: "https://in.linkedin.com/in/soham-nimbalkar-58853a252",
+        image:
+          "https://res.cloudinary.com/bytewise0405/image/upload/v1738430274/QuestIT/Team/BE/soham-nimbalkar_pktlrt.jpg",
+      },
+    ],
+  },
+  {
+    value: "TE Members",
+    title: "TE Members",
+    members: [
+      {
+        name: "Ronak Katariya",
+        email: "2022.ronak.katariya@ves.ac.in",
+        github: "https://github.com/ronak03rsk",
+        designation: "SR Public Relations Officer",
+        linkedin: "https://www.linkedin.com/in/ronak-katariya-02877b284",
+        image:
+          "https://res.cloudinary.com/bytewise0405/image/upload/v1736259227/QuestIT/Team/TE/ronak-katariya_nvukhj.png",
+      },
+      {
+        name: "Pranav Titambe",
+        designation: "SR Technical Officer",
+        email: "2022.pranav.titambe@ves.ac.in",
+        github: "https://github.com/Pranavlovescode",
+        linkedin: "https://in.linkedin.com/in/pranav-titambe",
+        image:
+          "https://res.cloudinary.com/bytewise0405/image/upload/v1736244063/QuestIT/Team/TE/pranav-titambe_faqqqs.jpg",
+      },
+      {
+        name: "Mohit Kerkar",
+        designation: "SR Content Writer",
+        email: "2022.mohit.kerkar@ves.ac.in",
+        linkedin: "https://in.linkedin.com/in/mohit-kerkar-a196a9255",
+        image:
+          "https://res.cloudinary.com/bytewise0405/image/upload/v1736259227/QuestIT/Team/TE/mohit-kerkar_i9vpu5.jpg",
+      },
+      {
+        name: "Aryan Dangat",
+        designation: "SR Content Writer",
+        email: "2022.aryan.dangat@ves.ac.in",
+        github: "https://github.com/Aryan2052",
+        linkedin: "https://www.linkedin.com/in/aryan-d-394450199",
+        image:
+          "https://res.cloudinary.com/bytewise0405/image/upload/v1736259228/QuestIT/Team/TE/aryan-dangat_dldwfv.jpg",
+      },
+      {
+        name: "Dhruv Maurya",
+        designation: "SR Graphics Officer",
+        email: "2022.dhruv.maurya@ves.ac.in",
+        github: "https://github.com/Dhruv07Maurya",
+        image:
+          "https://res.cloudinary.com/bytewise0405/image/upload/v1736244062/QuestIT/Team/TE/dhruv-maurya_dqgcsw.jpg",
+      },
+      {
+        name: "Roma Shirodkar",
+        designation: "Deputy Secretary",
+        email: "2022.roma.shirodkar@ves.ac.in",
+        github: "https://github.com/RomaShirodkar19",
+        linkedin: "https://www.linkedin.com/in/roma-shirodkar-3817852b2",
+        image:
+          "https://res.cloudinary.com/bytewise0405/image/upload/v1736259227/QuestIT/Team/TE/roma-shirodkar_iohp46.jpg",
+      },
+      {
+        name: "Eesha Chavan",
+        designation: "Deputy Secretary",
+        email: "2022.eesha.chavan@ves.ac.in",
+        github: "https://github.com/eeshachavan",
+        linkedin: "https://www.linkedin.com/in/eesha-chavan",
+        image:
+          "https://res.cloudinary.com/bytewise0405/image/upload/v1736259228/QuestIT/Team/TE/eesha-chavan_lsh67g.jpg",
+      },
+      {
+        name: "Pratik Patil",
+        designation: "SR Technical Officer",
+        email: "2022.pratik.patil@ves.ac.in",
+        github: "https://github.com/Pratik9113",
+        linkedin: "https://www.linkedin.com/in/pratik-patil-b5681424b",
+        image:
+          "https://res.cloudinary.com/bytewise0405/image/upload/v1736245706/QuestIT/Team/TE/pratik-patil_jt1vpl.png",
+      },
+      {
+        name: "Prajjwal Pandey",
+        designation: "SR Technical Officer",
+        email: "2022.prajjwal.pandey@ves.ac.in",
+        github: "https://github.com/Prajjwal-pep",
+        linkedin: "https://in.linkedin.com/in/prajjwal-pandey-a82b44264",
+        image:
+          "https://res.cloudinary.com/bytewise0405/image/upload/v1736263872/QuestIT/Team/TE/prajjwal-pandey_s66qyy.jpg",
+      },
+      {
+        name: "Sannidhi Kailaje",
+        designation: "SR Graphics Officer",
+        github: "https://github.com/Skailaje",
+        email: "2022.sannidhi.kailaje@ves.ac.in",
+        linkedin: "https://www.linkedin.com/in/sannidhi-kailaje-011a312a4",
+        image:
+          "https://res.cloudinary.com/bytewise0405/image/upload/v1738430294/QuestIT/Team/TE/sannidhi-kailaje_pdurd0.jpg",
+      },
+    ],
+  },
+  {
+    value: "SE Members",
+    title: "SE Members",
+    members: [
+      {
+        name: "Nupur Ghangarekar",
+        designation: "JR Technical Officer",
+        email: "2023.nupur.ghangarekar@ves.ac.in",
+        github: "https://github.com/NupurGhangarekar",
+        linkedin: "https://www.linkedin.com/in/nupur-ghangarekar-60291b291",
+        image:
+          "https://res.cloudinary.com/bytewise0405/image/upload/v1736258903/QuestIT/Team/SE/nupur-ghangarekar_uyebtz.jpg",
+      },
+      {
+        name: "Ayush Karanth",
+        email: "2023.ayush.karanth@ves.ac.in",
+        github: "https://github.com/Ayushkaranth",
+        designation: "JR Public Relations Officer",
+        linkedin: "https://www.linkedin.com/in/ayush-karanth-7276922a4",
+        image:
+          "https://res.cloudinary.com/bytewise0405/image/upload/v1736258903/QuestIT/Team/SE/ayush-karanth_pxhd7n.jpg",
+      },
+      {
+        name: "Monica Ahuja",
+        designation: "JR Graphic Officer",
+        email: "2023.monica.ahuja@ves.ac.in",
+        github: "https://github.com/ahujamonica",
+        linkedin: "https://www.linkedin.com/in/monica-ahuja01",
+        image:
+          "https://res.cloudinary.com/bytewise0405/image/upload/v1736258903/QuestIT/Team/SE/monica-ahuja_smy79q.jpg",
+      },
+      {
+        name: "Arnav Chaudhary",
+        designation: "JR Technical Officer",
+        email: "2023.arnav.chaudhary@ves.ac.in",
+        github: "https://github.com/Arnavch2024",
+        linkedin: "https://www.linkedin.com/in/arnav-chaudhary-2a526928b",
+        image:
+          "https://res.cloudinary.com/bytewise0405/image/upload/v1736258903/QuestIT/Team/SE/arnav-chaudhary_kmysjh.jpg",
+      },
+      {
+        name: "Vaishnavi Avhad",
+        email: "2023.vaishnavi.avhad@ves.ac.in",
+        github: "https://github.com/Vaishnavii-01",
+        designation: "JR Public Relations Officer",
+        linkedin: "https://www.linkedin.com/in/vaishnavi-avhad-056969330",
+        image:
+          "https://res.cloudinary.com/bytewise0405/image/upload/v1738430324/QuestIT/Team/SE/vaishnavi-avhad_nwu1ac.jpg",
+      },
+      {
+        name: "Jay Kerkar",
+        designation: "JR Technical Officer",
+        email: "2023.jay.kerkar@ves.ac.in",
+        github: "https://github.com/jaykerkar0405",
+        linkedin: "https://www.linkedin.com/in/jaykerkar0405",
+        image:
+          "https://res.cloudinary.com/bytewise0405/image/upload/v1736243132/QuestIT/Team/SE/jay-kerkar_ksqatl.png",
+      },
+      {
+        name: "Harshita Singh",
+        email: "2023.harshita.singh@ves.ac.in",
+        github: "https://github.com/HarshitaS01",
+        designation: "JR Public Relations Officer",
+        linkedin: "https://www.linkedin.com/in/harshita-singh-3846302a4",
+        image:
+          "https://res.cloudinary.com/bytewise0405/image/upload/v1736258903/QuestIT/Team/SE/harshita-singh_sxutyq.jpg",
+      },
+      {
+        name: "Nidhi Puthran",
+        designation: "JR Graphics Officer",
+        email: "2023.nidhi.puthran@ves.ac.in",
+        github: "https://github.com/nidhi0810",
+        linkedin: "https://www.linkedin.com/in/nidhi-puthran-2824a9299",
+        image:
+          "https://res.cloudinary.com/bytewise0405/image/upload/v1736258902/QuestIT/Team/SE/nidhi-puthran_qdbo8i.jpg",
+      },
+      {
+        name: "Anushka Sharma",
+        designation: "JR Graphics Officer",
+        email: "2023.anushka.sharma@ves.ac.in",
+        github: "https://github.com/Anu-shhkaa",
+        linkedin: "https://www.linkedin.com/in/anushka-sharma-0543832a1",
+        image:
+          "https://res.cloudinary.com/bytewise0405/image/upload/v1736258902/QuestIT/Team/SE/anushka-sharma_iozkpv.jpg",
+      },
+      {
+        name: "Sameeksha Sankpal",
+        designation: "JR Technical Officer",
+        github: "https://github.com/sameeksha15",
+        email: "2023.sameeksha.sankpal@ves.ac.in",
+        linkedin: "https://www.linkedin.com/in/sameeksha-sankpal-12aa72251",
+        image:
+          "https://res.cloudinary.com/bytewise0405/image/upload/v1736243127/QuestIT/Team/SE/sameeksha-sankpal_ljptpu.jpg",
+      },
+      {
+        name: "Varun Rahatgaonkar",
+        designation: "JR Social Media Manager",
+        email: "2023.varun.rahatgaonkar@ves.ac.in",
+        github: "https://github.com/kingslaye-varun",
+        linkedin: "https://www.linkedin.com/in/varun-rahatgaonkar-448392321",
+        image:
+          "https://res.cloudinary.com/bytewise0405/image/upload/v1736258902/QuestIT/Team/SE/varun-rahatgaonkar_kozoi5.jpg",
+      },
+      {
+        name: "Archit Chitte",
+        designation: "JR Graphics Officer",
+        email: "2023.archit.chitte@ves.ac.in",
+        github: "https://github.com/architchitte",
+        linkedin: "https://in.linkedin.com/in/archit-chitte-4551ba288",
+        image:
+          "https://res.cloudinary.com/bytewise0405/image/upload/v1736258902/QuestIT/Team/SE/archit-chitte_g8h6ti.jpg",
+      },
+      {
+        name: "Shravanya Andhale",
+        designation: "JR Technical Officer",
+        email: "2023.shravanya.andhale@ves.ac.in",
+        github: "https://github.com/Shravanya178",
+        linkedin: "https://www.linkedin.com/in/shravanya-andhale-b729a2314",
+        image:
+          "https://res.cloudinary.com/bytewise0405/image/upload/v1736243128/QuestIT/Team/SE/shravanya-andhale_usemz5.jpg",
+      },
+      {
+        name: "Harsh Kumar",
+        email: "2023.harsh.kumar@ves.ac.in",
+        designation: "JR Social Media Manager",
+        image:
+          "https://res.cloudinary.com/bytewise0405/image/upload/v1736258902/QuestIT/Team/SE/harsh-kumar_m3u0oy.jpg",
+      },
+      {
+        name: "Anish Tawade",
+        designation: "JR Graphics Officer",
+        email: "2023.anish.tawade@ves.ac.in",
+        github: "https://github.com/Anissh280507",
+        linkedin: "https://in.linkedin.com/in/anish-tawade-53a82a1ba",
+        image:
+          "https://res.cloudinary.com/bytewise0405/image/upload/v1736242752/QuestIT/Team/SE/anish-tawade_ejnuxi.jpg",
+      },
+    ],
+  },
+];
+
+export default team;

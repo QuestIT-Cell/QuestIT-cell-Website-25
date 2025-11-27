@@ -1,0 +1,15 @@
+# Next.js build output
+.next/
+
+# VSCode settings
+.vscode/
+
+# Environment files (keep only .env.example)
+.env.local
+
+# Node modules
+node_modules/
+
+# Service worker and Workbox files
+public/sw.js
+public/workbox-*.js
