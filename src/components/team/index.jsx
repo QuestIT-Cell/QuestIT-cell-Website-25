@@ -22,6 +22,7 @@ import { Mail, Github, Linkedin } from "lucide-react";
 
 const Team = () => {
   const accordion_ref = useRef({});
+  const sub_accordion_ref = useRef({});
   const container_ref = useRef(null);
   const words = ["Visionary", "Passionate", "Innovative", "Collaborative"];
 
@@ -47,6 +48,19 @@ const Team = () => {
     }
   };
 
+  const handle_sub_scroll = (subValue, parentValue) => {
+    if (!subValue) return;
+    
+    const element = sub_accordion_ref.current[`${parentValue}-${subValue}`];
+    
+    setTimeout(() => {
+      element?.scrollIntoView({
+        block: "start",
+        behavior: "smooth",
+      });
+    }, 150);
+  };
+
   return (
     <div
       ref={container_ref}
@@ -66,7 +80,7 @@ const Team = () => {
         className="w-full flex flex-col gap-12"
         onValueChange={handle_scroll_to_top}
       >
-        {team.map(({ value, title, members }, index) => (
+        {team.map(({ value, title, members, subGroups }, index) => (
           <AccordionItem
             key={index}
             value={value}
@@ -76,75 +90,163 @@ const Team = () => {
             <AccordionTrigger>{title}</AccordionTrigger>
 
             <AccordionContent className="py-8">
-              <div className="flex flex-col md:grid md:grid-cols-2 gap-y-16">
-                {members
-                  .sort((a, b) =>
-                    value === "Faculty In-Charges"
-                      ? 0
-                      : a.name.localeCompare(b.name)
-                  )
-                  .map(
-                    (
-                      {
-                        name,
-                        image,
-                        designation,
-                        email = "questit@ves.ac.in",
-                        github = "https://github.com/QuestIT-Cell",
-                        linkedin = "https://www.linkedin.com/company/questit-vesit",
-                      },
-                      index
-                    ) => (
-                      <div
-                        key={index}
-                        className="border border-white/[0.2] flex flex-col items-start max-w-[19rem] md:max-w-[22rem] mx-auto p-4 relative h-[30rem]"
-                      >
-                        <Icon className="absolute h-6 w-6 -top-3 -left-3 text-white" />
-                        <Icon className="absolute h-6 w-6 -bottom-3 -left-3 text-white" />
-                        <Icon className="absolute h-6 w-6 -top-3 -right-3 text-white" />
-                        <Icon className="absolute h-6 w-6 -bottom-3 -right-3 text-white" />
+              {/* If it has subGroups (nested structure), render nested accordion */}
+              {subGroups ? (
+                <Accordion
+                  type="single"
+                  collapsible
+                  className="w-full flex flex-col gap-8"
+                  onValueChange={(subValue) => handle_sub_scroll(subValue, value)}
+                >
+                  {subGroups.map(({ value: subValue, title: subTitle, members: subMembers }, subIndex) => (
+                    <AccordionItem
+                      key={subIndex}
+                      value={subValue}
+                      className="text-lg border-l-2 border-neutral-700 pl-4"
+                      ref={(element) => (sub_accordion_ref.current[`${value}-${subValue}`] = element)}
+                    >
+                      <AccordionTrigger>{subTitle}</AccordionTrigger>
 
-                        <EvervaultCard image={image} />
+                      <AccordionContent className="py-8 relative z-10">
+                        <div className="flex flex-col md:grid md:grid-cols-2 gap-y-16">
+                          {subMembers
+                            .sort((a, b) => a.name.localeCompare(b.name))
+                            .map(
+                              (
+                                {
+                                  name,
+                                  image,
+                                  designation,
+                                  email = "questit@ves.ac.in",
+                                  github = "https://github.com/QuestIT-Cell",
+                                  linkedin = "https://www.linkedin.com/company/questit-vesit",
+                                },
+                                memberIndex
+                              ) => (
+                                <div
+                                  key={memberIndex}
+                                  className="border border-white/[0.2] flex flex-col items-start max-w-[19rem] md:max-w-[22rem] mx-auto p-4 relative h-[30rem]"
+                                >
+                                  <Icon className="absolute h-6 w-6 -top-3 -left-3 text-white" />
+                                  <Icon className="absolute h-6 w-6 -bottom-3 -left-3 text-white" />
+                                  <Icon className="absolute h-6 w-6 -top-3 -right-3 text-white" />
+                                  <Icon className="absolute h-6 w-6 -bottom-3 -right-3 text-white" />
 
-                        <h2 className="text-white mt-4 text-lg font-semibold">
-                          {name}
-                        </h2>
+                                  <EvervaultCard image={image} />
 
-                        <p className="text-sm absolute right-[1.75rem] border font-light border-white/[0.2] rounded-full mt-4 text-white px-2 py-1">
-                          {designation}
-                        </p>
+                                  <h2 className="text-white mt-4 text-lg font-semibold">
+                                    {name}
+                                  </h2>
 
-                        <div className="mt-4 flex gap-2">
-                          <Link
-                            aria-label="Email"
-                            href={`mailto:${email}`}
-                            className="inline-flex justify-center items-center size-8 text-sm font-semibold rounded-lg border border-neutral-700 text-neutral-400 hover:bg-neutral-700 focus:outline-none focus:bg-neutral-700 disabled:opacity-50 disabled:pointer-events-none"
-                          >
-                            <Mail className="h-4 w-4 transition text-white" />
-                          </Link>
+                                  <p className="text-sm absolute right-[1.75rem] border font-light border-white/[0.2] rounded-full mt-4 text-white px-2 py-1">
+                                    {designation}
+                                  </p>
 
-                          {value != "Faculty In-Charges" && (
-                            <LinkPreview
-                              url={github}
-                              aria-label="GitHub"
+                                  <div className="mt-4 flex gap-2">
+                                    <Link
+                                      aria-label="Email"
+                                      href={`mailto:${email}`}
+                                      className="inline-flex justify-center items-center size-8 text-sm font-semibold rounded-lg border border-neutral-700 text-neutral-400 hover:bg-neutral-700 focus:outline-none focus:bg-neutral-700 disabled:opacity-50 disabled:pointer-events-none"
+                                    >
+                                      <Mail className="h-4 w-4 transition text-white" />
+                                    </Link>
+
+                                    <LinkPreview
+                                      url={github}
+                                      aria-label="GitHub"
+                                      className="inline-flex justify-center items-center size-8 text-sm font-semibold rounded-lg border border-neutral-700 text-neutral-400 hover:bg-neutral-700 focus:outline-none focus:bg-neutral-700 disabled:opacity-50 disabled:pointer-events-none"
+                                    >
+                                      <Github className="h-4 w-4 transition text-white" />
+                                    </LinkPreview>
+
+                                    <LinkPreview
+                                      url={linkedin}
+                                      aria-label="LinkedIn"
+                                      className="inline-flex justify-center items-center size-8 text-sm font-semibold rounded-lg border border-neutral-700 text-neutral-400 hover:bg-neutral-700 focus:outline-none focus:bg-neutral-700 disabled:opacity-50 disabled:pointer-events-none"
+                                    >
+                                      <Linkedin className="h-4 w-4 transition text-white" />
+                                    </LinkPreview>
+                                  </div>
+                                </div>
+                              )
+                            )}
+                        </div>
+                      </AccordionContent>
+                    </AccordionItem>
+                  ))}
+                </Accordion>
+              ) : (
+                /* Regular members display for Faculty In-Charges */
+                <div className="flex flex-col md:grid md:grid-cols-2 gap-y-16">
+                  {members
+                    .sort((a, b) =>
+                      value === "Faculty In-Charges"
+                        ? 0
+                        : a.name.localeCompare(b.name)
+                    )
+                    .map(
+                      (
+                        {
+                          name,
+                          image,
+                          designation,
+                          email = "questit@ves.ac.in",
+                          github = "https://github.com/QuestIT-Cell",
+                          linkedin = "https://www.linkedin.com/company/questit-vesit",
+                        },
+                        memberIndex
+                      ) => (
+                        <div
+                          key={memberIndex}
+                          className="border border-white/[0.2] flex flex-col items-start max-w-[19rem] md:max-w-[22rem] mx-auto p-4 relative h-[30rem]"
+                        >
+                          <Icon className="absolute h-6 w-6 -top-3 -left-3 text-white" />
+                          <Icon className="absolute h-6 w-6 -bottom-3 -left-3 text-white" />
+                          <Icon className="absolute h-6 w-6 -top-3 -right-3 text-white" />
+                          <Icon className="absolute h-6 w-6 -bottom-3 -right-3 text-white" />
+
+                          <EvervaultCard image={image} />
+
+                          <h2 className="text-white mt-4 text-lg font-semibold">
+                            {name}
+                          </h2>
+
+                          <p className="text-sm absolute right-[1.75rem] border font-light border-white/[0.2] rounded-full mt-4 text-white px-2 py-1">
+                            {designation}
+                          </p>
+
+                          <div className="mt-4 flex gap-2">
+                            <Link
+                              aria-label="Email"
+                              href={`mailto:${email}`}
                               className="inline-flex justify-center items-center size-8 text-sm font-semibold rounded-lg border border-neutral-700 text-neutral-400 hover:bg-neutral-700 focus:outline-none focus:bg-neutral-700 disabled:opacity-50 disabled:pointer-events-none"
                             >
-                              <Github className="h-4 w-4 transition text-white" />
-                            </LinkPreview>
-                          )}
+                              <Mail className="h-4 w-4 transition text-white" />
+                            </Link>
 
-                          <LinkPreview
-                            url={linkedin}
-                            aria-label="LinkedIn"
-                            className="inline-flex justify-center items-center size-8 text-sm font-semibold rounded-lg border border-neutral-700 text-neutral-400 hover:bg-neutral-700 focus:outline-none focus:bg-neutral-700 disabled:opacity-50 disabled:pointer-events-none"
-                          >
-                            <Linkedin className="h-4 w-4 transition text-white" />
-                          </LinkPreview>
+                            {value != "Faculty In-Charges" && (
+                              <LinkPreview
+                                url={github}
+                                aria-label="GitHub"
+                                className="inline-flex justify-center items-center size-8 text-sm font-semibold rounded-lg border border-neutral-700 text-neutral-400 hover:bg-neutral-700 focus:outline-none focus:bg-neutral-700 disabled:opacity-50 disabled:pointer-events-none"
+                              >
+                                <Github className="h-4 w-4 transition text-white" />
+                              </LinkPreview>
+                            )}
+
+                            <LinkPreview
+                              url={linkedin}
+                              aria-label="LinkedIn"
+                              className="inline-flex justify-center items-center size-8 text-sm font-semibold rounded-lg border border-neutral-700 text-neutral-400 hover:bg-neutral-700 focus:outline-none focus:bg-neutral-700 disabled:opacity-50 disabled:pointer-events-none"
+                            >
+                              <Linkedin className="h-4 w-4 transition text-white" />
+                            </LinkPreview>
+                          </div>
                         </div>
-                      </div>
-                    )
-                  )}
-              </div>
+                      )
+                    )}
+                </div>
+              )}
             </AccordionContent>
           </AccordionItem>
         ))}

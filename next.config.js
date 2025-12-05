@@ -20,6 +20,10 @@ const next_config = {
         pathname: "/bytewise0405/**",
         hostname: "res.cloudinary.com",
       },
+      {
+        protocol: "https",
+        hostname: "ui-avatars.com",
+      },
     ],
   },
 };

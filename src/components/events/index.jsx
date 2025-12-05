@@ -171,23 +171,23 @@ const Events = ({ featured = false }) => {
                     exit={{ opacity: 0 }}
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
-                    className="text-base h-52 md:h-[5.5rem] pb-5 text-ellipsis flex flex-col items-start gap-4 overflow-auto text-neutral-400 [mask:linear-gradient(to_bottom,white,white,transparent)] [scrollbar-width:none] [-ms-overflow-style:none] [-webkit-overflow-scrolling:touch]"
+                    className="text-base h-52 md:h-fit max-h-[20rem] pb-5 text-ellipsis flex flex-col items-start gap-4 overflow-auto text-neutral-400 [scrollbar-width:none] [-ms-overflow-style:none] [-webkit-overflow-scrolling:touch]"
                   >
                     {active.description}
+
+                    {active.speakers && (
+                      <>
+                        <motion.h3 className="font-medium text-neutral-200 text-xl mt-4">
+                          Speakers
+                        </motion.h3>
+
+                        <div className="pt-2 flex flex-row items-center justify-start mb-4 w-full">
+                          <AnimatedTooltip items={active.speakers} />
+                        </div>
+                      </>
+                    )}
                   </motion.div>
                 </div>
-
-                {active.speakers && (
-                  <>
-                    <motion.h3 className="font-medium px-4 text-neutral-200 text-xl">
-                      Speakers
-                    </motion.h3>
-
-                    <div className="pt-4 relative px-4 flex flex-row items-center justify-start mb-10 w-full">
-                      <AnimatedTooltip items={active.speakers} />
-                    </div>
-                  </>
-                )}
               </div>
             </motion.div>
           </div>

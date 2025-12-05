@@ -5,7 +5,9 @@
 .vscode/
 
 # Environment files (keep only .env.example)
+.env
 .env.local
+.env*.local
 
 # Node modules
 node_modules/

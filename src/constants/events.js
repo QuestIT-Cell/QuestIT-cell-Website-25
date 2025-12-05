@@ -167,6 +167,82 @@ const events = [
       "Workshop comprised of Node.js, Express.js, API development, Postman, and MongoDB Atlas. Participants learned about the advantages of Node.js, middleware, routing, and RESTful API principles. The session included practical demonstrations of CRUD operations using Node.js and MongoDB Atlas, along with API testing and development using Postman.",
   },
   {
+    date: "September 2025",
+    title: "SIH Insider",
+    speakers: [
+      {
+        id: 1,
+        name: "Shravani Rasam",
+        designation: "SIH Champion",
+        image:
+          "https://ui-avatars.com/api/?name=Shravani+Rasam&background=0D8ABC&color=fff&size=200",
+      },
+      {
+        id: 2,
+        name: "Darshan Khapekar",
+        designation: "SIH Champion",
+        image:
+          "https://ui-avatars.com/api/?name=Darshan+Khapekar&background=0D8ABC&color=fff&size=200",
+      },
+    ],
+    image: "/images/SIH Insider.jpg",
+    description:
+      "SIH Insider brings past SIH champions Shravani Rasam and Darshan Khapekar to share their real journey—from late-night brainstorming to the national stage. Two voices, one roadmap, and invaluable insights. If SIH 2025 is on your mind, this September workshop is your chance to get ahead.",
+  },
+  {
+    date: "October 2025",
+    title: "TestDrive - From Manual to Automation",
+    speakers: [
+      {
+        id: 1,
+        name: "Mr. Siddharth Rawlani",
+        designation: "Trading Technologies",
+        image:
+          "https://ui-avatars.com/api/?name=Siddharth+Rawlani&background=0D8ABC&color=fff&size=200",
+      },
+    ],
+    image: "/images/Test Drive.jpg",
+    description:
+      "TestDrive – From Manual to Automation is an October workshop led by Siddharth Rawlani from Trading Technologies. Learn to accelerate your workflow, master automation tools and frameworks, and explore real FinTech testing practices. This session offers industry insights, practical guidance, and a clear roadmap for moving beyond manual testing.",
+  },
+  {
+    date: "October 2025",
+    title: "CodeFlix: ML Special",
+    speakers: [
+      {
+        id: 1,
+        name: "Vaishnavi Avhad",
+        designation: "Workshop Instructor",
+        image:
+          "https://ui-avatars.com/api/?name=Vaishnavi+Avhad&background=0D8ABC&color=fff&size=200",
+      },
+      {
+        id: 2,
+        name: "Harshita Singh",
+        designation: "Workshop Instructor",
+        image:
+          "https://ui-avatars.com/api/?name=Harshita+Singh&background=0D8ABC&color=fff&size=200",
+      },
+      {
+        id: 3,
+        name: "Arnav Chaudhary",
+        designation: "Workshop Instructor",
+        image:
+          "https://ui-avatars.com/api/?name=Arnav+Chaudhary&background=0D8ABC&color=fff&size=200",
+      },
+      {
+        id: 4,
+        name: "Atharva Lotankar",
+        designation: "Workshop Instructor",
+        image:
+          "https://ui-avatars.com/api/?name=Atharva+Lotankar&background=0D8ABC&color=fff&size=200",
+      },
+    ],
+    image: "/images/CodeFlix.png",
+    description:
+      "CodeFlix: ML Special is a 2-day beginner-friendly workshop this October featuring Vaishnavi Avhad, Harshita Singh, Arnav Chaudhary, and Atharva Lotankar. SE students will explore how machines learn from data, how intelligence forms, and how platforms like Netflix predict choices in this hands-on introduction to AI and ML.",
+  },
+  {
     date: "March 2025",
     title: "Invictus 2025",
     image:
