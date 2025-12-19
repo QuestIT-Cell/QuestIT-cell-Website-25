@@ -1,5 +1,5 @@
 // App's External Imports
-import { Home, Mail, Users, Calendar } from "lucide-react";
+import { Home, Mail, Users, Calendar, UserPlus, MessageSquare } from "lucide-react";
 
 const menu = [
   {
@@ -20,10 +20,22 @@ const menu = [
     icon: <Calendar />,
   },
   {
+    name: "Registration",
+    path: "/registration",
+    icon: <UserPlus />,
+    mobile_nav: true,
+  },
+  {
+    name: "Feedback",
+    path: "/feedback",
+    icon: <MessageSquare />,
+    mobile_nav: true,
+  },
+  {
     name: "Team",
     path: "/team",
     icon: <Users />,
-    mobile_nav: true,
+    mobile_nav: false,
   },
   {
     icon: <Mail />,
