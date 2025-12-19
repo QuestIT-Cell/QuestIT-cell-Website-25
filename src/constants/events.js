@@ -173,16 +173,14 @@ const events = [
       {
         id: 1,
         name: "Shravani Rasam",
-        designation: "SIH Champion",
-        image:
-          "https://ui-avatars.com/api/?name=Shravani+Rasam&background=0D8ABC&color=fff&size=200",
+        designation: "Technical Head & SIH 2x Winner",
+        image: "/images/speaker_photos/sih_insider/shravani_rasam.png",
       },
       {
         id: 2,
         name: "Darshan Khapekar",
-        designation: "SIH Champion",
-        image:
-          "https://ui-avatars.com/api/?name=Darshan+Khapekar&background=0D8ABC&color=fff&size=200",
+        designation: "SIH 2x Winner",
+        image: "/images/speaker_photos/sih_insider/darshan_khapekar.png",
       },
     ],
     image: "/images/SIH Insider.jpg",
@@ -196,9 +194,8 @@ const events = [
       {
         id: 1,
         name: "Mr. Siddharth Rawlani",
-        designation: "Trading Technologies",
-        image:
-          "https://ui-avatars.com/api/?name=Siddharth+Rawlani&background=0D8ABC&color=fff&size=200",
+        designation: "Automation Engineer at Trading Technologies",
+        image: "/images/speaker_photos/TestDrive/siddharth_rawlani.png",
       },
     ],
     image: "/images/Test Drive.jpg",
@@ -212,30 +209,26 @@ const events = [
       {
         id: 1,
         name: "Vaishnavi Avhad",
-        designation: "Workshop Instructor",
-        image:
-          "https://ui-avatars.com/api/?name=Vaishnavi+Avhad&background=0D8ABC&color=fff&size=200",
+        designation: "Sr. Technical Officer",
+        image: "/images/speaker_photos/codeflix/vaishnavi_avhad.png",
       },
       {
         id: 2,
         name: "Harshita Singh",
-        designation: "Workshop Instructor",
-        image:
-          "https://ui-avatars.com/api/?name=Harshita+Singh&background=0D8ABC&color=fff&size=200",
+        designation: "Sr. Technical Officer",
+        image: "/images/speaker_photos/codeflix/harshita_singh.png",
       },
       {
         id: 3,
         name: "Arnav Chaudhary",
-        designation: "Workshop Instructor",
-        image:
-          "https://ui-avatars.com/api/?name=Arnav+Chaudhary&background=0D8ABC&color=fff&size=200",
+        designation: "Sr. Technical Officer",
+        image: "/images/speaker_photos/codeflix/arnav_chaudhary.png",
       },
       {
         id: 4,
         name: "Atharva Lotankar",
-        designation: "Workshop Instructor",
-        image:
-          "https://ui-avatars.com/api/?name=Atharva+Lotankar&background=0D8ABC&color=fff&size=200",
+        designation: "Sr. Technical Officer",
+        image: "/images/speaker_photos/codeflix/atharva_lotankar.png",
       },
     ],
     image: "/images/CodeFlix.png",

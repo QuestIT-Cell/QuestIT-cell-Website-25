@@ -79,7 +79,7 @@ const Events = ({ featured = false }) => {
   useEffect(() => {
     function on_key_down(event) {
       if (event.key === "Escape") {
-        set_active(false);
+        set_active(null);
       }
     }
 
