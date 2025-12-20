@@ -349,7 +349,7 @@ const team = [
             name: "Soniya Lulla",
             designation: "JR Public Relations Officer",
             email: "2024.soniya.lulla@ves.ac.in",
-            github: "https://github.com/QuestIT-Cell",
+            github: "https://github.com/lullasoniya4-dotcom",
             linkedin: "https://www.linkedin.com/in/soniya-lulla-36b072338/",
             image: "/images/team2025/seMembers/SoniyaLulla.png",
           },
