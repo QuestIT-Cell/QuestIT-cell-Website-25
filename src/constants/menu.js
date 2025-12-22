@@ -20,11 +20,12 @@ const menu = [
     icon: <Calendar />,
   },
   {
-    name: "HashQuest",
-    path: "#",
+    name: "QuestIT Editorial",
+    path: "https://questit-editorial.hashnode.dev/",
     icon: <NotebookPen />,
     special: true,
-    mobile_nav: true, // Assuming it should appear in mobile nav too? User didn't specify, but safer to include.
+    mobile_nav: true,
+    external: true,
   },
   {
     name: "WorkshopToday",

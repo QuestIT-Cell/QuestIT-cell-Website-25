@@ -27,7 +27,7 @@ const Footer = () => {
         </Link>
 
         <ul className="md:-mt-6 flex flex-wrap justify-center gap-6 md:gap-8 lg:gap-12">
-          {menu.map(({ name, path, dropdown }, index) => (
+          {menu.map(({ name, path, dropdown, external }, index) => (
             <li key={index} className="relative group">
               {dropdown ? (
                 <>
@@ -46,6 +46,15 @@ const Footer = () => {
                     ))}
                   </div>
                 </>
+              ) : external ? (
+                <a
+                  href={path}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-white transition hover:text-[#00A3FF]"
+                >
+                  {name}
+                </a>
               ) : (
                 <Link
                   href={path}

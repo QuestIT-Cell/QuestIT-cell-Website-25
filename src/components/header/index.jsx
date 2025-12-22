@@ -87,19 +87,37 @@ const Header = () => {
                           </ul>
                         </>
                       ) : item.special ? (
-                        <Link
-                          href={item.path}
-                          className="relative overflow-hidden group/link flex py-2 text-base lg:text-sm font-medium lg:inline-flex lg:px-3 lg:py-1.5 text-white bg-neutral-800 rounded-[1.5rem] border border-neutral-700 hover:border-cyan-500/50 hover:bg-neutral-800/80 transition-all duration-300 ml-1"
-                        >
-                          <span className="relative z-10 flex items-center gap-1.5">
-                            <span className="text-cyan-500 group-hover/link:text-cyan-400 transition-colors">
-                              {item.icon}
+                        item.external ? (
+                          <a
+                            href={item.path}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="relative overflow-hidden group/link flex py-2 text-base lg:text-sm font-medium lg:inline-flex lg:px-3 lg:py-1.5 text-white bg-neutral-800 rounded-[1.5rem] border border-neutral-700 hover:border-cyan-500/50 hover:bg-neutral-800/80 transition-all duration-300 ml-1"
+                          >
+                            <span className="relative z-10 flex items-center gap-1.5">
+                              <span className="text-cyan-500 group-hover/link:text-cyan-400 transition-colors">
+                                {item.icon}
+                              </span>
+                              <span className="group-hover/link:text-cyan-300 transition-colors">
+                                {item.name}
+                              </span>
                             </span>
-                            <span className="group-hover/link:text-cyan-300 transition-colors">
-                              {item.name}
+                          </a>
+                        ) : (
+                          <Link
+                            href={item.path}
+                            className="relative overflow-hidden group/link flex py-2 text-base lg:text-sm font-medium lg:inline-flex lg:px-3 lg:py-1.5 text-white bg-neutral-800 rounded-[1.5rem] border border-neutral-700 hover:border-cyan-500/50 hover:bg-neutral-800/80 transition-all duration-300 ml-1"
+                          >
+                            <span className="relative z-10 flex items-center gap-1.5">
+                              <span className="text-cyan-500 group-hover/link:text-cyan-400 transition-colors">
+                                {item.icon}
+                              </span>
+                              <span className="group-hover/link:text-cyan-300 transition-colors">
+                                {item.name}
+                              </span>
                             </span>
-                          </span>
-                        </Link>
+                          </Link>
+                        )
                       ) : (
                         <Link
                           href={item.path}
@@ -124,20 +142,38 @@ const Header = () => {
             .filter(({ mobile_nav }) => {
               return mobile_nav;
             })
-            .map(({ name, path, icon }, index) => (
-              <Link
-                key={index}
-                href={path}
-                className="inline-flex flex-col items-center justify-center px-5 hover:bg-gray-800 group"
-              >
-                <span className="w-5 h-5 mb-2 text-gray-400 group-hover:text-cyan-500">
-                  {icon}
-                </span>
+            .map(({ name, path, icon, external }, index) => (
+              external ? (
+                <a
+                  key={index}
+                  href={path}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex flex-col items-center justify-center px-5 hover:bg-gray-800 group"
+                >
+                  <span className="w-5 h-5 mb-2 text-gray-400 group-hover:text-cyan-500">
+                    {icon}
+                  </span>
 
-                <span className="text-sm text-gray-400 group-hover:text-cyan-500">
-                  {name}
-                </span>
-              </Link>
+                  <span className="text-sm text-gray-400 group-hover:text-cyan-500">
+                    {name}
+                  </span>
+                </a>
+              ) : (
+                <Link
+                  key={index}
+                  href={path}
+                  className="inline-flex flex-col items-center justify-center px-5 hover:bg-gray-800 group"
+                >
+                  <span className="w-5 h-5 mb-2 text-gray-400 group-hover:text-cyan-500">
+                    {icon}
+                  </span>
+
+                  <span className="text-sm text-gray-400 group-hover:text-cyan-500">
+                    {name}
+                  </span>
+                </Link>
+              )
             ))}
         </div>
       </div>
