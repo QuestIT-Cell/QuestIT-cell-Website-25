@@ -27,16 +27,36 @@ const Footer = () => {
         </Link>
 
         <ul className="md:-mt-6 flex flex-wrap justify-center gap-6 md:gap-8 lg:gap-12">
-          {menu.map(({ name, path }, index) => (
-            <li key={index}>
-              <Link
-                href={path}
-                className="text-white transition hover:text-[#00A3FF]"
-              >
-                {name}
-              </Link>
+          {menu.map(({ name, path, dropdown }, index) => (
+            <li key={index} className="relative group">
+              {dropdown ? (
+                <>
+                  <span className="text-white transition hover:text-[#00A3FF] cursor-pointer">
+                    {name}
+                  </span>
+                  <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:block w-32 bg-neutral-800 rounded-md shadow-lg py-1 z-50">
+                    {dropdown.map((item, subIndex) => (
+                      <Link
+                        key={subIndex}
+                        href={item.path}
+                        className="block px-4 py-2 text-sm text-gray-200 hover:bg-neutral-700 hover:text-[#00A3FF] transition"
+                      >
+                        {item.name}
+                      </Link>
+                    ))}
+                  </div>
+                </>
+              ) : (
+                <Link
+                  href={path}
+                  className="text-white transition hover:text-[#00A3FF]"
+                >
+                  {name}
+                </Link>
+              )}
             </li>
           ))}
+
         </ul>
 
         <ul className="mt-12 flex justify-center gap-6 md:gap-8">
@@ -68,7 +88,7 @@ const Footer = () => {
           <li>
             <LinkPreview
               aria-label="Instagram"
-              url="https://www.instagram.com/questit_cell"
+              url="https://www.instagram.com/questit_cell?igsh=MWgzNGdzYnUxanF5Yg=="
             >
               <Instagram className="h-6 w-6 transition text-white hover:text-[#00A3FF]" />
             </LinkPreview>

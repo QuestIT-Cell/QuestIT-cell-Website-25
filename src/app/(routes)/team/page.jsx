@@ -7,7 +7,7 @@ export const metadata = meta_data;
 
 const Team = () => {
   return (
-    <TracingBeam className="px-4 mb-7 max-h-[50%]">
+    <TracingBeam className="w-full max-w-none px-4 mb-7 max-h-[50%]">
       <TeamComponent />
     </TracingBeam>
   );

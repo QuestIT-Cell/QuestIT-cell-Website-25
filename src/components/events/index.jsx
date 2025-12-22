@@ -171,7 +171,7 @@ const Events = ({ featured = false }) => {
                     exit={{ opacity: 0 }}
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
-                    className="text-base h-52 md:h-fit max-h-[20rem] pb-5 text-ellipsis flex flex-col items-start gap-4 overflow-auto text-neutral-400 [scrollbar-width:none] [-ms-overflow-style:none] [-webkit-overflow-scrolling:touch]"
+                    className="text-base flex-1 h-full max-h-[50vh] md:max-h-[60vh] pb-5 text-ellipsis flex flex-col items-start gap-4 overflow-y-auto text-neutral-400"
                   >
                     {active.description}
 
@@ -194,17 +194,17 @@ const Events = ({ featured = false }) => {
         ) : null}
       </AnimatePresence>
 
-      <ul className="max-w-2xl mx-auto w-full grid grid-cols-1 md:grid-cols-2 items-start gap-4">
+      <ul className="w-full max-w-none px-4 md:px-10 mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 items-start gap-4">
         {events
           .sort((a, b) => new Date(b.date) - new Date(a.date))
           .map((event, index) => {
-            if (featured && index < 4) {
+            if (featured && index < 6) {
               return (
                 <motion.div
                   key={index}
                   onClick={() => set_active(event)}
                   layoutId={`event-${event.title}-${id}`}
-                  className="ml-4 p-4 flex flex-col hover:bg-neutral-900 rounded-xl cursor-pointer"
+                  className="p-4 flex flex-col hover:bg-neutral-900 rounded-xl cursor-pointer"
                 >
                   <div className="flex gap-4 flex-col w-full">
                     <motion.div>

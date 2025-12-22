@@ -50,9 +50,9 @@ const Team = () => {
 
   const handle_sub_scroll = (subValue, parentValue) => {
     if (!subValue) return;
-    
+
     const element = sub_accordion_ref.current[`${parentValue}-${subValue}`];
-    
+
     setTimeout(() => {
       element?.scrollIntoView({
         block: "start",
@@ -64,9 +64,9 @@ const Team = () => {
   return (
     <div
       ref={container_ref}
-      className="max-w-[85rem] px-4 py-10 sm:px-6 lg:px-8 lg:py-14 mx-auto"
+      className="w-full max-w-none px-4 py-10 sm:px-6 lg:px-8 lg:py-14 mx-auto"
     >
-      <div className="mx-auto text-center mb-10 lg:mb-14 pt-24">
+      <div className="mx-auto text-center mb-10 lg:mb-14 pt-40">
         <div className="text-2xl md:text-3xl mx-auto font-normal text-neutral-400">
           Meet the&nbsp;
           <FlipWords words={words} />
@@ -108,7 +108,7 @@ const Team = () => {
                       <AccordionTrigger>{subTitle}</AccordionTrigger>
 
                       <AccordionContent className="py-8 relative z-10">
-                        <div className="flex flex-col md:grid md:grid-cols-2 gap-y-16">
+                        <div className="flex flex-wrap justify-center gap-10 w-full max-w-none mx-auto">
                           {subMembers
                             .sort((a, b) => a.name.localeCompare(b.name))
                             .map(
@@ -176,8 +176,7 @@ const Team = () => {
                   ))}
                 </Accordion>
               ) : (
-                /* Regular members display for Faculty In-Charges */
-                <div className="flex flex-col md:grid md:grid-cols-2 gap-y-16">
+                <div className="flex flex-wrap justify-center gap-10 w-full max-w-none mx-auto">
                   {members
                     .sort((a, b) =>
                       value === "Faculty In-Charges"

@@ -26,10 +26,10 @@ const About = () => {
 
       <TextGenerateEffect
         words={about}
-        className="bg-neutral-900 rounded-xl p-7 max-w-2xl mx-auto"
+        className="bg-neutral-900 rounded-xl p-7 w-full max-w-none mx-auto"
       />
 
-      <div className="grid grid-cols-1 md:grid-cols-2 max-w-2xl mx-auto gap-6 my-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 w-full max-w-none mx-auto gap-6 my-6">
         <div className="bg-neutral-900 rounded-xl py-2">
           <MembersSplitChart />
         </div>

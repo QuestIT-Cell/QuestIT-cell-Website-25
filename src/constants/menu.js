@@ -1,5 +1,5 @@
 // App's External Imports
-import { Home, Mail, Users, Calendar, UserPlus, MessageSquare } from "lucide-react";
+import { Home, Mail, Users, Calendar, UserPlus, MessageSquare, NotebookPen } from "lucide-react";
 
 const menu = [
   {
@@ -15,21 +15,34 @@ const menu = [
   },
   {
     name: "Events",
-    path: "/#events",
+    path: "/events",
     mobile_nav: true,
     icon: <Calendar />,
   },
   {
-    name: "Registration",
-    path: "/registration",
-    icon: <UserPlus />,
-    mobile_nav: true,
+    name: "HashQuest",
+    path: "#",
+    icon: <NotebookPen />,
+    special: true,
+    mobile_nav: true, // Assuming it should appear in mobile nav too? User didn't specify, but safer to include.
   },
   {
-    name: "Feedback",
-    path: "/feedback",
-    icon: <MessageSquare />,
+    name: "WorkshopToday",
+    path: "#",
+    icon: <UserPlus />, // Using UserPlus as generic icon for now
     mobile_nav: true,
+    dropdown: [
+      {
+        name: "Registration",
+        path: "/registration",
+        icon: <UserPlus />,
+      },
+      {
+        name: "Feedback",
+        path: "/feedback",
+        icon: <MessageSquare />,
+      },
+    ],
   },
   {
     name: "Team",

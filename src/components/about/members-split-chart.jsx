@@ -1,7 +1,8 @@
 "use client";
 
 // React's Imports
-import { useMemo } from "react";
+// React's Imports
+import { useMemo, useState } from "react";
 
 // App's Internal Imports
 import {
@@ -16,15 +17,23 @@ import {
   ChartContainer,
   ChartTooltipContent,
 } from "@/components/ui/chart";
+import { Button } from "@/components/ui/button";
 
 // App's External Imports
 import { Pie, Label, PieChart } from "recharts";
 
-const data = [
-  { category: "TE", members: 10, fill: "hsl(var(--chart-2))" },
-  { category: "SE", members: 15, fill: "hsl(var(--chart-3))" },
-  { category: "BE", members: 10, fill: "hsl(var(--chart-1))" },
-];
+const chartData = {
+  "2024-25": [
+    { category: "TE", members: 10, fill: "hsl(var(--chart-2))" },
+    { category: "SE", members: 15, fill: "hsl(var(--chart-3))" },
+    { category: "BE", members: 10, fill: "hsl(var(--chart-1))" },
+  ],
+  "2025-26": [
+    { category: "TE", members: 16, fill: "hsl(var(--chart-2))" },
+    { category: "SE", members: 17, fill: "hsl(var(--chart-3))" },
+    { category: "BE", members: 7, fill: "hsl(var(--chart-1))" },
+  ],
+};
 
 const config = {
   members: {
@@ -45,15 +54,38 @@ const config = {
 };
 
 const MembersSplitChart = () => {
+  const [activeYear, setActiveYear] = useState("2025-26");
+
+  const currentData = useMemo(() => chartData[activeYear], [activeYear]);
+
   const total_members = useMemo(() => {
-    return data.reduce((acc, { members }) => acc + members, 0);
-  }, []);
+    return currentData.reduce((acc, { members }) => acc + members, 0);
+  }, [currentData]);
 
   return (
     <Card className="flex flex-col bg-neutral-900 border-none">
-      <CardHeader>
-        <CardTitle>Members Split</CardTitle>
-        <CardDescription>August 2024 - 2025</CardDescription>
+      <CardHeader className="flex flex-row items-center justify-between pb-2">
+        <div className="space-y-1">
+          <CardTitle>Members Split</CardTitle>
+          <CardDescription>
+            {activeYear === "2024-25"
+              ? "August 2024 - 2025"
+              : "August 2025 - 2026"}
+          </CardDescription>
+        </div>
+        <div className="flex gap-1 bg-neutral-800 p-1 rounded-lg">
+          {Object.keys(chartData).map((year) => (
+            <Button
+              key={year}
+              variant={activeYear === year ? "secondary" : "ghost"}
+              size="sm"
+              className="h-7 px-3 text-xs"
+              onClick={() => setActiveYear(year)}
+            >
+              {year}
+            </Button>
+          ))}
+        </div>
       </CardHeader>
 
       <CardContent className="flex-1 pb-0">
@@ -67,7 +99,7 @@ const MembersSplitChart = () => {
               content={<ChartTooltipContent hideLabel />}
             />
             <Pie
-              data={data}
+              data={currentData}
               strokeWidth={5}
               innerRadius={60}
               dataKey="members"

@@ -7,7 +7,7 @@ export const metadata = meta_data;
 
 const FeedbackPage = () => {
   return (
-    <TracingBeam className="px-4 mb-7">
+    <TracingBeam className="w-full max-w-none px-4 mb-7">
       <Feedback />
     </TracingBeam>
   );

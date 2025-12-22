@@ -44,7 +44,7 @@ const RootLayout = ({ children }) => {
 
   return (
     <html lang="en" className="dark scroll-smooth">
-      <body className={`antialiased ${poppins.className}`}>
+      <body className={`antialiased ${poppins.className} overflow-x-hidden`}>
         {is_mounted ? (
           <>
             <NextTopLoader zIndex={10500} color="#00FAFF" showSpinner={false} />

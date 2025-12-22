@@ -10,9 +10,9 @@ const Events = () => {
   const words = ["Dynamic", "Exciting", "Engaging", "Memorable"];
 
   return (
-    <TracingBeam className="px-4 mb-7">
-      <div className="max-w-[85rem] px-4 py-10 sm:px-6 lg:px-8 mx-auto">
-        <div className="mx-auto text-center mb-10 lg:mb-14 pt-24">
+    <TracingBeam className="w-full max-w-none px-4 mb-7">
+      <div className="w-full max-w-none px-4 py-10 sm:px-6 lg:px-8 mx-auto">
+        <div className="mx-auto text-center mb-10 lg:mb-14 pt-40">
           <div className="text-2xl md:text-3xl mx-auto font-normal text-neutral-400">
             Discover&nbsp;
             <FlipWords words={words} />
