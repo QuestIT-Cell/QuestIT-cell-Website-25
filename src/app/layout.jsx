@@ -5,6 +5,7 @@ import { useState, useEffect } from "react";
 
 // Next's Imports
 import dynamic from "next/dynamic";
+import { usePathname } from "next/navigation";
 
 // App's Internal Imports
 import "./globals.css";
@@ -24,6 +25,8 @@ import { GoogleTagManager } from "@next/third-parties/google";
 const RootLayout = ({ children }) => {
   const [is_mounted, set_is_mounted] = useState(false);
   const [is_cookie_consent_given, set_is_cookie_consent_given] = useState(null);
+  const pathname = usePathname();
+  const isAdminRoute = pathname?.startsWith("/admin");
 
   useEffect(() => {
     set_is_mounted(true);
@@ -48,10 +51,10 @@ const RootLayout = ({ children }) => {
         {is_mounted ? (
           <>
             <NextTopLoader zIndex={10500} color="#00FAFF" showSpinner={false} />
-            <Header />
+            {!isAdminRoute && <Header />}
             {children}
             {is_cookie_consent_given === null && <CookieConsent />}
-            <Footer />
+            {!isAdminRoute && <Footer />}
             <ScrollToTop />
             {process.env.NODE_ENV !== "development" && (
               <GoogleTagManager

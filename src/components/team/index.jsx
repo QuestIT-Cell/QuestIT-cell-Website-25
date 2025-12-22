@@ -4,7 +4,7 @@
 import Link from "next/link";
 
 // React's Imports
-import { useRef } from "react";
+import { useRef, useState, useEffect } from "react";
 
 import {
   Accordion,
@@ -12,7 +12,6 @@ import {
   AccordionTrigger,
   AccordionContent,
 } from "@/components/ui/accordion";
-import team from "@/constants/team";
 import { FlipWords } from "@/components/ui/flip-words";
 import { LinkPreview } from "@/components/ui/link-preview";
 import { Icon, EvervaultCard } from "@/components/ui/evervault-card";
@@ -25,6 +24,38 @@ const Team = () => {
   const sub_accordion_ref = useRef({});
   const container_ref = useRef(null);
   const words = ["Visionary", "Passionate", "Innovative", "Collaborative"];
+
+  const [team, setTeam] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const fetchTeamData = async () => {
+      try {
+        const response = await fetch('/api/team');
+        const result = await response.json();
+
+        if (result.success) {
+          // Sort to put Faculty In-Charges first
+          const sortedData = result.data.sort((a, b) => {
+            if (a.value === "Faculty In-Charges") return -1;
+            if (b.value === "Faculty In-Charges") return 1;
+            return 0;
+          });
+          setTeam(sortedData);
+        } else {
+          setError(result.message || 'Failed to fetch team data');
+        }
+      } catch (err) {
+        setError(err.message || 'An error occurred while fetching team data');
+        console.error('Error fetching team data:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchTeamData();
+  }, []);
 
   const handle_scroll_to_top = (value) => {
     const keys = Object.keys(accordion_ref.current);
@@ -74,182 +105,215 @@ const Team = () => {
         </div>
       </div>
 
-      <Accordion
-        type="single"
-        defaultValue="Faculty In-Charges"
-        className="w-full flex flex-col gap-12"
-        onValueChange={handle_scroll_to_top}
-      >
-        {team.map(({ value, title, members, subGroups }, index) => (
-          <AccordionItem
-            key={index}
-            value={value}
-            className="text-xl"
-            ref={(element) => (accordion_ref.current[value] = element)}
-          >
-            <AccordionTrigger>{title}</AccordionTrigger>
+      {loading && (
+        <div className="text-center text-neutral-400">
+          <p>Loading team members...</p>
+        </div>
+      )}
 
-            <AccordionContent className="py-8">
-              {/* If it has subGroups (nested structure), render nested accordion */}
-              {subGroups ? (
-                <Accordion
-                  type="single"
-                  collapsible
-                  className="w-full flex flex-col gap-8"
-                  onValueChange={(subValue) => handle_sub_scroll(subValue, value)}
-                >
-                  {subGroups.map(({ value: subValue, title: subTitle, members: subMembers }, subIndex) => (
-                    <AccordionItem
-                      key={subIndex}
-                      value={subValue}
-                      className="text-lg border-l-2 border-neutral-700 pl-4"
-                      ref={(element) => (sub_accordion_ref.current[`${value}-${subValue}`] = element)}
-                    >
-                      <AccordionTrigger>{subTitle}</AccordionTrigger>
+      {error && (
+        <div className="text-center text-red-400">
+          <p>Error: {error}</p>
+        </div>
+      )}
 
-                      <AccordionContent className="py-8 relative z-10">
-                        <div className="flex flex-wrap justify-center gap-10 w-full max-w-none mx-auto">
-                          {subMembers
-                            .sort((a, b) => a.name.localeCompare(b.name))
-                            .map(
-                              (
-                                {
-                                  name,
-                                  image,
-                                  designation,
-                                  email = "questit@ves.ac.in",
-                                  github = "https://github.com/QuestIT-Cell",
-                                  linkedin = "https://www.linkedin.com/company/questit-vesit",
-                                },
-                                memberIndex
-                              ) => (
-                                <div
-                                  key={memberIndex}
-                                  className="border border-white/[0.2] flex flex-col items-start max-w-[19rem] md:max-w-[22rem] mx-auto p-4 relative h-[30rem]"
-                                >
-                                  <Icon className="absolute h-6 w-6 -top-3 -left-3 text-white" />
-                                  <Icon className="absolute h-6 w-6 -bottom-3 -left-3 text-white" />
-                                  <Icon className="absolute h-6 w-6 -top-3 -right-3 text-white" />
-                                  <Icon className="absolute h-6 w-6 -bottom-3 -right-3 text-white" />
+      {!loading && !error && team.length === 0 && (
+        <div className="text-center text-neutral-400">
+          <p>No team members found. Please seed the database first.</p>
+        </div>
+      )}
 
-                                  <EvervaultCard image={image} />
+      {!loading && !error && team.length === 0 && (
+        <div className="text-center text-neutral-400">
+          <p>No team members found. Please seed the database first.</p>
+        </div>
+      )}
 
-                                  <h2 className="text-white mt-4 text-lg font-semibold">
-                                    {name}
-                                  </h2>
+      {!loading && !error && team.length > 0 && (
+        <Accordion
+          type="single"
+          defaultValue="Faculty In-Charges"
+          className="w-full flex flex-col gap-12"
+          onValueChange={handle_scroll_to_top}
+        >
+          {team.map(({ value, title, members, subGroups }, index) => (
+            <AccordionItem
+              key={index}
+              value={value}
+              className="text-xl"
+              ref={(element) => (accordion_ref.current[value] = element)}
+            >
+              <AccordionTrigger>{title}</AccordionTrigger>
 
-                                  <p className="text-sm absolute right-[1.75rem] border font-light border-white/[0.2] rounded-full mt-4 text-white px-2 py-1">
-                                    {designation}
-                                  </p>
+              <AccordionContent className="py-8">
+                {/* If it has subGroups (nested structure), render nested accordion */}
+                {subGroups && subGroups.length > 0 ? (
+                  <Accordion
+                    type="single"
+                    collapsible
+                    className="w-full flex flex-col gap-8"
+                    onValueChange={(subValue) => handle_sub_scroll(subValue, value)}
+                  >
+                    {subGroups.map(({ value: subValue, title: subTitle, members: subMembers }, subIndex) => (
+                      <AccordionItem
+                        key={subIndex}
+                        value={subValue}
+                        className="text-lg border-l-2 border-neutral-700 pl-4"
+                        ref={(element) => (sub_accordion_ref.current[`${value}-${subValue}`] = element)}
+                      >
+                        <AccordionTrigger>{subTitle}</AccordionTrigger>
 
-                                  <div className="mt-4 flex gap-2">
-                                    <Link
-                                      aria-label="Email"
-                                      href={`mailto:${email}`}
-                                      className="inline-flex justify-center items-center size-8 text-sm font-semibold rounded-lg border border-neutral-700 text-neutral-400 hover:bg-neutral-700 focus:outline-none focus:bg-neutral-700 disabled:opacity-50 disabled:pointer-events-none"
-                                    >
-                                      <Mail className="h-4 w-4 transition text-white" />
-                                    </Link>
+                        <AccordionContent className="py-8 relative z-10">
+                          <div className="flex flex-wrap justify-center gap-10 w-full max-w-none mx-auto">
+                            {subMembers
+                              .sort((a, b) => a.name.localeCompare(b.name))
+                              .map(
+                                (
+                                  {
+                                    name,
+                                    image,
+                                    designation,
+                                    email = "questit@ves.ac.in",
+                                    github = "https://github.com/QuestIT-Cell",
+                                    linkedin = "https://www.linkedin.com/company/questit-vesit",
+                                  },
+                                  memberIndex
+                                ) => (
+                                  <div
+                                    key={memberIndex}
+                                    className="border border-white/[0.2] flex flex-col items-start max-w-[19rem] md:max-w-[22rem] mx-auto p-4 relative h-[30rem]"
+                                  >
+                                    <Icon className="absolute h-6 w-6 -top-3 -left-3 text-white" />
+                                    <Icon className="absolute h-6 w-6 -bottom-3 -left-3 text-white" />
+                                    <Icon className="absolute h-6 w-6 -top-3 -right-3 text-white" />
+                                    <Icon className="absolute h-6 w-6 -bottom-3 -right-3 text-white" />
 
-                                    <LinkPreview
-                                      url={github}
-                                      aria-label="GitHub"
-                                      className="inline-flex justify-center items-center size-8 text-sm font-semibold rounded-lg border border-neutral-700 text-neutral-400 hover:bg-neutral-700 focus:outline-none focus:bg-neutral-700 disabled:opacity-50 disabled:pointer-events-none"
-                                    >
-                                      <Github className="h-4 w-4 transition text-white" />
-                                    </LinkPreview>
+                                    <EvervaultCard image={image} />
 
-                                    <LinkPreview
-                                      url={linkedin}
-                                      aria-label="LinkedIn"
-                                      className="inline-flex justify-center items-center size-8 text-sm font-semibold rounded-lg border border-neutral-700 text-neutral-400 hover:bg-neutral-700 focus:outline-none focus:bg-neutral-700 disabled:opacity-50 disabled:pointer-events-none"
-                                    >
-                                      <Linkedin className="h-4 w-4 transition text-white" />
-                                    </LinkPreview>
+                                    <h2 className="text-white mt-4 text-lg font-semibold">
+                                      {name}
+                                    </h2>
+
+                                    <p className="text-sm absolute right-[1.75rem] border font-light border-white/[0.2] rounded-full mt-4 text-white px-2 py-1">
+                                      {designation}
+                                    </p>
+
+                                    <div className="mt-4 flex gap-2">
+                                      <Link
+                                        aria-label="Email"
+                                        href={`mailto:${email}`}
+                                        className="inline-flex justify-center items-center size-8 text-sm font-semibold rounded-lg border border-neutral-700 text-neutral-400 hover:bg-neutral-700 focus:outline-none focus:bg-neutral-700 disabled:opacity-50 disabled:pointer-events-none"
+                                      >
+                                        <Mail className="h-4 w-4 transition text-white" />
+                                      </Link>
+
+                                      <LinkPreview
+                                        url={github}
+                                        aria-label="GitHub"
+                                        className="inline-flex justify-center items-center size-8 text-sm font-semibold rounded-lg border border-neutral-700 text-neutral-400 hover:bg-neutral-700 focus:outline-none focus:bg-neutral-700 disabled:opacity-50 disabled:pointer-events-none"
+                                      >
+                                        <Github className="h-4 w-4 transition text-white" />
+                                      </LinkPreview>
+
+                                      <LinkPreview
+                                        url={linkedin}
+                                        aria-label="LinkedIn"
+                                        className="inline-flex justify-center items-center size-8 text-sm font-semibold rounded-lg border border-neutral-700 text-neutral-400 hover:bg-neutral-700 focus:outline-none focus:bg-neutral-700 disabled:opacity-50 disabled:pointer-events-none"
+                                      >
+                                        <Linkedin className="h-4 w-4 transition text-white" />
+                                      </LinkPreview>
+                                    </div>
                                   </div>
-                                </div>
-                              )
-                            )}
-                        </div>
-                      </AccordionContent>
-                    </AccordionItem>
-                  ))}
-                </Accordion>
-              ) : (
-                <div className="flex flex-wrap justify-center gap-10 w-full max-w-none mx-auto">
-                  {members
-                    .sort((a, b) =>
-                      value === "Faculty In-Charges"
-                        ? 0
-                        : a.name.localeCompare(b.name)
-                    )
-                    .map(
-                      (
-                        {
-                          name,
-                          image,
-                          designation,
-                          email = "questit@ves.ac.in",
-                          github = "https://github.com/QuestIT-Cell",
-                          linkedin = "https://www.linkedin.com/company/questit-vesit",
-                        },
-                        memberIndex
-                      ) => (
-                        <div
-                          key={memberIndex}
-                          className="border border-white/[0.2] flex flex-col items-start max-w-[19rem] md:max-w-[22rem] mx-auto p-4 relative h-[30rem]"
-                        >
-                          <Icon className="absolute h-6 w-6 -top-3 -left-3 text-white" />
-                          <Icon className="absolute h-6 w-6 -bottom-3 -left-3 text-white" />
-                          <Icon className="absolute h-6 w-6 -top-3 -right-3 text-white" />
-                          <Icon className="absolute h-6 w-6 -bottom-3 -right-3 text-white" />
-
-                          <EvervaultCard image={image} />
-
-                          <h2 className="text-white mt-4 text-lg font-semibold">
-                            {name}
-                          </h2>
-
-                          <p className="text-sm absolute right-[1.75rem] border font-light border-white/[0.2] rounded-full mt-4 text-white px-2 py-1">
-                            {designation}
-                          </p>
-
-                          <div className="mt-4 flex gap-2">
-                            <Link
-                              aria-label="Email"
-                              href={`mailto:${email}`}
-                              className="inline-flex justify-center items-center size-8 text-sm font-semibold rounded-lg border border-neutral-700 text-neutral-400 hover:bg-neutral-700 focus:outline-none focus:bg-neutral-700 disabled:opacity-50 disabled:pointer-events-none"
-                            >
-                              <Mail className="h-4 w-4 transition text-white" />
-                            </Link>
-
-                            {value != "Faculty In-Charges" && (
-                              <LinkPreview
-                                url={github}
-                                aria-label="GitHub"
-                                className="inline-flex justify-center items-center size-8 text-sm font-semibold rounded-lg border border-neutral-700 text-neutral-400 hover:bg-neutral-700 focus:outline-none focus:bg-neutral-700 disabled:opacity-50 disabled:pointer-events-none"
-                              >
-                                <Github className="h-4 w-4 transition text-white" />
-                              </LinkPreview>
-                            )}
-
-                            <LinkPreview
-                              url={linkedin}
-                              aria-label="LinkedIn"
-                              className="inline-flex justify-center items-center size-8 text-sm font-semibold rounded-lg border border-neutral-700 text-neutral-400 hover:bg-neutral-700 focus:outline-none focus:bg-neutral-700 disabled:opacity-50 disabled:pointer-events-none"
-                            >
-                              <Linkedin className="h-4 w-4 transition text-white" />
-                            </LinkPreview>
+                                )
+                              )}
                           </div>
-                        </div>
-                      )
+                        </AccordionContent>
+                      </AccordionItem>
+                    ))}
+                  </Accordion>
+                ) : (
+                  /* Regular members display for Faculty In-Charges */
+                  <div className="flex flex-col md:grid md:grid-cols-2 gap-y-16">
+                    {members && members.length > 0 ? (
+                      members
+                        .sort((a, b) =>
+                          value === "Faculty In-Charges"
+                            ? 0
+                            : a.name.localeCompare(b.name)
+                        )
+                        .map(
+                          (
+                            {
+                              name,
+                              image,
+                              designation,
+                              email = "questit@ves.ac.in",
+                              github = "https://github.com/QuestIT-Cell",
+                              linkedin = "https://www.linkedin.com/company/questit-vesit",
+                            },
+                            memberIndex
+                          ) => (
+                            <div
+                              key={memberIndex}
+                              className="border border-white/[0.2] flex flex-col items-start max-w-[19rem] md:max-w-[22rem] mx-auto p-4 relative h-[30rem]"
+                            >
+                              <Icon className="absolute h-6 w-6 -top-3 -left-3 text-white" />
+                              <Icon className="absolute h-6 w-6 -bottom-3 -left-3 text-white" />
+                              <Icon className="absolute h-6 w-6 -top-3 -right-3 text-white" />
+                              <Icon className="absolute h-6 w-6 -bottom-3 -right-3 text-white" />
+
+                              <EvervaultCard image={image} />
+
+                              <h2 className="text-white mt-4 text-lg font-semibold">
+                                {name}
+                              </h2>
+
+                              <p className="text-sm absolute right-[1.75rem] border font-light border-white/[0.2] rounded-full mt-4 text-white px-2 py-1">
+                                {designation}
+                              </p>
+
+                              <div className="mt-4 flex gap-2">
+                                <Link
+                                  aria-label="Email"
+                                  href={`mailto:${email}`}
+                                  className="inline-flex justify-center items-center size-8 text-sm font-semibold rounded-lg border border-neutral-700 text-neutral-400 hover:bg-neutral-700 focus:outline-none focus:bg-neutral-700 disabled:opacity-50 disabled:pointer-events-none"
+                                >
+                                  <Mail className="h-4 w-4 transition text-white" />
+                                </Link>
+
+                                {value != "Faculty In-Charges" && (
+                                  <LinkPreview
+                                    url={github}
+                                    aria-label="GitHub"
+                                    className="inline-flex justify-center items-center size-8 text-sm font-semibold rounded-lg border border-neutral-700 text-neutral-400 hover:bg-neutral-700 focus:outline-none focus:bg-neutral-700 disabled:opacity-50 disabled:pointer-events-none"
+                                  >
+                                    <Github className="h-4 w-4 transition text-white" />
+                                  </LinkPreview>
+                                )}
+
+                                <LinkPreview
+                                  url={linkedin}
+                                  aria-label="LinkedIn"
+                                  className="inline-flex justify-center items-center size-8 text-sm font-semibold rounded-lg border border-neutral-700 text-neutral-400 hover:bg-neutral-700 focus:outline-none focus:bg-neutral-700 disabled:opacity-50 disabled:pointer-events-none"
+                                >
+                                  <Linkedin className="h-4 w-4 transition text-white" />
+                                </LinkPreview>
+                              </div>
+                            </div>
+                          )
+                        )
+                    ) : (
+                      <div className="text-center text-neutral-400 col-span-full">
+                        <p>No members found in this section.</p>
+                      </div>
                     )}
-                </div>
-              )}
-            </AccordionContent>
-          </AccordionItem>
-        ))}
-      </Accordion>
+                  </div>
+                )}
+              </AccordionContent>
+            </AccordionItem>
+          ))}
+        </Accordion>
+      )}
     </div>
   );
 };

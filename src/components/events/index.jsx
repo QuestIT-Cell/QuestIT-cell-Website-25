@@ -10,7 +10,6 @@ import { useId, useRef, useState, useEffect } from "react";
 import Image from "next/image";
 
 // App's Internal Imports
-import events from "@/constants/events";
 import { Button } from "@/components/ui/button";
 import useOutsideClick from "@/hooks/use-outside-click";
 import { AnimatedTooltip } from "@/components/ui/animated-tooltip";
@@ -57,6 +56,9 @@ const Events = ({ featured = false }) => {
   const id = useId();
   const ref = useRef(null);
   const [active, set_active] = useState(null);
+  const [events, setEvents] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   const words = [
     {
@@ -73,6 +75,28 @@ const Events = ({ featured = false }) => {
       className: "!text-cyan-300",
     },
   ];
+
+  useEffect(() => {
+    const fetchEventsData = async () => {
+      try {
+        const response = await fetch('/api/events');
+        const result = await response.json();
+        
+        if (result.success) {
+          setEvents(result.data);
+        } else {
+          setError(result.message || 'Failed to fetch events data');
+        }
+      } catch (err) {
+        setError(err.message || 'An error occurred while fetching events data');
+        console.error('Error fetching events data:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchEventsData();
+  }, []);
 
   useOutsideClick(ref, () => set_active(null));
 
@@ -99,6 +123,26 @@ const Events = ({ featured = false }) => {
         <TypewriterEffect words={words} className="pt-5 md:pt-10 pb-16" />
       )}
 
+      {loading && (
+        <div className="text-center text-neutral-400">
+          <p>Loading events...</p>
+        </div>
+      )}
+
+      {error && (
+        <div className="text-center text-red-400">
+          <p>Error: {error}</p>
+        </div>
+      )}
+
+      {!loading && !error && events.length === 0 && (
+        <div className="text-center text-neutral-400">
+          <p>No events found. Please seed the database first.</p>
+        </div>
+      )}
+
+      {!loading && !error && events.length > 0 && (
+      <>
       <AnimatePresence>
         {active && typeof active === "object" && (
           <motion.div
@@ -137,7 +181,7 @@ const Events = ({ featured = false }) => {
             <motion.div
               ref={ref}
               layoutId={`event-${active.title}-${id}`}
-              className="w-full max-w-[500px] h-full md:h-fit md:max-h-[90%] flex flex-col bg-neutral-900 sm:rounded-3xl overflow-hidden"
+              className="w-full max-w-[500px] h-full md:h-fit md:max-h-[100%] flex flex-col bg-neutral-900 sm:rounded-3xl overflow-hidden"
             >
               <motion.div>
                 <Image
@@ -175,14 +219,16 @@ const Events = ({ featured = false }) => {
                   >
                     {active.description}
 
-                    {active.speakers && (
+                    {active.speakers && active.speakers.length > 0 && (
                       <>
                         <motion.h3 className="font-medium text-neutral-200 text-xl mt-4">
                           Speakers
                         </motion.h3>
 
-                        <div className="pt-2 flex flex-row items-center justify-start mb-4 w-full">
-                          <AnimatedTooltip items={active.speakers} />
+                        <div className="pt-4 flex flex-row items-center gap-2 w-full">
+                          <div className="flex flex-row -space-x-3">
+                            <AnimatedTooltip items={active.speakers} />
+                          </div>
                         </div>
                       </>
                     )}
@@ -280,6 +326,8 @@ const Events = ({ featured = false }) => {
             View All <ArrowRight className="w-[18px] h-[18px]" />
           </Button>
         </Link>
+      )}
+      </>
       )}
     </div>
   );
