@@ -4,7 +4,7 @@
 import Link from "next/link";
 
 // React's Imports
-import { useRef } from "react";
+import { useRef, useState, useEffect } from "react";
 
 import {
   Accordion,
@@ -12,7 +12,6 @@ import {
   AccordionTrigger,
   AccordionContent,
 } from "@/components/ui/accordion";
-import team from "@/constants/team";
 import { FlipWords } from "@/components/ui/flip-words";
 import { LinkPreview } from "@/components/ui/link-preview";
 import { Icon, EvervaultCard } from "@/components/ui/evervault-card";
@@ -25,6 +24,38 @@ const Team = () => {
   const sub_accordion_ref = useRef({});
   const container_ref = useRef(null);
   const words = ["Visionary", "Passionate", "Innovative", "Collaborative"];
+  
+  const [team, setTeam] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const fetchTeamData = async () => {
+      try {
+        const response = await fetch('/api/team');
+        const result = await response.json();
+        
+        if (result.success) {
+          // Sort to put Faculty In-Charges first
+          const sortedData = result.data.sort((a, b) => {
+            if (a.value === "Faculty In-Charges") return -1;
+            if (b.value === "Faculty In-Charges") return 1;
+            return 0;
+          });
+          setTeam(sortedData);
+        } else {
+          setError(result.message || 'Failed to fetch team data');
+        }
+      } catch (err) {
+        setError(err.message || 'An error occurred while fetching team data');
+        console.error('Error fetching team data:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchTeamData();
+  }, []);
 
   const handle_scroll_to_top = (value) => {
     const keys = Object.keys(accordion_ref.current);
@@ -74,6 +105,31 @@ const Team = () => {
         </div>
       </div>
 
+      {loading && (
+        <div className="text-center text-neutral-400">
+          <p>Loading team members...</p>
+        </div>
+      )}
+
+      {error && (
+        <div className="text-center text-red-400">
+          <p>Error: {error}</p>
+        </div>
+      )}
+
+      {!loading && !error && team.length === 0 && (
+        <div className="text-center text-neutral-400">
+          <p>No team members found. Please seed the database first.</p>
+        </div>
+      )}
+
+      {!loading && !error && team.length === 0 && (
+        <div className="text-center text-neutral-400">
+          <p>No team members found. Please seed the database first.</p>
+        </div>
+      )}
+
+      {!loading && !error && team.length > 0 && (
       <Accordion
         type="single"
         defaultValue="Faculty In-Charges"
@@ -91,7 +147,7 @@ const Team = () => {
 
             <AccordionContent className="py-8">
               {/* If it has subGroups (nested structure), render nested accordion */}
-              {subGroups ? (
+              {subGroups && subGroups.length > 0 ? (
                 <Accordion
                   type="single"
                   collapsible
@@ -178,13 +234,14 @@ const Team = () => {
               ) : (
                 /* Regular members display for Faculty In-Charges */
                 <div className="flex flex-col md:grid md:grid-cols-2 gap-y-16">
-                  {members
-                    .sort((a, b) =>
-                      value === "Faculty In-Charges"
-                        ? 0
-                        : a.name.localeCompare(b.name)
-                    )
-                    .map(
+                  {members && members.length > 0 ? (
+                    members
+                      .sort((a, b) =>
+                        value === "Faculty In-Charges"
+                          ? 0
+                          : a.name.localeCompare(b.name)
+                      )
+                      .map(
                       (
                         {
                           name,
@@ -244,13 +301,19 @@ const Team = () => {
                           </div>
                         </div>
                       )
-                    )}
+                    )
+                  ) : (
+                    <div className="text-center text-neutral-400 col-span-full">
+                      <p>No members found in this section.</p>
+                    </div>
+                  )}
                 </div>
               )}
             </AccordionContent>
           </AccordionItem>
         ))}
       </Accordion>
+      )}
     </div>
   );
 };
