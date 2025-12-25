@@ -18,6 +18,7 @@ import { TypewriterEffect } from "@/components/ui/typewriter-effect";
 // App's External Imports
 import { motion, AnimatePresence } from "framer-motion";
 import { ArrowRight, CalendarRange } from "lucide-react";
+import events from "@/constants/events";
 
 const CloseIcon = () => {
   return (
@@ -56,9 +57,6 @@ const Events = ({ featured = false }) => {
   const id = useId();
   const ref = useRef(null);
   const [active, set_active] = useState(null);
-  const [events, setEvents] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
 
   const words = [
     {
@@ -75,28 +73,6 @@ const Events = ({ featured = false }) => {
       className: "!text-cyan-300",
     },
   ];
-
-  useEffect(() => {
-    const fetchEventsData = async () => {
-      try {
-        const response = await fetch('/api/events');
-        const result = await response.json();
-        
-        if (result.success) {
-          setEvents(result.data);
-        } else {
-          setError(result.message || 'Failed to fetch events data');
-        }
-      } catch (err) {
-        setError(err.message || 'An error occurred while fetching events data');
-        console.error('Error fetching events data:', err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchEventsData();
-  }, []);
 
   useOutsideClick(ref, () => set_active(null));
 
@@ -123,25 +99,6 @@ const Events = ({ featured = false }) => {
         <TypewriterEffect words={words} className="pt-5 md:pt-10 pb-16" />
       )}
 
-      {loading && (
-        <div className="text-center text-neutral-400">
-          <p>Loading events...</p>
-        </div>
-      )}
-
-      {error && (
-        <div className="text-center text-red-400">
-          <p>Error: {error}</p>
-        </div>
-      )}
-
-      {!loading && !error && events.length === 0 && (
-        <div className="text-center text-neutral-400">
-          <p>No events found. Please seed the database first.</p>
-        </div>
-      )}
-
-      {!loading && !error && events.length > 0 && (
       <>
       <AnimatePresence>
         {active && typeof active === "object" && (
@@ -328,7 +285,6 @@ const Events = ({ featured = false }) => {
         </Link>
       )}
       </>
-      )}
     </div>
   );
 };

@@ -15,3 +15,4 @@ node_modules/
 # Service worker and Workbox files
 public/sw.js
 public/workbox-*.js
+/out

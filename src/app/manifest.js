@@ -1,3 +1,4 @@
+export const dynamic = "force-static";
 const manifest = () => {
   return {
     id: "/",

@@ -26,6 +26,7 @@ const next_config = {
       },
     ],
   },
+  output:"export",
 };
 
 module.exports = with_PWA(next_config);

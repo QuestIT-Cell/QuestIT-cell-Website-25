@@ -18,7 +18,7 @@ const Root = () => {
       <GenesisPromo />
       <About />
       <Events featured />
-      <Testimonials />
+      {/* <Testimonials /> */}
       <Contact />
     </TracingBeam>
   );
