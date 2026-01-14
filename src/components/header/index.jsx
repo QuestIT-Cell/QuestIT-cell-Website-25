@@ -151,15 +151,15 @@ const Header = () => {
 
         {/* Sidebar Content */}
         <div
-          className={`absolute top-0 left-0 h-full w-[310px] bg-gradient-to-b from-black via-zinc-900 to-black border-r border-neutral-800 shadow-2xl transition-transform duration-500 ease-in-out ${is_sidebar_open ? "translate-x-0" : "-translate-x-full"
+          className={`absolute top-0 left-0 h-full w-[310px] bg-gradient-to-b from-black via-zinc-950 to-black border-r border-neutral-800 shadow-2xl transition-transform duration-500 ease-in-out ${is_sidebar_open ? "translate-x-0" : "-translate-x-full"
             } flex flex-col p-6 overflow-y-auto`}
         >
-          <div className="flex justify-between items-center mb-10">
-            <div className="w-[170px]">
+          <div className="flex justify-between items-center mb-2">
+            <div className="w-[190px]">
               <Image
                 src="/images/logo.png"
-                width={170}
-                height={60}
+                width={190}
+                height={65}
                 alt="Logo"
                 unoptimized
               />
@@ -172,10 +172,13 @@ const Header = () => {
             </button>
           </div>
 
+          <div className="h-px w-full bg-white/20 mb-2" />
+
           <nav className="flex-1">
-            <ul className="space-y-4">
+            <ul className="space-y-1">
               {menu.map((item, index) => (
                 <li key={index} className="overflow-hidden">
+                  {index !== 0 && <div className="h-px w-full bg-white/5 my-1" />}
                   {item.dropdown ? (
                     <div className="space-y-2">
                       <button
@@ -184,7 +187,7 @@ const Header = () => {
                           }`}
                       >
                         <div className="flex items-center gap-4">
-                          <div className={`p-2 rounded-lg transition-colors ${open_dropdown === item.name ? "bg-cyan-500/20" : "bg-neutral-900"
+                          <div className={`p-2 rounded-lg transition-colors text-cyan-500 ${open_dropdown === item.name ? "bg-cyan-500/20" : "bg-neutral-900"
                             }`}>
                             {item.icon || <div className="w-5 h-5 flex items-center justify-center font-bold text-xs">#</div>}
                           </div>
@@ -223,7 +226,7 @@ const Header = () => {
                       rel={item.external ? "noopener noreferrer" : undefined}
                       className="flex items-center gap-4 p-3 text-gray-200 hover:text-cyan-400 hover:bg-neutral-900 rounded-xl transition-all group"
                     >
-                      <div className="p-2 bg-neutral-900 rounded-lg group-hover:bg-cyan-500/10 group-hover:text-cyan-400 transition-all">
+                      <div className="p-2 bg-neutral-900 text-cyan-500 rounded-lg group-hover:bg-cyan-500/20 transition-all">
                         {item.icon || <div className="w-5 h-5 flex items-center justify-center font-bold text-xs">#</div>}
                       </div>
                       <span className="text-xl font-semibold tracking-tight flex-1">
@@ -237,8 +240,8 @@ const Header = () => {
             </ul>
           </nav>
 
-          <div className="mt-auto pt-10 border-t border-neutral-800/50">
-            <p className="text-neutral-500 text-sm mb-4">Community & Tech</p>
+          <div className="mt-auto pt-4 border-t border-neutral-800/50 flex flex-col items-center">
+            <p className="text-neutral-500 text-sm mb-2">© {new Date().getFullYear()} QuestIT</p>
             <div className="flex gap-4">
               {/* Social icons could go here if available */}
             </div>
