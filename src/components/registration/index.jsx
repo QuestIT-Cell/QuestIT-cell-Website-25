@@ -51,21 +51,21 @@ const Registration = () => {
 
   const validateForm = () => {
     const { email, fullName, division, rollNumber, phoneNumber } = formData;
-    
+
     if (!email || !fullName || !division || !rollNumber || !phoneNumber) {
       return false;
     }
-    
+
     // VES email validation
     if (!email.endsWith("@ves.ac.in")) {
       return false;
     }
-    
+
     // Phone number validation (10 digits)
     if (!/^\d{10}$/.test(phoneNumber)) {
       return false;
     }
-    
+
     return true;
   };
 
@@ -74,7 +74,7 @@ const Registration = () => {
       // Get existing registrations from localStorage
       const existingRegistrations = localStorage.getItem('questit_registrations');
       const registrations = existingRegistrations ? JSON.parse(existingRegistrations) : [];
-      
+
       // Add new registration with timestamp and unique ID
       const newRegistration = {
         id: Date.now(), // Simple unique ID
@@ -82,15 +82,15 @@ const Registration = () => {
         timestamp: new Date().toISOString(),
         submittedAt: new Date().toLocaleString(),
       };
-      
+
       registrations.push(newRegistration);
-      
+
       // Save back to localStorage
       localStorage.setItem('questit_registrations', JSON.stringify(registrations));
-      
+
       console.log("Registration saved to localStorage:", newRegistration);
       console.log("Total registrations:", registrations.length);
-      
+
       return true;
     } catch (error) {
       console.error("Error saving to localStorage:", error);
@@ -100,7 +100,7 @@ const Registration = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     if (!validateForm()) {
       setSubmitStatus({
         type: "error",
@@ -115,16 +115,16 @@ const Registration = () => {
     try {
       // Save to Google Sheet via Sheety API
       const sheetResult = await saveToGoogleSheet(formData);
-      
+
       if (sheetResult.success) {
         // Also save to localStorage as backup
         saveToLocalStorage(formData);
-        
+
         setSubmitStatus({
           type: "success",
           message: "Registration submitted successfully! Your details have been saved.",
         });
-        
+
         // Clear form
         setFormData({
           email: "",
@@ -136,10 +136,10 @@ const Registration = () => {
       } else {
         // If Google Sheet fails, still save to localStorage
         const localSaved = saveToLocalStorage(formData);
-        
+
         setSubmitStatus({
           type: localSaved ? "warning" : "error",
-          message: localSaved 
+          message: localSaved
             ? "Registration saved locally. There was an issue with our main database, but your data is secure."
             : `Failed to save registration: ${sheetResult.error}`,
         });
@@ -147,10 +147,10 @@ const Registration = () => {
     } catch (error) {
       // Fallback to localStorage if API fails
       const localSaved = saveToLocalStorage(formData);
-      
+
       setSubmitStatus({
         type: localSaved ? "warning" : "error",
-        message: localSaved 
+        message: localSaved
           ? "Registration saved locally. Please check your internet connection."
           : "Failed to save registration. Please try again.",
       });
@@ -160,10 +160,10 @@ const Registration = () => {
   };
 
   return (
-    <div className="px-4 py-20">
+    <div className="px-4 pt-36 pb-20">
       {/* Header Section */}
       <TypewriterEffect words={words} className="pb-12" />
-      
+
       <TextGenerateEffect
         words={description}
         className="bg-neutral-900 rounded-xl p-7 max-w-2xl mx-auto mb-12"
@@ -285,13 +285,12 @@ const Registration = () => {
               <motion.div
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
-                className={`p-4 rounded-lg text-center ${
-                  submitStatus.type === "success"
+                className={`p-4 rounded-lg text-center ${submitStatus.type === "success"
                     ? "bg-green-500/20 text-green-300 border border-green-500/30"
                     : submitStatus.type === "warning"
-                    ? "bg-yellow-500/20 text-yellow-300 border border-yellow-500/30"
-                    : "bg-red-500/20 text-red-300 border border-red-500/30"
-                }`}
+                      ? "bg-yellow-500/20 text-yellow-300 border border-yellow-500/30"
+                      : "bg-red-500/20 text-red-300 border border-red-500/30"
+                  }`}
               >
                 {submitStatus.message}
               </motion.div>

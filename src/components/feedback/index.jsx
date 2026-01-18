@@ -55,16 +55,16 @@ const Feedback = () => {
 
   const validateForm = () => {
     const { email, fullName, division, rollNumber, satisfaction, relevance, keyTakeaways } = formData;
-    
+
     if (!email || !fullName || !division || !rollNumber || !satisfaction || !relevance || !keyTakeaways) {
       return false;
     }
-    
+
     // VES email validation
     if (!email.endsWith("@ves.ac.in")) {
       return false;
     }
-    
+
     return true;
   };
 
@@ -73,7 +73,7 @@ const Feedback = () => {
       // Get existing feedback from localStorage
       const existingFeedback = localStorage.getItem('questit_feedback');
       const feedback = existingFeedback ? JSON.parse(existingFeedback) : [];
-      
+
       // Add new feedback with timestamp and unique ID
       const newFeedback = {
         id: Date.now(), // Simple unique ID
@@ -81,15 +81,15 @@ const Feedback = () => {
         timestamp: new Date().toISOString(),
         submittedAt: new Date().toLocaleString(),
       };
-      
+
       feedback.push(newFeedback);
-      
+
       // Save back to localStorage
       localStorage.setItem('questit_feedback', JSON.stringify(feedback));
-      
+
       console.log("Feedback saved to localStorage:", newFeedback);
       console.log("Total feedback:", feedback.length);
-      
+
       return true;
     } catch (error) {
       console.error("Error saving to localStorage:", error);
@@ -99,7 +99,7 @@ const Feedback = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     if (!validateForm()) {
       setSubmitStatus({
         type: "error",
@@ -114,16 +114,16 @@ const Feedback = () => {
     try {
       // Save to Google Sheet via Sheety API
       const sheetResult = await saveToGoogleSheetFeedback(formData);
-      
+
       if (sheetResult.success) {
         // Also save to localStorage as backup
         saveToLocalStorage(formData);
-        
+
         setSubmitStatus({
           type: "success",
           message: "Feedback submitted successfully! Thank you for your valuable input.",
         });
-        
+
         // Clear form
         setFormData({
           email: "",
@@ -139,10 +139,10 @@ const Feedback = () => {
       } else {
         // If Google Sheet fails, still save to localStorage
         const localSaved = saveToLocalStorage(formData);
-        
+
         setSubmitStatus({
           type: localSaved ? "warning" : "error",
-          message: localSaved 
+          message: localSaved
             ? "Feedback saved locally. There was an issue with our main database, but your data is secure."
             : `Failed to save feedback: ${sheetResult.error}`,
         });
@@ -150,10 +150,10 @@ const Feedback = () => {
     } catch (error) {
       // Fallback to localStorage if API fails
       const localSaved = saveToLocalStorage(formData);
-      
+
       setSubmitStatus({
         type: localSaved ? "warning" : "error",
-        message: localSaved 
+        message: localSaved
           ? "Feedback saved locally. Please check your internet connection."
           : "Failed to save feedback. Please try again.",
       });
@@ -179,11 +179,10 @@ const Feedback = () => {
               className="sr-only"
               required={required}
             />
-            <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center mr-2 transition-all duration-200 ${
-              value === option.value 
-                ? 'border-cyan-500 bg-cyan-500' 
+            <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center mr-2 transition-all duration-200 ${value === option.value
+                ? 'border-cyan-500 bg-cyan-500'
                 : 'border-neutral-600 hover:border-cyan-400'
-            }`}>
+              }`}>
               {value === option.value && (
                 <div className="w-2 h-2 rounded-full bg-white"></div>
               )}
@@ -212,10 +211,10 @@ const Feedback = () => {
   ];
 
   return (
-    <div className="px-4 py-20">
+    <div className="px-4 pt-36 pb-20">
       {/* Header Section */}
       <TypewriterEffect words={words} className="pb-12" />
-      
+
       <TextGenerateEffect
         words={description}
         className="bg-neutral-900 rounded-xl p-7 max-w-2xl mx-auto mb-12"
@@ -389,13 +388,12 @@ const Feedback = () => {
               <motion.div
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
-                className={`p-4 rounded-lg text-center ${
-                  submitStatus.type === "success"
+                className={`p-4 rounded-lg text-center ${submitStatus.type === "success"
                     ? "bg-green-500/20 text-green-300 border border-green-500/30"
                     : submitStatus.type === "warning"
-                    ? "bg-yellow-500/20 text-yellow-300 border border-yellow-500/30"
-                    : "bg-red-500/20 text-red-300 border border-red-500/30"
-                }`}
+                      ? "bg-yellow-500/20 text-yellow-300 border border-yellow-500/30"
+                      : "bg-red-500/20 text-red-300 border border-red-500/30"
+                  }`}
               >
                 {submitStatus.message}
               </motion.div>
