@@ -17,7 +17,7 @@ import { TypewriterEffect } from "@/components/ui/typewriter-effect";
 
 // App's External Imports
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowRight, CalendarRange } from "lucide-react";
+import { ArrowRight, CalendarRange, ExternalLink } from "lucide-react";
 import events from "@/constants/events";
 
 const CloseIcon = () => {
@@ -161,9 +161,23 @@ const Events = ({ featured = false }) => {
                     {active.title}
                   </motion.h3>
 
-                  <motion.p className="text-neutral-400 text-center md:text-left text-base flex gap-2 items-center">
-                    <CalendarRange size={20} /> {active.date}
-                  </motion.p>
+                  <div className="flex items-center gap-4 w-full">
+                    <motion.p className="text-neutral-400 text-center md:text-left text-base flex gap-2 items-center">
+                      <CalendarRange size={20} /> {active.date}
+                    </motion.p>
+                    
+                    {active.website && (
+                      <Link 
+                        href={active.website} 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-2 text-cyan-400 hover:text-cyan-300 transition-colors text-base"
+                      >
+                        <ExternalLink size={16} />
+                        <span>Genesis Website</span>
+                      </Link>
+                    )}
+                  </div>
                 </div>
 
                 <div className="pt-4 md:pt-2 relative px-4">

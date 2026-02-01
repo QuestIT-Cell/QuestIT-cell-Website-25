@@ -5,7 +5,7 @@ import { useState, useEffect } from "react";
 
 // App's Internal Imports
 import menu from "@/constants/menu";
-import { InstallPromptButton } from "../utils";
+import { InstallPromptButton } from "./utils";
 
 // App's External Imports
 // App's External Imports
@@ -189,7 +189,7 @@ const Header = () => {
                         <div className="flex items-center gap-4">
                           <div className={`p-2 rounded-lg transition-colors text-cyan-500 ${open_dropdown === item.name ? "bg-cyan-500/20" : "bg-neutral-900"
                             }`}>
-                            {item.icon || <div className="w-5 h-5 flex items-center justify-center font-bold text-xs">#</div>}
+                            {item.icon}
                           </div>
                           <span className="text-xl font-semibold tracking-tight">{item.name}</span>
                         </div>
@@ -227,7 +227,7 @@ const Header = () => {
                       className="flex items-center gap-4 p-3 text-gray-200 hover:text-cyan-400 hover:bg-neutral-900 rounded-xl transition-all group"
                     >
                       <div className="p-2 bg-neutral-900 text-cyan-500 rounded-lg group-hover:bg-cyan-500/20 transition-all">
-                        {item.icon || <div className="w-5 h-5 flex items-center justify-center font-bold text-xs">#</div>}
+                        {item.icon}
                       </div>
                       <span className="text-xl font-semibold tracking-tight flex-1">
                         {item.name}

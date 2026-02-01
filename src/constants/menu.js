@@ -1,5 +1,5 @@
 // App's External Imports
-import { Home, Mail, Users, Calendar, UserPlus, MessageSquare, NotebookPen } from "lucide-react";
+import { Home, Mail, Users, Calendar, UserPlus, MessageSquare, NotebookPen, HelpCircle, Laptop } from "lucide-react";
 
 const menu = [
   {
@@ -11,6 +11,7 @@ const menu = [
   {
     name: "About",
     path: "/#about",
+    icon: <HelpCircle />,
     mobile_nav: false,
   },
   {
@@ -61,6 +62,7 @@ const menu = [
     mobile_nav: false,
     name: "Developers",
     path: "/developers",
+    icon: <Laptop />,
   },
 ];
 

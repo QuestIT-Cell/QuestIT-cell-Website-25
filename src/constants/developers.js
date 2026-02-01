@@ -21,6 +21,26 @@ const developers = [
     description:
       "Managed website data, including team images and event details, ensuring accurate and consistent content display for a seamless user experience.",
   },
+  {
+    name: "Atharva Lotankar",
+    role: "Frontend Developer",
+    email: "2023.atharva.lotankar@ves.ac.in",
+    github: "https://github.com/AtharvaLotankar11",
+    linkedin: "https://www.linkedin.com/in/atharva-lotankar-51824537b",
+    image: "/images/dev_images/atharva_lotankar.png",
+    description:
+      "Redesigned QuestIT website UI, improved frontend components, implemented council member management with 2025–26 metadata, managed events and Hashnode integration, updated navigation, and added responsive hamburger menu.",
+  },
+  {
+    name: "Pranav Titambe",
+    role: "Backend Developer",
+    email: "2022.pranav.titambe@ves.ac.in",
+    github: "https://github.com/Pranavlovescode",
+    linkedin: "https://in.linkedin.com/in/pranav-titambe",
+    image: "/images/dev_images/Pranav_Titambe.png",
+    description:
+      "Engineered and optimized the Quest IT website backend by automating event and workshop data workflows and implementing dynamic, scalable content management using MongoDB and other advanced backend technologies.",
+  },
 ];
 
 export default developers;

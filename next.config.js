@@ -27,7 +27,9 @@ const next_config = {
       },
     ],
   },
-  output:"export",
+  output: "export",
+  trailingSlash: true,
+  skipMiddlewareUrlNormalize: true,
 };
 
 module.exports = with_PWA(next_config);

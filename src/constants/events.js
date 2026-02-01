@@ -188,6 +188,13 @@ const events = [
       "SIH Insider brings past SIH champions Shravani Rasam and Darshan Khapekar to share their real journey—from late-night brainstorming to the national stage. Two voices, one roadmap, and invaluable insights. If SIH 2025 is on your mind, this September workshop is your chance to get ahead.",
   },
   {
+    date: "February 2026",
+    title: "GENESIS 2026",
+    image: "/images/genesis_image.jpeg",
+    description: "GENESIS 2026 is Quest-IT's first independent offline hackathon, conducted in collaboration with the Brihanmumbai Municipal Corporation (BMC) – Solid Waste Management (SWM) Department, and in association with VESIT IQAC and VESIT IIC, providing a structured academic-industry platform wherein teams of 3–4 members participated in any one domain addressing real-world problem statements under BMC-SWM, namely Sustainability, Artificial Intelligence/Machine Learning (AI/ML), or Blockchain, to demonstrate teamwork, innovation, and technical competence; participating teams competed for cash prizes exceeding ₹1,00,000, along with sponsor-supported rewards, and the successful execution of the event was facilitated by BMC, Shawarmaji, Unstop, Gemini, FAD, SUD Life, Nova AI, and Cyrene AI.",
+    website: "https://genesis-hazel-one.vercel.app"
+  },
+  {
     date: "October 2025",
     title: "TestDrive - From Manual to Automation",
     speakers: [

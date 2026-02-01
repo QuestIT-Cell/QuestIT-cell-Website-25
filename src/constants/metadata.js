@@ -34,6 +34,8 @@ const root = {
   authors: [
     { name: "Jay Kerkar", url: "https://github.com/jaykerkar0405" },
     { name: "Anish Tawade", url: "https://github.com/Anissh280507" },
+    { name: "Atharva Lotankar", url: "https://github.com/AtharvaLotankar11" },
+    { name: "Pranav Titambe", url: "https://github.com/Pranavlovescode" },
   ],
   description:
     "QuestIT offers VESIT students a platform to learn, compete, and enjoy through a wide range of technical and non-technical events, fostering growth, collaboration, and innovation.",
