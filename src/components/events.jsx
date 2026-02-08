@@ -6,6 +6,9 @@ import Link from "next/link";
 // React's Imports
 import { useId, useRef, useState, useEffect } from "react";
 
+// Confetti Import
+import confetti from "canvas-confetti";
+
 // Next's Imports
 import Image from "next/image";
 
@@ -58,6 +61,42 @@ const Events = ({ featured = false }) => {
   const id = useId();
   const ref = useRef(null);
   const [active, set_active] = useState(null);
+  const [showConfetti, setShowConfetti] = useState(false);
+
+  // Party celebration animation function
+  const triggerConfetti = () => {
+    const duration = 3 * 1000;
+    const animationEnd = Date.now() + duration;
+    const defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 12000 };
+
+    function randomInRange(min, max) {
+      return Math.random() * (max - min) + min;
+    }
+
+    const interval = setInterval(function() {
+      const timeLeft = animationEnd - Date.now();
+
+      if (timeLeft <= 0) {
+        return clearInterval(interval);
+      }
+
+      const particleCount = 50 * (timeLeft / duration);
+      
+      // Confetti from left
+      confetti({
+        ...defaults,
+        particleCount,
+        origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 }
+      });
+      
+      // Confetti from right
+      confetti({
+        ...defaults,
+        particleCount,
+        origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 }
+      });
+    }, 250);
+  };
 
   const words = [
     {
@@ -86,6 +125,11 @@ const Events = ({ featured = false }) => {
 
     if (active && typeof active === "object") {
       document.body.style.overflow = "hidden";
+      
+      // Trigger confetti for GENESIS 2026
+      if (active.title === "GENESIS 2026") {
+        triggerConfetti();
+      }
     } else {
       document.body.style.overflow = "auto";
     }
