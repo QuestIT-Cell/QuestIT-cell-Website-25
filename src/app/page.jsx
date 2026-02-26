@@ -15,7 +15,7 @@ const Root = () => {
       <Home />
       <About />
       <Events featured />
-      {/* <Testimonials /> */}
+      <Testimonials />
       <Contact />
     </TracingBeam>
   );
