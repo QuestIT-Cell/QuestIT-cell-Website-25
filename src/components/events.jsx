@@ -381,11 +381,13 @@ const Events = ({ featured = false }) => {
         </ul>
 
         {featured && (
-          <Link href="/events" className="flex justify-center items-center">
-            <Button className="mt-7 w-1/3 md:w-[20%] md:mt-12 font-medium">
-              View All <ArrowRight className="w-[18px] h-[18px]" />
-            </Button>
-          </Link>
+          <div className="flex justify-center items-center mt-8 md:mt-12 mb-12 md:mb-16">
+            <Link href="/events">
+              <Button className="px-8 py-6 text-base font-semibold bg-cyan-500 hover:bg-cyan-600 text-white rounded-lg transition-all duration-300 shadow-lg hover:shadow-cyan-500/50">
+                Explore More Events <ArrowRight className="w-5 h-5 ml-2" />
+              </Button>
+            </Link>
+          </div>
         )}
       </>
     </div>

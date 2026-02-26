@@ -189,6 +189,126 @@ const events = [
   },
   {
     date: "February 2026",
+    title: "Bridge The Gap",
+    speakers: [
+      {
+        id: 1,
+        name: "Chinmay Chaudhari",
+        designation: "AI Intern at VeeFly",
+        image: "/images/speaker_photos/bridgeGap/chinmay-chaudhari.png",
+      },
+      {
+        id: 2,
+        name: "Sameeksha Sankpal",
+        designation: "LFX Mentee at The Linux Foundation",
+        image: "/images/speaker_photos/bridgeGap/sameeksha-sankpal.png",
+      },
+      {
+        id: 3,
+        name: "Harshita Singh",
+        designation: "Product Intern at Adobe",
+        image: "/images/speaker_photos/bridgeGap/harshita-singh.png",
+      },
+      {
+        id: 4,
+        name: "Mohish Padave",
+        designation: "SDE Intern at DataCircles",
+        image: "/images/speaker_photos/bridgeGap/mohish-padave.png",
+      },
+      {
+        id: 5,
+        name: "Khushi Singh",
+        designation: "Research Intern at VJTI",
+        image: "/images/speaker_photos/bridgeGap/khushi-singh.png",
+      },
+      {
+        id: 6,
+        name: "Kshitij Nangare",
+        designation: "SDE Intern at DataCircles",
+        image: "/images/speaker_photos/bridgeGap/kshitij-nangare.png",
+      },
+    ],
+    image: "/images/BridgeTheGap.png",
+    description:
+      "Quest IT conducted Bridge the Gap, an interactive career guidance session focused on helping students navigate placements and off-campus internship opportunities with confidence. The event featured experienced seniors who shared practical insights on acing interviews, leveraging prior job experience, and securing competitive off-campus roles, providing attendees with actionable strategies to strengthen their placement preparation and enhance career outcomes.",
+  },
+  {
+    date: "February 2026",
+    title: "Career Connect",
+    speakers: [
+      {
+        id: 1,
+        name: "Shravani Patil",
+        designation: "Placed at ISS",
+        image: "/images/speaker_photos/careerConnect/shravani-patil.png",
+      },
+      {
+        id: 2,
+        name: "Krushikesh Shelar",
+        designation: "Technical Head at QuestIT & Placed at IVP",
+        image: "/images/speaker_photos/careerConnect/krushikesh-shelar.png",
+      },
+      {
+        id: 3,
+        name: "Brijesh Sharma",
+        designation: "Placed at Dolat Capital",
+        image: "/images/speaker_photos/careerConnect/brijesh-sharma.png",
+      },
+      {
+        id: 4,
+        name: "Swayam Raut",
+        designation: "Placed at Saint Gobain",
+        image: "/images/speaker_photos/careerConnect/swayam-raut.png",
+      },
+      {
+        id: 5,
+        name: "Shubham Jha",
+        designation: "Placed at Carwale",
+        image: "/images/speaker_photos/careerConnect/shubham-jha.png",
+      },
+      {
+        id: 6,
+        name: "Anuprita Mhapankar",
+        designation: "Placed at Quantiphi",
+        image: "/images/speaker_photos/careerConnect/anuprita-mhapankar.png",
+      },
+      {
+        id: 7,
+        name: "Kshitij Hundre",
+        designation: "Placed at EY",
+        image: "/images/speaker_photos/careerConnect/kshitij-hundre.png",
+      },
+      {
+        id: 8,
+        name: "Snehal Patil",
+        designation: "Placed at Oracle",
+        image: "/images/speaker_photos/careerConnect/snehal-patil.png",
+      },
+      {
+        id: 9,
+        name: "Vedang Wajge",
+        designation: "Placed at Sciative Solutions",
+        image: "/images/speaker_photos/careerConnect/vedang-wajge.png",
+      },
+      {
+        id: 10,
+        name: "Anushka Shahane",
+        designation: "Placed at Nomura",
+        image: "/images/speaker_photos/careerConnect/anushka-shahane.png",
+      },
+      {
+        id: 11,
+        name: "Mahvish Siddiqui",
+        designation: "Speaker",
+        image: "/images/speaker_photos/careerConnect/mahvish-siddiqui.png",
+      },
+    ],
+    image: "/images/Career_Connect.jpeg",
+    description:
+      "Quest IT successfully conducted Career Connect 2026, a placement readiness session for Second and Third Year students focused on employability and structured preparation. The session covered ATS-friendly resume building, professional communication, and strategies for technical, aptitude, and HR rounds, featuring insights from seniors placed at leading firms such as Nomura and ISS, who shared practical, results-driven approaches to succeeding in the placement process.",
+  },
+  {
+    date: "February 2026",
     title: "GENESIS 2026",
     image: "/images/genesis_image.jpeg",
     description: "GENESIS 2026 is Quest-IT's first independent offline hackathon, conducted in collaboration with the Brihanmumbai Municipal Corporation (BMC) – Solid Waste Management (SWM) Department, and in association with VESIT IQAC and VESIT IIC, providing a structured academic-industry platform wherein teams of 3–4 members participated in any one domain addressing real-world problem statements under BMC-SWM, namely Sustainability, Artificial Intelligence/Machine Learning (AI/ML), or Blockchain, to demonstrate teamwork, innovation, and technical competence; participating teams competed for cash prizes exceeding ₹1,00,000, along with sponsor-supported rewards, and the successful execution of the event was facilitated by BMC, Shawarmaji, Unstop, Gemini, FAD, SUD Life, Nova AI, and Cyrene AI.",

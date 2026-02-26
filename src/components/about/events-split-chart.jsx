@@ -28,9 +28,9 @@ const chartData = {
     { category: "Hackathon", events: 2, fill: "hsl(var(--chart-1))" },
   ],
   "2025-26": [
-    { category: "Tech", events: 5, fill: "hsl(var(--chart-2))" },
+    { category: "Tech", events: 4, fill: "hsl(var(--chart-2))" },
     { category: "Non-Tech", events: 2, fill: "hsl(var(--chart-3))" },
-    { category: "Hackathon", events: 2, fill: "hsl(var(--chart-1))" },
+    { category: "Hackathon", events: 1, fill: "hsl(var(--chart-1))" },
   ],
 };
 
