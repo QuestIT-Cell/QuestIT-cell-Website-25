@@ -383,7 +383,7 @@ const Events = ({ featured = false }) => {
         {featured && (
           <div className="flex justify-center items-center mt-8 md:mt-12 mb-12 md:mb-16">
             <Link href="/events">
-              <Button className="px-8 py-6 text-base font-semibold bg-cyan-500 hover:bg-cyan-600 text-white rounded-lg transition-all duration-300 shadow-lg hover:shadow-cyan-500/50">
+              <Button className="px-8 py-4 text-lg bg-cyan-600 hover:bg-cyan-700 text-white rounded-lg transition duration-200 shadow-[0px_2px_0px_0px_#FFFFFF40_inset]">
                 Explore More Events <ArrowRight className="w-5 h-5 ml-2" />
               </Button>
             </Link>

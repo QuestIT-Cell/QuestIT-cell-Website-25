@@ -275,7 +275,7 @@ const Registration = () => {
               disabled={isSubmitting}
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
-              className="w-full bg-cyan-600 hover:bg-cyan-700 text-white font-semibold py-3 px-6 rounded-lg transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed shadow-[0px_2px_0px_0px_#FFFFFF40_inset]"
+              className="w-full bg-cyan-600 hover:bg-cyan-700 text-white py-2 px-4 rounded-lg transition duration-200 disabled:opacity-50 disabled:cursor-not-allowed shadow-[0px_2px_0px_0px_#FFFFFF40_inset]"
             >
               {isSubmitting ? "Submitting..." : "Register Now"}
             </motion.button>
