@@ -28,7 +28,7 @@ const Developers = () => {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-12 md:gap-16">
           {developers.map(
             (
               { name, role, email, image, github, linkedin, description },
@@ -36,7 +36,7 @@ const Developers = () => {
             ) => (
               <div
                 key={index}
-                className="flex flex-col rounded-xl p-4 md:p-6 bg-neutral-900 border border-neutral-700"
+                className="flex flex-col rounded-3xl p-6 md:p-10 skeuomorphic-card"
               >
                 <div className="flex items-center gap-x-4">
                   <Image
@@ -44,22 +44,24 @@ const Developers = () => {
                     width={100}
                     height={100}
                     alt="Developer Image"
-                    className="size-20 rounded-full"
+                    className="size-20 rounded-full object-cover grayscale-[0.2] hover:grayscale-0 transition-all duration-300"
                   />
 
                   <div className="grow">
-                    <h3 className="font-medium text-neutral-200">{name}</h3>
-                    <p className="text-xs uppercase text-neutral-500">{role}</p>
+                    <h3 className="font-semibold text-lg text-neutral-200">{name}</h3>
+                    <p className="text-xs uppercase tracking-widest text-neutral-500">{role}</p>
                   </div>
                 </div>
 
-                <p className="mt-3 text-[#C7C7C7]">{description}</p>
+                <p className="mt-6 text-[#C7C7C7] leading-relaxed text-sm md:text-base">
+                  {description}
+                </p>
 
-                <div className="mt-4 flex gap-2">
+                <div className="mt-8 flex gap-4">
                   <Link
                     aria-label="Email"
                     href={`mailto:${email}`}
-                    className="inline-flex justify-center items-center size-8 text-sm font-semibold rounded-lg border border-neutral-700 text-neutral-400 hover:bg-neutral-700 focus:outline-none focus:bg-neutral-700 disabled:opacity-50 disabled:pointer-events-none"
+                    className="inline-flex justify-center items-center size-10 rounded-xl skeuomorphic-button"
                   >
                     <Mail className="h-4 w-4 transition text-white" />
                   </Link>
@@ -67,7 +69,7 @@ const Developers = () => {
                   <LinkPreview
                     url={github}
                     aria-label="GitHub"
-                    className="inline-flex justify-center items-center size-8 text-sm font-semibold rounded-lg border border-neutral-700 text-neutral-400 hover:bg-neutral-700 focus:outline-none focus:bg-neutral-700 disabled:opacity-50 disabled:pointer-events-none"
+                    className="inline-flex justify-center items-center size-10 rounded-xl skeuomorphic-button"
                   >
                     <Github className="h-4 w-4 transition text-white" />
                   </LinkPreview>
@@ -75,7 +77,7 @@ const Developers = () => {
                   <LinkPreview
                     url={linkedin}
                     aria-label="LinkedIn"
-                    className="inline-flex justify-center items-center size-8 text-sm font-semibold rounded-lg border border-neutral-700 text-neutral-400 hover:bg-neutral-700 focus:outline-none focus:bg-neutral-700 disabled:opacity-50 disabled:pointer-events-none"
+                    className="inline-flex justify-center items-center size-10 rounded-xl skeuomorphic-button"
                   >
                     <Linkedin className="h-4 w-4 transition text-white" />
                   </LinkPreview>

@@ -13,6 +13,40 @@
 }
 
 @layer utilities {
+  .skeuomorphic-card {
+    background: radial-gradient(circle at 30% 30%, rgba(26, 26, 26, 0.6) 0%, rgba(18, 18, 18, 0.4) 100%);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    box-shadow: 12px 12px 24px rgba(0, 0, 0, 0.5), -12px -12px 24px rgba(35, 35, 35, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .skeuomorphic-card:hover {
+    background: radial-gradient(circle at 30% 30%, rgba(28, 28, 28, 0.7) 0%, rgba(20, 20, 20, 0.5) 100%);
+    box-shadow: 15px 15px 30px rgba(0, 0, 0, 0.6), -15px -15px 30px rgba(45, 45, 45, 0.2);
+    transform: translateY(-5px);
+  }
+
+  .skeuomorphic-button {
+    background: rgba(18, 18, 18, 0.5);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    box-shadow: 4px 4px 8px rgba(0, 0, 0, 0.4), -4px -4px 8px rgba(40, 40, 40, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    transition: all 0.2s ease;
+  }
+
+  .skeuomorphic-button:hover {
+    background: rgba(25, 25, 25, 0.6);
+    box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.4), -2px -2px 4px rgba(40, 40, 40, 0.1);
+    transform: scale(0.98);
+  }
+
+  .skeuomorphic-button:active {
+    box-shadow: inset 2px 2px 5px rgba(0, 0, 0, 0.5), inset -2px -2px 5px rgba(40, 40, 40, 0.1);
+  }
+
   ::selection {
     color: #1a202c;
     background-color: #00faff;
