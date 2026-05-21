@@ -1,5 +1,5 @@
 // App's External Imports
-import { Home, Mail, Users, Calendar, UserPlus, MessageSquare, NotebookPen, HelpCircle, Laptop } from "lucide-react";
+import { Home, Mail, Users, Calendar, UserPlus, MessageSquare, NotebookPen, HelpCircle, Laptop, Images } from "lucide-react";
 
 const menu = [
   {
@@ -28,23 +28,29 @@ const menu = [
     mobile_nav: true,
     external: true,
   },
+  // {
+  //   name: "WorkshopToday",
+  //   path: "#",
+  //   icon: <UserPlus />, // Using UserPlus as generic icon for now
+  //   mobile_nav: true,
+  //   dropdown: [
+  //     {
+  //       name: "Registration",
+  //       path: "/registration",
+  //       icon: <UserPlus />,
+  //     },
+  //     {
+  //       name: "Feedback",
+  //       path: "/feedback",
+  //       icon: <MessageSquare />,
+  //     },
+  //   ],
+  // },
   {
-    name: "WorkshopToday",
-    path: "#",
-    icon: <UserPlus />, // Using UserPlus as generic icon for now
+    name: "Gallery",
+    path: "/gallery",
+    icon: <Images />,
     mobile_nav: true,
-    dropdown: [
-      {
-        name: "Registration",
-        path: "/registration",
-        icon: <UserPlus />,
-      },
-      {
-        name: "Feedback",
-        path: "/feedback",
-        icon: <MessageSquare />,
-      },
-    ],
   },
   {
     name: "Team",
