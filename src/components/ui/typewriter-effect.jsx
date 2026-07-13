@@ -58,7 +58,7 @@ export const TypewriterEffect = ({
         }}
       >
         <div
-          className="font-bold flex items-center"
+          className="font-bold flex items-center typewriter-mobile-fix"
           style={{
             whiteSpace: "nowrap",
             fontSize: "clamp(1.5rem, 4vw, 3rem)",

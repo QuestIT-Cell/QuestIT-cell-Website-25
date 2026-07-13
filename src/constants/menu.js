@@ -20,14 +20,6 @@ const menu = [
     mobile_nav: true,
     icon: <Calendar />,
   },
-  {
-    name: "QuestIT Editorial",
-    path: "https://questit-editorial.hashnode.dev/",
-    icon: <NotebookPen />,
-    special: true,
-    mobile_nav: true,
-    external: true,
-  },
   // {
   //   name: "WorkshopToday",
   //   path: "#",

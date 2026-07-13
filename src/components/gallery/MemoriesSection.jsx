@@ -192,7 +192,7 @@ const MemoriesSection = () => {
                     src={`/images/gallery-images/diagonal_images/diagonal_${index + 1}.${getImageExtension(index + 1)}`}
                     alt={`Quest-IT Memory ${index + 1}`}
                     fill
-                    className="object-cover"
+                    className="object-cover gallery-image-mobile"
                     sizes="(max-width: 768px) 180px, 220px"
                     quality={90}
                     loading="lazy"

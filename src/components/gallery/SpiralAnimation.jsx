@@ -181,7 +181,7 @@ const SpiralAnimation = ({ onComplete }) => {
                   }`}
                   alt={`Spiral frame ${index + 1}`}
                   fill
-                  className="object-cover rounded-lg shadow-2xl"
+                  className="object-cover rounded-lg shadow-2xl gallery-image-mobile"
                   priority={index <= 3}
                   quality={85}
                 />

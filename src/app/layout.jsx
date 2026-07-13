@@ -9,6 +9,7 @@ import { usePathname } from "next/navigation";
 
 // App's Internal Imports
 import "./globals.css";
+import "@/styles/mobile-responsive.css";
 import poppins from "./font";
 import Header from "@/components/header";
 import Footer from "@/components/footer";

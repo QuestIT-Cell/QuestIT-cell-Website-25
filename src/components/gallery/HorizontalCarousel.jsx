@@ -53,7 +53,7 @@ const HorizontalCarousel = () => {
             src={`/images/gallery-images/sliding_images/sliding_${currentIndex + 1}.${getImageExtension(currentIndex + 1)}`}
             alt={`Gallery slide ${currentIndex + 1}`}
             fill
-            className="object-cover"
+            className="object-cover gallery-image-mobile"
             sizes="100vw"
             quality={90}
             priority={currentIndex === 0}

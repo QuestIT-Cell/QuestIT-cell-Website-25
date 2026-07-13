@@ -58,14 +58,14 @@ const EventsSplitChart = () => {
 
   return (
     <Card className="flex flex-col bg-neutral-900 border-none">
-      <CardHeader className="flex flex-row items-center justify-between pb-2">
+      <CardHeader className="flex flex-row items-center justify-between pb-2 chart-header-mobile">
         <div className="space-y-1">
-          <CardTitle>Events Split</CardTitle>
-          <CardDescription>
+          <CardTitle className="chart-title-mobile">Events Split</CardTitle>
+          <CardDescription className="chart-description-mobile">
             {activeYear === "2024-25" ? "AY 2024 - 2025" : "AY 2025 - 2026"}
           </CardDescription>
         </div>
-        <div className="flex gap-1 bg-neutral-800 p-1 rounded-lg">
+        <div className="flex gap-1 bg-neutral-800 p-1 rounded-lg chart-buttons-mobile">
           {Object.keys(chartData).map((year) => (
             <Button
               key={year}

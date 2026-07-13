@@ -138,6 +138,23 @@ const Events = ({ featured = false }) => {
     return () => window.removeEventListener("keydown", on_key_down);
   }, [active]);
 
+  // Close modal on scroll
+  useEffect(() => {
+    function on_scroll() {
+      if (active && typeof active === "object") {
+        set_active(null);
+      }
+    }
+
+    if (active && typeof active === "object") {
+      window.addEventListener("scroll", on_scroll);
+    }
+
+    return () => {
+      window.removeEventListener("scroll", on_scroll);
+    };
+  }, [active]);
+
   return (
     <div id="events">
       {featured && (

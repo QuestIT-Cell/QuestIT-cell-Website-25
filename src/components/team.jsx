@@ -87,7 +87,7 @@ const Team = () => {
               className="text-xl"
               ref={(element) => (accordion_ref.current[value] = element)}
             >
-              <AccordionTrigger>{title}</AccordionTrigger>
+              <AccordionTrigger className="team-accordion-trigger">{title}</AccordionTrigger>
 
               <AccordionContent className="py-8">
                 {/* If it has subGroups (nested structure), render nested accordion */}
@@ -105,10 +105,10 @@ const Team = () => {
                         className="text-lg border-l-2 border-neutral-700 pl-4"
                         ref={(element) => (sub_accordion_ref.current[`${value}-${subValue}`] = element)}
                       >
-                        <AccordionTrigger>{subTitle}</AccordionTrigger>
+                        <AccordionTrigger className="team-sub-accordion-trigger">{subTitle}</AccordionTrigger>
 
                         <AccordionContent className="py-8 relative z-10">
-                          <div className="flex flex-wrap justify-center gap-10 w-full max-w-none mx-auto">
+                          <div className="flex flex-wrap justify-center gap-10 w-full max-w-none mx-auto team-card-container-mobile">
                             {subMembers
                               .sort((a, b) => a.name.localeCompare(b.name))
                               .map(
@@ -138,7 +138,7 @@ const Team = () => {
                                       {name}
                                     </h2>
 
-                                    <p className="text-sm absolute right-[1.75rem] border font-light border-white/[0.2] rounded-full mt-4 text-white px-2 py-1">
+                                    <p className="text-sm absolute right-[1.75rem] border font-light border-white/[0.2] rounded-full mt-4 text-white px-2 py-1 team-designation-mobile">
                                       {designation}
                                     </p>
 
@@ -177,7 +177,7 @@ const Team = () => {
                   </Accordion>
                 ) : (
                   /* Regular members display for Faculty In-Charges */
-                  <div className="flex flex-col md:grid md:grid-cols-2 gap-y-16">
+                  <div className="flex flex-col md:grid md:grid-cols-2 gap-y-16 team-card-container-mobile">
                     {members && members.length > 0 ? (
                       members
                         .sort((a, b) =>
@@ -212,7 +212,7 @@ const Team = () => {
                                 {name}
                               </h2>
 
-                              <p className="text-sm absolute right-[1.75rem] border font-light border-white/[0.2] rounded-full mt-4 text-white px-2 py-1">
+                              <p className="text-sm absolute right-[1.75rem] border font-light border-white/[0.2] rounded-full mt-4 text-white px-2 py-1 team-designation-mobile">
                                 {designation}
                               </p>
 

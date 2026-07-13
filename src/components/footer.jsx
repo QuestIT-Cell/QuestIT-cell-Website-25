@@ -68,7 +68,7 @@ const Footer = () => {
 
         </ul>
 
-        <ul className="mt-12 flex justify-center gap-6 md:gap-8">
+        <ul className="mt-12 flex justify-center gap-6 md:gap-8 footer-list-mobile">
           <li className="text-[#C7C7C7]">
             &copy; {fetch_current_year()}{" "}
             <Link href="/#home" className="hover:!text-[#00A3FF] transition">
