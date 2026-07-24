@@ -6,9 +6,22 @@ import Image from "next/image";
 
 const HorizontalCarousel = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [loadedImages, setLoadedImages] = useState(new Set([0])); // Track loaded images
   const totalSlides = 12;
   const autoPlayDelay = 4000; // 4 seconds per slide
   const timerRef = useRef(null);
+
+  // Preload next image
+  useEffect(() => {
+    const nextIndex = (currentIndex + 1) % totalSlides;
+    if (!loadedImages.has(nextIndex)) {
+      const img = document.createElement('img');
+      img.src = `/images/gallery-images/sliding_images/sliding_${nextIndex + 1}.${getImageExtension(nextIndex + 1)}`;
+      img.onload = () => {
+        setLoadedImages(prev => new Set([...prev, nextIndex]));
+      };
+    }
+  }, [currentIndex, loadedImages]);
 
   // Auto-advance carousel
   useEffect(() => {
@@ -56,7 +69,8 @@ const HorizontalCarousel = () => {
             className="object-cover gallery-image-mobile"
             sizes="100vw"
             quality={90}
-            priority={currentIndex === 0}
+            priority={currentIndex <= 1} // Priority load for first two images
+            loading={currentIndex <= 1 ? "eager" : "eager"} // Force eager loading for all
           />
           {/* Subtle gradient overlay for better text visibility if needed */}
           <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-transparent to-black/40" />

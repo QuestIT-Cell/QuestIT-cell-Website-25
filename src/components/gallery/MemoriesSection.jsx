@@ -8,7 +8,7 @@ const MemoriesSection = () => {
   const [isVisible, setIsVisible] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const sectionRef = useRef(null);
-  const totalCards = 12;
+  const totalCards = 15;
 
   useEffect(() => {
     // Check if mobile
@@ -41,17 +41,20 @@ const MemoriesSection = () => {
   }, []);
 
   const getImageExtension = (index) => {
-    // Based on actual files (using 12 images):
+    // Based on actual files (using 15 images):
     // diagonal_1,2,3,5,6,7,8,10: jpeg
-    // diagonal_4,9,11,12: jpg
-    const jpgIndices = [4, 9, 11, 12];
+    // diagonal_4,11,12: jpg
+    // diagonal_9,13,14,15: png
+    const jpgIndices = [4, 11, 12];
+    const pngIndices = [9, 13, 14, 15];
+    if (pngIndices.includes(index)) return 'png';
     return jpgIndices.includes(index) ? 'jpg' : 'jpeg';
   };
 
   // Pinterest-style masonry layout with varying heights
   // Cards flow top-left to bottom-right with edge bleed
   const masonryLayout = {
-    // Desktop: 4 columns with A4 portrait aspect ratio (taller cards)
+    // Desktop: 5 columns with A4 portrait aspect ratio (taller cards)
     desktop: [
       // Column 1
       { col: 0, row: 0, height: 340, offsetX: 0, offsetY: 0 },      // index 0
@@ -72,6 +75,11 @@ const MemoriesSection = () => {
       { col: 3, row: 0, height: 350, offsetX: 0, offsetY: 0 },      // index 9
       { col: 3, row: 1, height: 330, offsetX: 0, offsetY: 370 },    // index 10
       { col: 3, row: 2, height: 300, offsetX: 0, offsetY: 720 },    // index 11
+      
+      // Column 5 (NEW)
+      { col: 4, row: 0, height: 340, offsetX: 0, offsetY: 0 },      // index 12
+      { col: 4, row: 1, height: 320, offsetX: 0, offsetY: 360 },    // index 13
+      { col: 4, row: 2, height: 320, offsetX: 0, offsetY: 700 },    // index 14
     ],
     // Mobile: 2 columns with A4 portrait aspect ratio
     mobile: [
@@ -87,6 +95,9 @@ const MemoriesSection = () => {
       { col: 1, row: 4, height: 300, offsetX: 0, offsetY: 1304 },   // index 9
       { col: 0, row: 5, height: 320, offsetX: 0, offsetY: 1680 },   // index 10
       { col: 1, row: 5, height: 360, offsetX: 0, offsetY: 1620 },   // index 11
+      { col: 0, row: 6, height: 340, offsetX: 0, offsetY: 2016 },   // index 12
+      { col: 1, row: 6, height: 320, offsetX: 0, offsetY: 1996 },   // index 13
+      { col: 0, row: 7, height: 320, offsetX: 0, offsetY: 2372 },   // index 14
     ]
   };
 
@@ -132,7 +143,7 @@ const MemoriesSection = () => {
       {/* Pinterest-Style Masonry Grid - Top-Left Anchored */}
       <div className="relative w-full max-w-7xl">
         <div className="relative" style={{ 
-          minHeight: isMobile ? '2000px' : '1060px',
+          minHeight: isMobile ? '2700px' : '1060px',
           marginLeft: isMobile ? '0' : '2rem'
         }}>
           {/* Memory Cards in Masonry Layout */}
