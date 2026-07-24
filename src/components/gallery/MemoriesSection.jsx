@@ -25,15 +25,21 @@ const MemoriesSection = () => {
           setIsVisible(true);
         }
       },
-      { threshold: 0.2 }
+      { threshold: 0.1 } // Reduced from 0.2 to 0.1 for better mobile detection
     );
 
     if (sectionRef.current) {
       observer.observe(sectionRef.current);
     }
 
+    // Fallback: Set visible after a short delay to ensure rendering on mobile
+    const fallbackTimer = setTimeout(() => {
+      setIsVisible(true);
+    }, 100);
+
     return () => {
       window.removeEventListener('resize', checkMobile);
+      clearTimeout(fallbackTimer);
       if (sectionRef.current) {
         observer.unobserve(sectionRef.current);
       }
@@ -84,20 +90,20 @@ const MemoriesSection = () => {
     // Mobile: 2 columns with A4 portrait aspect ratio
     mobile: [
       { col: 0, row: 0, height: 300, offsetX: 0, offsetY: 0 },      // index 0
-      { col: 1, row: 0, height: 340, offsetX: 0, offsetY: 0 },      // index 1
+      { col: 1, row: 0, height: 300, offsetX: 0, offsetY: 0 },      // index 1
       { col: 0, row: 1, height: 320, offsetX: 0, offsetY: 316 },    // index 2
-      { col: 1, row: 1, height: 280, offsetX: 0, offsetY: 356 },    // index 3
-      { col: 0, row: 2, height: 360, offsetX: 0, offsetY: 652 },    // index 4
-      { col: 1, row: 2, height: 300, offsetX: 0, offsetY: 652 },    // index 5
-      { col: 0, row: 3, height: 280, offsetX: 0, offsetY: 1028 },   // index 6
-      { col: 1, row: 3, height: 320, offsetX: 0, offsetY: 968 },    // index 7
-      { col: 0, row: 4, height: 340, offsetX: 0, offsetY: 1324 },   // index 8
-      { col: 1, row: 4, height: 300, offsetX: 0, offsetY: 1304 },   // index 9
-      { col: 0, row: 5, height: 320, offsetX: 0, offsetY: 1680 },   // index 10
-      { col: 1, row: 5, height: 360, offsetX: 0, offsetY: 1620 },   // index 11
-      { col: 0, row: 6, height: 340, offsetX: 0, offsetY: 2016 },   // index 12
-      { col: 1, row: 6, height: 320, offsetX: 0, offsetY: 1996 },   // index 13
-      { col: 0, row: 7, height: 320, offsetX: 0, offsetY: 2372 },   // index 14
+      { col: 1, row: 1, height: 320, offsetX: 0, offsetY: 316 },    // index 3
+      { col: 0, row: 2, height: 340, offsetX: 0, offsetY: 652 },    // index 4
+      { col: 1, row: 2, height: 340, offsetX: 0, offsetY: 652 },    // index 5
+      { col: 0, row: 3, height: 300, offsetX: 0, offsetY: 1008 },   // index 6
+      { col: 1, row: 3, height: 300, offsetX: 0, offsetY: 1008 },   // index 7
+      { col: 0, row: 4, height: 320, offsetX: 0, offsetY: 1324 },   // index 8
+      { col: 1, row: 4, height: 320, offsetX: 0, offsetY: 1324 },   // index 9
+      { col: 0, row: 5, height: 340, offsetX: 0, offsetY: 1660 },   // index 10
+      { col: 1, row: 5, height: 340, offsetX: 0, offsetY: 1660 },   // index 11
+      { col: 0, row: 6, height: 300, offsetX: 0, offsetY: 2016 },   // index 12
+      { col: 1, row: 6, height: 300, offsetX: 0, offsetY: 2016 },   // index 13
+      { col: 0, row: 7, height: 320, offsetX: 0, offsetY: 2332 },   // index 14
     ]
   };
 
@@ -123,7 +129,7 @@ const MemoriesSection = () => {
   return (
     <section
       ref={sectionRef}
-      className="relative min-h-screen w-full flex flex-col items-start justify-center bg-black py-20 px-4 md:px-8 lg:px-16 overflow-hidden"
+      className="relative min-h-screen w-full flex flex-col items-start justify-start bg-black py-12 md:py-20 px-4 md:px-8 lg:px-16 overflow-hidden"
     >
       {/* Title - Top Left Anchored */}
       <motion.div
@@ -141,10 +147,11 @@ const MemoriesSection = () => {
       </motion.div>
 
       {/* Pinterest-Style Masonry Grid - Top-Left Anchored */}
-      <div className="relative w-full max-w-7xl">
-        <div className="relative" style={{ 
+      <div className="relative w-full max-w-7xl mx-auto">
+        <div className="relative w-full" style={{ 
           minHeight: isMobile ? '2700px' : '1060px',
-          marginLeft: isMobile ? '0' : '2rem'
+          marginLeft: isMobile ? '0' : '2rem',
+          maxWidth: isMobile ? '100%' : 'auto'
         }}>
           {/* Memory Cards in Masonry Layout */}
           {Array.from({ length: totalCards }).map((_, index) => {
