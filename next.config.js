@@ -6,9 +6,8 @@ const with_PWA = require("next-pwa")({
 });
 
 const next_config = {
-  eslint: {
-    ignoreDuringBuilds: true,
-  },
+  // Add empty turbopack config to silence Next.js 16 warning
+  turbopack: {},
   images: {
     unoptimized: true,
     remotePatterns: [
@@ -29,7 +28,8 @@ const next_config = {
   },
   output: "export",
   trailingSlash: true,
-  skipMiddlewareUrlNormalize: true,
+  // Updated deprecated option
+  skipProxyUrlNormalize: true,
 };
 
 module.exports = with_PWA(next_config);
