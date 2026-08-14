@@ -126,14 +126,14 @@ const VibeWQuestWinners = () => {
             <Trophy className="w-16 h-16 text-cyan-400" />
           </div>
 
-          <div className="relative inline-block mb-8">
+          <div className="relative w-full flex justify-center mb-8 px-4">
             <Image
               src="/images/vibeWQuest_photos/vibeWquest_logo.png"
               alt="Vibe W Quest Logo"
-              width={400}
-              height={100}
-              className="w-auto h-24 md:h-32"
-              unoptimized
+              width={800}
+              height={200}
+              className="w-full max-w-[280px] sm:max-w-[350px] md:max-w-[450px] lg:max-w-[550px] xl:max-w-[650px] h-auto object-contain"
+              priority
             />
           </div>
 
