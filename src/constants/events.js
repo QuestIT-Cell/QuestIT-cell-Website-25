@@ -1,5 +1,39 @@
 const events = [
   {
+    date: "August 2026",
+    title: "Vibe W Quest",
+    speakers: [
+      {
+        id: 1,
+        name: "Shivam Mishra",
+        designation: "Sr. Technical Officer",
+        image: "/images/speaker_photos/vibeWQuest/shivam_mishra.png",
+      },
+      {
+        id: 2,
+        name: "Rushabh Gupta",
+        designation: "Sr. Technical Officer",
+        image: "/images/speaker_photos/vibeWQuest/rushabh_gupta.png",
+      },
+      {
+        id: 3,
+        name: "Sanjog Poojary",
+        designation: "Sr. Technical Officer",
+        image: "/images/speaker_photos/vibeWQuest/sanjog_poojary.png",
+      },
+      {
+        id: 4,
+        name: "Ashutosh Mishra",
+        designation: "Sr. Technical Officer",
+        image: "/images/speaker_photos/vibeWQuest/ashutosh_mishra.png",
+      },
+    ],
+    image: "/images/workshop_thumbnails/vibeWquest.PNG",
+    description:
+      "QuestIT conducted VibeWQuest 2026, an introductory AI-powered development workshop for SE students, led by TE Tech Members Shivam Mishra, Ashutosh Mishra, Rushabh Gupta, and Sanjog Poojary. Students learned Vibe Coding and built Cosmos OS, a browser-based desktop environment using React, Tailwind CSS, Firebase, Vercel, and modern AI tools, implementing backend integration, reusable components, applications, widgets, notifications, and an interactive music system.",
+    website: "/vibe-w-quest-winners"
+  },
+  {
     date: "January 2025",
     title: "WebDev Odyssey",
     speakers: [
@@ -183,7 +217,7 @@ const events = [
         image: "/images/speaker_photos/sih_insider/darshan_khapekar.png",
       },
     ],
-    image: "/images/SIH Insider.jpg",
+    image: "/images/workshop_thumbnails/SIH Insider.jpg",
     description:
       "SIH Insider brings past SIH champions Shravani Rasam and Darshan Khapekar to share their real journey—from late-night brainstorming to the national stage. Two voices, one roadmap, and invaluable insights. If SIH 2025 is on your mind, this September workshop is your chance to get ahead.",
   },
@@ -228,7 +262,7 @@ const events = [
         image: "/images/speaker_photos/bridgeGap/kshitij-nangare.png",
       },
     ],
-    image: "/images/BridgeTheGap.png",
+    image: "/images/workshop_thumbnails/BridgeTheGap.png",
     description:
       "Quest IT conducted Bridge the Gap, an interactive career guidance session focused on helping students navigate placements and off-campus internship opportunities with confidence. The event featured experienced seniors who shared practical insights on acing interviews, leveraging prior job experience, and securing competitive off-campus roles, providing attendees with actionable strategies to strengthen their placement preparation and enhance career outcomes.",
   },
@@ -303,14 +337,14 @@ const events = [
         image: "/images/speaker_photos/careerConnect/mahvish-siddiqui.png",
       },
     ],
-    image: "/images/Career_Connect.jpeg",
+    image: "/images/workshop_thumbnails/Career_Connect.jpeg",
     description:
       "Quest IT successfully conducted Career Connect 2026, a placement readiness session for Second and Third Year students focused on employability and structured preparation. The session covered ATS-friendly resume building, professional communication, and strategies for technical, aptitude, and HR rounds, featuring insights from seniors placed at leading firms such as Nomura and ISS, who shared practical, results-driven approaches to succeeding in the placement process.",
   },
   {
     date: "February 2026",
     title: "GENESIS 2026",
-    image: "/images/genesis_image.jpeg",
+    image: "/images/workshop_thumbnails/genesis_image.jpeg",
     description: "GENESIS 2026 is Quest-IT's first independent offline hackathon, conducted in collaboration with the Brihanmumbai Municipal Corporation (BMC) – Solid Waste Management (SWM) Department, and in association with VESIT IQAC and VESIT IIC, providing a structured academic-industry platform wherein teams of 3–4 members participated in any one domain addressing real-world problem statements under BMC-SWM, namely Sustainability, Artificial Intelligence/Machine Learning (AI/ML), or Blockchain, to demonstrate teamwork, innovation, and technical competence; participating teams competed for cash prizes exceeding ₹1,00,000, along with sponsor-supported rewards, and the successful execution of the event was facilitated by BMC, Shawarmaji, Unstop, Gemini, FAD, SUD Life, Nova AI, and Cyrene AI.",
     website: "https://genesis-hazel-one.vercel.app"
   },
@@ -325,7 +359,7 @@ const events = [
         image: "/images/speaker_photos/TestDrive/siddharth_rawlani.png",
       },
     ],
-    image: "/images/Test Drive.jpg",
+    image: "/images/workshop_thumbnails/Test Drive.jpg",
     description:
       "TestDrive – From Manual to Automation is an October workshop led by Siddharth Rawlani from Trading Technologies. Learn to accelerate your workflow, master automation tools and frameworks, and explore real FinTech testing practices. This session offers industry insights, practical guidance, and a clear roadmap for moving beyond manual testing.",
   },
@@ -358,7 +392,7 @@ const events = [
         image: "/images/speaker_photos/codeflix/atharva_lotankar.png",
       },
     ],
-    image: "/images/CodeFlix.png",
+    image: "/images/workshop_thumbnails/CodeFlix.png",
     description:
       "CodeFlix: ML Special is a 2-day beginner-friendly workshop this October featuring Vaishnavi Avhad, Harshita Singh, Arnav Chaudhary, and Atharva Lotankar. SE students will explore how machines learn from data, how intelligence forms, and how platforms like Netflix predict choices in this hands-on introduction to AI and ML.",
   },

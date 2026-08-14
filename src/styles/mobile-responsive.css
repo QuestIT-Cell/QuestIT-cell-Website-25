@@ -93,11 +93,27 @@
   }
 }
 
-/* Fix 4c: Team cards - Add padding on mobile to prevent border cutoff */
+/* Fix 4c: Team cards - Proper mobile containment */
 @media (max-width: 767px) {
   .team-card-container-mobile {
-    padding-left: 1rem !important;
-    padding-right: 1rem !important;
+    padding-left: 0.5rem !important;
+    padding-right: 0.5rem !important;
+    justify-content: center !important;
+    width: 100% !important;
+  }
+  
+  /* Make individual cards fit properly on mobile */
+  .team-card-container-mobile > div {
+    max-width: calc(100vw - 2rem) !important;
+    width: 100% !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+  }
+  
+  /* Ensure border icons stay within bounds */
+  .team-card-container-mobile .border {
+    position: relative;
+    margin: 0.75rem auto !important;
   }
 }
 
@@ -117,5 +133,51 @@
   .mobile-padding-fix {
     padding-left: 0.5rem;
     padding-right: 0.5rem;
+  }
+  
+  /* Prevent any horizontal overflow on mobile */
+  body, html {
+    overflow-x: hidden !important;
+    max-width: 100vw !important;
+  }
+  
+  /* Ensure all containers respect viewport width */
+  * {
+    max-width: 100%;
+  }
+}
+
+/* Fix 7: Team page specific mobile fixes */
+@media (max-width: 767px) {
+  /* Ensure team page container doesn't overflow */
+  .w-full.max-w-none {
+    max-width: 100vw !important;
+    overflow-x: hidden !important;
+  }
+  
+  /* Fix accordion content overflow */
+  [data-state="open"] {
+    overflow-x: hidden !important;
+  }
+}
+
+/* Fix 8: Events page mobile responsiveness */
+@media (max-width: 767px) {
+  /* Ensure event cards fit within viewport */
+  #events {
+    overflow-x: hidden !important;
+    max-width: 100vw !important;
+  }
+  
+  /* Prevent event card container overflow */
+  #events ul {
+    padding-left: 0.75rem !important;
+    padding-right: 0.75rem !important;
+  }
+  
+  /* Make event cards responsive */
+  #events .rounded-xl {
+    max-width: 100% !important;
+    margin-left: 0 !important;
   }
 }

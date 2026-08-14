@@ -125,7 +125,7 @@ const Team = () => {
                                 ) => (
                                   <div
                                     key={memberIndex}
-                                    className="border border-white/[0.2] flex flex-col items-start max-w-[19rem] md:max-w-[22rem] mx-auto p-4 relative h-[30rem]"
+                                    className="border border-white/[0.2] flex flex-col items-start w-full max-w-[17rem] sm:max-w-[19rem] md:max-w-[22rem] mx-auto p-4 relative h-[30rem]"
                                   >
                                     <Icon className="absolute h-6 w-6 -top-3 -left-3 text-white" />
                                     <Icon className="absolute h-6 w-6 -bottom-3 -left-3 text-white" />
@@ -199,7 +199,7 @@ const Team = () => {
                           ) => (
                             <div
                               key={memberIndex}
-                              className="border border-white/[0.2] flex flex-col items-start max-w-[19rem] md:max-w-[22rem] mx-auto p-4 relative h-[30rem]"
+                              className="border border-white/[0.2] flex flex-col items-start w-full max-w-[17rem] sm:max-w-[19rem] md:max-w-[22rem] mx-auto p-4 relative h-[30rem]"
                             >
                               <Icon className="absolute h-6 w-6 -top-3 -left-3 text-white" />
                               <Icon className="absolute h-6 w-6 -bottom-3 -left-3 text-white" />
