@@ -20,22 +20,34 @@ const sitemap = () => {
       lastModified: fetch_last_modified_date("page.jsx"),
     },
     {
-      priority: 0.8,
-      url: `${base_url}/team`,
-      changeFrequency: "yearly",
-      lastModified: fetch_last_modified_date("(routes)/team/page.jsx"),
-    },
-    {
       priority: 0.9,
       url: `${base_url}/events`,
       changeFrequency: "monthly",
       lastModified: fetch_last_modified_date("(routes)/events/page.jsx"),
     },
     {
+      priority: 0.8,
+      url: `${base_url}/team`,
+      changeFrequency: "yearly",
+      lastModified: fetch_last_modified_date("(routes)/team/page.jsx"),
+    },
+    {
       priority: 0.7,
       changeFrequency: "yearly",
       url: `${base_url}/developers`,
       lastModified: fetch_last_modified_date("(routes)/developers/page.jsx"),
+    },
+    {
+      priority: 0.8,
+      url: `${base_url}/registration`,
+      changeFrequency: "monthly",
+      lastModified: new Date(),
+    },
+    {
+      priority: 0.6,
+      url: `${base_url}/feedback`,
+      changeFrequency: "monthly",
+      lastModified: new Date(),
     },
   ];
 };
