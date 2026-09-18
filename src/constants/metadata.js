@@ -1,4 +1,13 @@
+// Only noindex on the personal Vercel deployment, not on the official domain
+const isVercelPersonalDeploy =
+  String(process.env.NEXT_PUBLIC_BASE_URL).includes("vercel.app");
+
+const noIndexIfVercel = isVercelPersonalDeploy
+  ? { robots: { index: false, follow: false } }
+  : {};
+
 const root = {
+  ...noIndexIfVercel,
   alternates: {
     canonical: "/",
   },
@@ -74,6 +83,7 @@ const root = {
 };
 
 const team = {
+  ...noIndexIfVercel,
   alternates: {
     canonical: "/team",
   },
@@ -136,6 +146,7 @@ const team = {
 };
 
 const events = {
+  ...noIndexIfVercel,
   alternates: {
     canonical: "/events",
   },
@@ -198,6 +209,7 @@ const events = {
 };
 
 const developers = {
+  ...noIndexIfVercel,
   alternates: {
     canonical: "/developers",
   },
@@ -260,6 +272,7 @@ const developers = {
 };
 
 const registration = {
+  ...noIndexIfVercel,
   alternates: {
     canonical: "/registration",
   },
@@ -313,6 +326,7 @@ const registration = {
 };
 
 const feedback = {
+  ...noIndexIfVercel,
   alternates: {
     canonical: "/feedback",
   },
