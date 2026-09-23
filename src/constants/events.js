@@ -346,7 +346,7 @@ const events = [
     title: "GENESIS 2026",
     image: "/images/workshop_thumbnails/genesis_image.jpeg",
     description: "GENESIS 2026 is Quest-IT's first independent offline hackathon, conducted in collaboration with the Brihanmumbai Municipal Corporation (BMC) – Solid Waste Management (SWM) Department, and in association with VESIT IQAC and VESIT IIC, providing a structured academic-industry platform wherein teams of 3–4 members participated in any one domain addressing real-world problem statements under BMC-SWM, namely Sustainability, Artificial Intelligence/Machine Learning (AI/ML), or Blockchain, to demonstrate teamwork, innovation, and technical competence; participating teams competed for cash prizes exceeding ₹1,00,000, along with sponsor-supported rewards, and the successful execution of the event was facilitated by BMC, Shawarmaji, Unstop, Gemini, FAD, SUD Life, Nova AI, and Cyrene AI.",
-    website: "https://genesis-hazel-one.vercel.app"
+    website: "https://questit.vesit.ves.ac.in/genesis/"
   },
   {
     date: "October 2025",
