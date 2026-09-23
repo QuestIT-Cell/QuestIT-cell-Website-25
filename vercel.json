@@ -1,0 +1,9 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "rewrites": [
+    { "source": "/genesis-cour2", "destination": "https://genesis-v21.vercel.app" },
+    { "source": "/genesis-cour2/:path*", "destination": "https://genesis-v21.vercel.app/:path*" },
+    { "source": "/genesis", "destination": "https://genesis-hazel-one.vercel.app" },
+    { "source": "/genesis/:path*", "destination": "https://genesis-hazel-one.vercel.app/:path*" }
+  ]
+}
