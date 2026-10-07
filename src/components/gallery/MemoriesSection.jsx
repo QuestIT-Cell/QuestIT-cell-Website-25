@@ -678,7 +678,7 @@ const MemoriesSection = () => {
             aria-hidden="true"
             className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none select-none flex items-center justify-center"
             style={{
-              transform: "translate3d(-50%, -50%, -20px)",
+              transform: "translateZ(-20px)",
               zIndex: 0,
             }}
           >
