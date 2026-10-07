@@ -1218,7 +1218,6 @@ const HorizontalCarousel = () => {
         style={{
           bottom: "0px",
           width: isVertical ? "min(56vw, 240px)" : "min(56vw, 460px)",
-          transform: "translateX(-50%)",
           /* Projector is always visible from the start */
           opacity: 1,
           /* Explicit zIndex: 50 brings projector in front of bottom card (zIndex: 10) */

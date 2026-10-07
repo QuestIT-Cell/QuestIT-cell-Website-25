@@ -699,7 +699,7 @@ const DeveloperEditorialSection = () => {
           </div>
 
           {/* 2. 3D Hero Card Stack with 4 Fanned Background Cards, Hover Tilt & Mobile Navigation Buttons */}
-          <div className="relative w-full flex items-center justify-center mt-2 mb-1 shrink-0">
+          <div className="relative w-full flex items-center justify-center mt-1 sm:mt-2 mb-2 sm:mb-3 shrink-0">
             {/* Mobile Previous Button */}
             <button
               type="button"
@@ -853,7 +853,7 @@ const DeveloperEditorialSection = () => {
           </div>
 
           {/* 3. Work / Contribution with Static Visual Anchor & Masked Vertical Reveal (Moved downwards) */}
-          <div className="relative w-full flex flex-col items-center justify-center shrink-0 px-2 sm:px-3 mt-4 sm:mt-5">
+          <div className="relative w-full flex flex-col items-center justify-center shrink-0 px-2 sm:px-3 mt-7 sm:mt-8">
             <div className="flex items-center justify-center gap-2">
               <span className="w-5 h-[2px] bg-[#22d3ee] inline-block" />
               <span className="font-mono text-[10px] sm:text-xs tracking-[0.22em] text-[#22d3ee] font-semibold uppercase">
