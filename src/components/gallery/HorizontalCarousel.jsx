@@ -1214,7 +1214,7 @@ const HorizontalCarousel = () => {
           3D INTERACTIVE PROJECTOR MODEL & CASSETTES
       ══════════════════════════════════════════════════════════════════════ */}
       <div
-        className="absolute left-1/2 -translate-x-1/2 select-none"
+        className="absolute left-1/2 select-none"
         style={{
           bottom: "0px",
           width: isVertical ? "min(56vw, 240px)" : "min(56vw, 460px)",
