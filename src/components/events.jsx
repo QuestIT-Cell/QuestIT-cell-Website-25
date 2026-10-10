@@ -16,6 +16,18 @@ import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import useOutsideClick from "@/hooks/use-outside-click";
 import { cn } from "@/lib/utils";
+
+const get_event_image = (image) => {
+  if (image === "/images/workshop_thumbnails/vibeWquest.webp") {
+    return "/images/workshop_thumbnails/vibeWquest-640.webp";
+  }
+
+  if (image === "/images/workshop_thumbnails/BridgeTheGap.webp") {
+    return "/images/workshop_thumbnails/BridgeTheGap-384.webp";
+  }
+
+  return image;
+};
 import { AnimatedTooltip } from "@/components/ui/animated-tooltip";
 import { TypewriterEffect } from "@/components/ui/typewriter-effect";
 
@@ -394,7 +406,7 @@ const Events = ({ featured = false }) => {
                         width={100}
                         unoptimized
                         height={100}
-                        src={event.image}
+                        src={get_event_image(event.image)}
                         alt={event.title}
                         className="h-60 w-full rounded-lg object-cover object-top"
                       />
@@ -687,7 +699,7 @@ const Events = ({ featured = false }) => {
                           width={100}
                           unoptimized
                           height={100}
-                          src={event.image}
+                          src={get_event_image(event.image)}
                           alt={event.title}
                           className="h-48 sm:h-56 md:h-60 w-full rounded-lg object-cover object-top"
                         />
