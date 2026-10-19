@@ -14,7 +14,8 @@ const DEVELOPER_WORK_TITLES = {
   "Pranav Titambe": "Backend Optimization & Dynamic Workflows",
   "Shivam Mishra": "Genesis Microsite & Subpath Routing",
   "Karthik Kotian": "Gallery & Developer Section Redesign",
-  "Avani Killekar": "Council 2026–27 & Media Standardization",
+  "Avani Killekar": "Council 2026–27 Team Section Architecture",
+  "Chaitali Rane": "Council 2026–27 Media Standardisation",
 };
 
 // Compute physical card stack transformation based on offset relative to active card
@@ -728,7 +729,7 @@ const DeveloperEditorialSection = () => {
               }}
               onMouseMove={handleCardMouseMove}
               onMouseLeave={handleCardMouseLeave}
-              className="relative cursor-pointer w-[clamp(160px,46vw,205px)] h-[clamp(215px,31vh,265px)]"
+              className="relative cursor-pointer w-[clamp(150px,42vw,195px)] h-[clamp(195px,28vh,245px)]"
               style={{
                 perspective: "1000px",
                 transformStyle: "preserve-3d",
@@ -853,7 +854,7 @@ const DeveloperEditorialSection = () => {
           </div>
 
           {/* 3. Work / Contribution with Static Visual Anchor & Masked Vertical Reveal (Moved downwards) */}
-          <div className="relative w-full flex flex-col items-center justify-center shrink-0 px-2 sm:px-3 mt-4 sm:mt-5">
+          <div className="relative w-full flex flex-col items-center justify-center shrink-0 px-2 sm:px-3 mt-2 sm:mt-3">
             <div className="flex items-center justify-center gap-2">
               <span className="w-5 h-[2px] bg-[#22d3ee] inline-block" />
               <span className="font-mono text-[10px] sm:text-xs tracking-[0.22em] text-[#22d3ee] font-semibold uppercase">
@@ -861,7 +862,7 @@ const DeveloperEditorialSection = () => {
               </span>
             </div>
 
-            <div className="relative overflow-hidden w-full h-[125px] sm:h-[135px] mt-0.5">
+            <div className="relative overflow-hidden w-full h-[165px] sm:h-[175px] mt-0.5">
               <AnimatePresence custom={direction} initial={false}>
                 <motion.div
                   key={currentDev.name}

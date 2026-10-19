@@ -1,15 +1,5 @@
 const developers = [
   {
-    name: "Shravanya Andhale",
-    role: "Website Deployment & Domain Coordinator",
-    email: "2023.shravanya.andhale@ves.ac.in",
-    github: "https://github.com/Shravanya178",
-    linkedin: "https://www.linkedin.com/in/shravanya-andhale-b729a2314/",
-    image: "/images/dev_images/shravanya_andhale.webp",
-    description:
-      "Managed QuestIT website domain deployment and publishing through Vercel, coordinating with faculty for credentials, CNAME configuration, domain verification, and seamless website accessibility.",
-  },
-  {
     name: "Atharva Lotankar",
     role: "Frontend & Web Management Developer",
     email: "2023.atharva.lotankar@ves.ac.in",
@@ -18,6 +8,16 @@ const developers = [
     image: "/images/dev_images/atharva_lotankar.webp",
     description:
       "Redesigned QuestIT website UI, enhanced frontend components, managed council metadata and events, integrated Hashnode, improved navigation, added responsive menus, and maintained domain indexing for SEO integrity.",
+  },
+  {
+    name: "Shravanya Andhale",
+    role: "Website Deployment & Domain Coordinator",
+    email: "2023.shravanya.andhale@ves.ac.in",
+    github: "https://github.com/Shravanya178",
+    linkedin: "https://www.linkedin.com/in/shravanya-andhale-b729a2314/",
+    image: "/images/dev_images/shravanya_andhale.webp",
+    description:
+      "Managed QuestIT website domain deployment and publishing through Vercel, coordinating with faculty for credentials, CNAME configuration, domain verification, and seamless website accessibility.",
   },
   {
     name: "Jay Kerkar",
@@ -69,7 +69,17 @@ const developers = [
     linkedin: "http://www.linkedin.com/in/avani-killekar-4184573b8",
     image: "/images/dev_images/avani_killekar.webp",
     description:
-      "Added the Quest IT Council 2026–27 team section with BE, TE, and SE groups, organized and optimized member profiles and images, and enhanced the page with smooth card animations and hover effects.",
+      "Built the Council 2026–27 team section across BE, TE, and SE groups, optimized member profiles and images, and delivered smooth card animations with hover effects.",
+  },
+  {
+    name: "Chaitali Rane",
+    role: "Frontend Developer",
+    email: "2025.chaitali.rane@ves.ac.in",
+    github: "https://github.com/C172007",
+    linkedin: "https://www.linkedin.com/in/chaitalirane1707",
+    image: "/images/dev_images/chaitali_rane.webp",
+    description:
+      "Managed council member photos, standardized team media via cropping and format conversion, enforced consistent naming conventions, and implemented smooth card entrance transitions with interactive hover effects.",
   },
 ];
 
