@@ -379,8 +379,14 @@ const Events = ({ featured = false }) => {
 
                   {/* Genesis 2.0 Special Button (Featured) */}
                   {isGenesis2(active.title) && active.website && (
-                    <div className="px-4 pb-4">
-                      <Link href={active.website} target="_blank" rel="noopener noreferrer">
+                    <div className="px-4 pb-4 flex flex-col sm:flex-row gap-3">
+                      <Link href="/genesis-2-winners" className="flex-1">
+                        <Button className="w-full bg-gradient-to-r from-yellow-400 to-amber-600 hover:from-yellow-500 hover:to-amber-700 text-white font-semibold py-3 rounded-lg transition-all duration-300 flex items-center justify-center gap-2 shadow-lg">
+                          <Trophy size={18} />
+                          Genesis 2.0 Winners 🏆
+                        </Button>
+                      </Link>
+                      <Link href={active.website} target="_blank" rel="noopener noreferrer" className="flex-1">
                         <Button className="w-full bg-gradient-to-r from-orange-500 to-amber-600 hover:from-orange-600 hover:to-amber-700 text-white font-semibold py-3 rounded-lg transition-all duration-300 flex items-center justify-center gap-2 shadow-lg">
                           <ExternalLink size={18} />
                           Explore Genesis 2.0
@@ -676,8 +682,14 @@ const Events = ({ featured = false }) => {
 
                 {/* Genesis 2.0 Special Button */}
                 {isGenesis2(active.title) && active.website && (
-                  <div className="px-4 pb-4">
-                    <Link href={active.website} target="_blank" rel="noopener noreferrer">
+                  <div className="px-4 pb-4 flex flex-col sm:flex-row gap-3">
+                    <Link href="/genesis-2-winners" className="flex-1">
+                      <Button className="w-full bg-gradient-to-r from-yellow-400 to-amber-600 hover:from-yellow-500 hover:to-amber-700 text-white font-semibold py-3 rounded-lg transition-all duration-300 flex items-center justify-center gap-2 shadow-lg">
+                        <Trophy size={18} />
+                        Genesis 2.0 Winners 🏆
+                      </Button>
+                    </Link>
+                    <Link href={active.website} target="_blank" rel="noopener noreferrer" className="flex-1">
                       <Button className="w-full bg-gradient-to-r from-orange-500 to-amber-600 hover:from-orange-600 hover:to-amber-700 text-white font-semibold py-3 rounded-lg transition-all duration-300 flex items-center justify-center gap-2 shadow-lg">
                         <ExternalLink size={18} />
                         Explore Genesis 2.0
