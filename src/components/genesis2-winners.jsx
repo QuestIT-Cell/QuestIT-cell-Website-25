@@ -116,10 +116,10 @@ export const Genesis2Tracks = () => {
   );
 };
 
-const WIDTH_SHARE = 0.8;
+const WIDTH_SHARE = 0.55;
 
-// Shrinks or grows the text so it spans most of the width of its box in one line
-const FitText = ({ text, className = "" }) => {
+// Shrinks or grows the text so it spans about half the width of its box in one line
+const FitText = ({ text, align_right, className = "" }) => {
   const ref = useRef(null);
 
   useLayoutEffect(() => {
@@ -129,7 +129,7 @@ const FitText = ({ text, className = "" }) => {
       el.style.fontSize = "100px";
       const width_at_100 = el.scrollWidth;
       if (!width_at_100 || !box.clientWidth) return;
-      // Take up most of the width, and cap short names so they don't get taller than a fifth of the screen
+      // Take up about half the width, and cap short names so they don't get taller than a fifth of the screen
       const size = Math.min((100 * box.clientWidth * WIDTH_SHARE) / width_at_100, window.innerHeight * 0.2);
       el.style.fontSize = `${size}px`;
     };
@@ -141,18 +141,18 @@ const FitText = ({ text, className = "" }) => {
   }, [text]);
 
   return (
-    <span ref={ref} className={`mx-auto block w-max whitespace-nowrap ${className}`}>
+    <span ref={ref} className={`${align_right ? "ml-auto" : ""} block w-max whitespace-nowrap ${className}`}>
       {text}
     </span>
   );
 };
 
-const WinnerPoster = ({ winner, track_name, number, from_left }) => {
+const WinnerPoster = ({ winner, track_name, number, on_right }) => {
   const ref = useRef(null);
   const reduce_motion = useReducedMotion();
-  // While the photo slides up into view, the team name slides in from the side
+  // While the photo slides up into view, the team name slides in from its own corner
   const { scrollYProgress } = useScroll({ target: ref, offset: ["start end", "start start"] });
-  const name_x = useTransform(scrollYProgress, [0, 1], [from_left ? "-100%" : "100%", "0%"]);
+  const name_x = useTransform(scrollYProgress, [0, 1], [on_right ? "100%" : "-100%", "0%"]);
 
   return (
     <section ref={ref} className="sticky top-0 h-svh w-full overflow-hidden bg-neutral-900">
@@ -185,7 +185,7 @@ const WinnerPoster = ({ winner, track_name, number, from_left }) => {
           style={{ x: reduce_motion ? 0 : name_x }}
           className="w-full pb-4 sm:pb-6 font-[family-name:var(--font-poster)] uppercase leading-none tracking-[0.06em]"
         >
-          <FitText text={winner.team} />
+          <FitText text={winner.team} align_right={on_right} />
         </motion.h2>
       </div>
     </section>
@@ -219,7 +219,7 @@ export const Genesis2TrackWinners = ({ slug }) => {
               key={winner.place}
               winner={winner}
               track_name={track.name}
-              from_left={index % 2 === 1}
+              on_right={index % 2 === 1}
               number={`${String(index + 1).padStart(2, "0")} / ${String(track.winners.length).padStart(2, "0")}`}
             />
           ))}
