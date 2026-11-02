@@ -12,7 +12,7 @@ import { Button } from "@/components/ui/button";
 import genesis2_tracks from "@/constants/genesis2-winners";
 
 // App's External Imports
-import { motion, MotionConfig, useReducedMotion, useScroll, useTransform } from "framer-motion";
+import { motion, MotionConfig, useReducedMotion, useScroll, useSpring, useTransform } from "framer-motion";
 import { ArrowLeft, ArrowRight, Trophy } from "lucide-react";
 import confetti from "canvas-confetti";
 
@@ -117,6 +117,8 @@ export const Genesis2Tracks = () => {
 };
 
 const WIDTH_SHARE = 0.55;
+// Lower = the team name slides in more slowly
+const NAME_STIFFNESS = 40;
 
 // Shrinks or grows the text so it spans about half the width of its box in one line
 const FitText = ({ text, align_right, className = "" }) => {
@@ -152,7 +154,9 @@ const WinnerPoster = ({ winner, track_name, number, on_right }) => {
   const reduce_motion = useReducedMotion();
   // While the photo slides up into view, the team name slides in from its own corner
   const { scrollYProgress } = useScroll({ target: ref, offset: ["start end", "start start"] });
-  const name_x = useTransform(scrollYProgress, [0, 1], [on_right ? "100%" : "-100%", "0%"]);
+  // The spring makes the name trail behind the scroll, so it glides in slowly instead of racing the page
+  const slow_progress = useSpring(scrollYProgress, { stiffness: NAME_STIFFNESS, damping: 20, restDelta: 0.001 });
+  const name_x = useTransform(slow_progress, [0, 1], [on_right ? "100%" : "-100%", "0%"]);
 
   return (
     <section ref={ref} className="sticky top-0 flex h-svh w-full items-center justify-center px-4 sm:px-8 pt-20 pb-6">
