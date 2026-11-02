@@ -1,8 +1,9 @@
 // Genesis 2.0 winners, grouped by track
 // Each winning team has one team photo in /images/genesis2_winners/<track>/
+// Photos fill the whole screen, so landscape photos with faces in the upper half work best
 // Placeholder values (TBA) are to be replaced once the results are out
 
-const PLACEHOLDER_PHOTO = "/images/Genesis2.0logo-600.webp";
+const PLACEHOLDER_PHOTO = "/images/Genesis2.0banner.webp";
 
 const placeholder_team = (place) => ({
   place,

@@ -1,7 +1,7 @@
 "use client";
 
 // React's Imports
-import { useEffect } from "react";
+import { useEffect, useLayoutEffect, useRef } from "react";
 
 // Next's Imports
 import Image from "next/image";
@@ -9,11 +9,11 @@ import Link from "next/link";
 
 // App's Internal Imports
 import { Button } from "@/components/ui/button";
-import genesis2_tracks, { PLACE_STYLES } from "@/constants/genesis2-winners";
+import genesis2_tracks from "@/constants/genesis2-winners";
 
 // App's External Imports
-import { motion, MotionConfig } from "framer-motion";
-import { ArrowLeft, ArrowRight, Trophy, Users } from "lucide-react";
+import { motion, MotionConfig, useReducedMotion, useScroll, useTransform } from "framer-motion";
+import { ArrowLeft, ArrowRight, Trophy } from "lucide-react";
 import confetti from "canvas-confetti";
 
 const GENESIS_ORANGE = ["#f97316", "#fb923c", "#fbbf24", "#ffffff"];
@@ -116,6 +116,80 @@ export const Genesis2Tracks = () => {
   );
 };
 
+// Shrinks or grows the text so it spans the full width of its box in one line
+const FitText = ({ text, className = "" }) => {
+  const ref = useRef(null);
+
+  useLayoutEffect(() => {
+    const el = ref.current;
+    const box = el.parentElement;
+    const fit = () => {
+      el.style.fontSize = "100px";
+      const width_at_100 = el.scrollWidth;
+      if (!width_at_100 || !box.clientWidth) return;
+      // Short names would get taller than the photo, so cap them at a share of the screen height
+      const size = Math.min((100 * box.clientWidth) / width_at_100, window.innerHeight * 0.36);
+      el.style.fontSize = `${size}px`;
+    };
+    fit();
+    document.fonts?.ready.then(fit);
+    const observer = new ResizeObserver(fit);
+    observer.observe(box);
+    return () => observer.disconnect();
+  }, [text]);
+
+  return (
+    <span ref={ref} className={`block w-max whitespace-nowrap ${className}`}>
+      {text}
+    </span>
+  );
+};
+
+const WinnerPoster = ({ winner, track_name, number, from_left }) => {
+  const ref = useRef(null);
+  const reduce_motion = useReducedMotion();
+  // While the photo slides up into view, the team name slides in from the side
+  const { scrollYProgress } = useScroll({ target: ref, offset: ["start end", "start start"] });
+  const name_x = useTransform(scrollYProgress, [0, 1], [from_left ? "-100%" : "100%", "0%"]);
+
+  return (
+    <section ref={ref} className="sticky top-0 h-svh w-full overflow-hidden bg-neutral-900">
+      <div className="absolute inset-0">
+        <Image
+          src={winner.photo}
+          alt={`${winner.team} - ${winner.place}, ${track_name}`}
+          fill
+          sizes="100vw"
+          className="object-cover"
+        />
+      </div>
+      {/* Soft shade at the top and bottom so the white text stays readable on bright photos */}
+      <div className="absolute inset-0 bg-gradient-to-b from-black/55 via-transparent to-black/45" />
+
+      <div className="relative flex h-full flex-col justify-between px-4 sm:px-6 pt-24 pb-3 sm:pb-5 text-white">
+        <div>
+          <div className="grid grid-cols-3 items-center text-[10px] sm:text-xs font-semibold uppercase tracking-[0.15em]">
+            <span>{winner.place}</span>
+            <span className="text-center">Genesis 2.0 · {track_name}</span>
+            <span className="text-right">{number}</span>
+          </div>
+
+          <p className="mx-auto mt-5 max-w-4xl text-center font-[family-name:var(--font-serif)] text-xl sm:text-3xl lg:text-[2.6rem] leading-tight">
+            {winner.project}, built by {winner.members.join(", ")}.
+          </p>
+        </div>
+
+        <motion.h2
+          style={{ x: reduce_motion ? 0 : name_x }}
+          className="w-full font-[family-name:var(--font-poster)] uppercase leading-[0.8] tracking-tight"
+        >
+          <FitText text={winner.team} />
+        </motion.h2>
+      </div>
+    </section>
+  );
+};
+
 // One track's winning teams, each shown with its team photo
 export const Genesis2TrackWinners = ({ slug }) => {
   const track = genesis2_tracks.find((t) => t.slug === slug);
@@ -134,43 +208,22 @@ export const Genesis2TrackWinners = ({ slug }) => {
             text={`Congratulations to the winners of the ${track.name} track at Genesis 2.0! 🎉`}
           />
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-14">
-            {track.winners.map((winner, index) => (
-              <motion.div
-                key={winner.place}
-                initial={{ opacity: 0, y: 40 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.15 * (index + 1), duration: 0.6 }}
-                className="overflow-hidden rounded-2xl border-2 border-orange-500/40 bg-neutral-900 shadow-lg shadow-orange-500/10"
-              >
-                <div className="group relative aspect-[4/3] overflow-hidden">
-                  <Image
-                    src={winner.photo}
-                    alt={`${winner.team} - ${winner.place}`}
-                    width={800}
-                    height={600}
-                    className="size-full object-cover transition-transform duration-500 group-hover:scale-105"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-neutral-900/80 via-transparent to-transparent" />
-                  <span
-                    className={`absolute top-4 left-4 rounded-full bg-gradient-to-r ${PLACE_STYLES[winner.place] ?? PLACE_STYLES["4th Place"]} px-4 py-2 text-sm font-bold text-white shadow-lg`}
-                  >
-                    {winner.place}
-                  </span>
-                </div>
+        </div>
 
-                <div className="space-y-3 p-6">
-                  <h2 className="text-2xl lg:text-3xl font-bold text-white">{winner.team}</h2>
-                  <p className="text-orange-300">{winner.project}</p>
-                  <p className="flex items-start gap-2 text-neutral-400">
-                    <Users size={18} className="mt-0.5 shrink-0" />
-                    <span>{winner.members.join(", ")}</span>
-                  </p>
-                </div>
-              </motion.div>
-            ))}
-          </div>
+        {/* Poster-style winner photos: each fills the screen and the next one slides up over it */}
+        <div className="-mx-4 sm:-mx-6 lg:-mx-8 mb-16">
+          {track.winners.map((winner, index) => (
+            <WinnerPoster
+              key={winner.place}
+              winner={winner}
+              track_name={track.name}
+              from_left={index % 2 === 1}
+              number={`${String(index + 1).padStart(2, "0")} / ${String(track.winners.length).padStart(2, "0")}`}
+            />
+          ))}
+        </div>
 
+        <div className="max-w-6xl mx-auto">
           <div className="flex flex-col sm:flex-row justify-center gap-4 text-center">
             <Link href="/genesis-2-winners">
               <Button className="w-full sm:w-auto px-8 py-4 text-lg bg-orange-600 hover:bg-orange-700 text-white rounded-lg transition duration-200 shadow-[0px_2px_0px_0px_#FFFFFF40_inset] flex items-center justify-center gap-2">
