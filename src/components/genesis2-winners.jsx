@@ -55,6 +55,76 @@ const GenesisHeader = ({ heading, text }) => (
   </motion.div>
 );
 
+// "TRACKS" title between two bracket lines, like on the Genesis 2.0 poster
+const TracksHeading = () => (
+  <div className="mb-8 flex items-center gap-3 text-orange-400/70">
+    <span className="h-px flex-1 bg-current" />
+    <span className="h-3 w-px bg-current" />
+    <h2 className="px-2 font-[family-name:var(--font-tech)] text-xl sm:text-2xl font-semibold tracking-[0.25em] text-orange-300">
+      TRACKS
+    </h2>
+    <span className="h-3 w-px bg-current" />
+    <span className="h-px flex-1 bg-current" />
+  </div>
+);
+
+// Faint crosshair rings drawn behind the character, in the track's colour
+const TargetLines = ({ color }) => (
+  <svg viewBox="0 0 200 200" className="absolute inset-0 m-auto size-[115%] -translate-y-6 opacity-25" aria-hidden="true">
+    <g fill="none" stroke={color} strokeWidth="0.6">
+      <circle cx="100" cy="100" r="88" />
+      <circle cx="100" cy="100" r="62" strokeDasharray="3 4" />
+      <circle cx="100" cy="100" r="34" />
+      <path d="M100 0v200M0 100h200M30 30l140 140M170 30 30 170" strokeWidth="0.3" />
+    </g>
+  </svg>
+);
+
+// Track card in the style of the Genesis 2.0 poster: EVA number, character, and the track name in a label box
+const TrackCard = ({ track }) => (
+  <Link
+    href={`/genesis-2-winners/${track.slug}`}
+    style={{ "--track": track.color }}
+    className="group relative flex h-full flex-col overflow-hidden rounded-2xl border-2 border-[var(--track)]/60 bg-neutral-950 p-3 transition-all duration-300 hover:-translate-y-1 hover:border-[var(--track)] hover:shadow-[0_0_40px_-8px_var(--track)]"
+  >
+    <div
+      className="relative aspect-[4/5] overflow-hidden rounded-xl border border-[var(--track)]/40"
+      style={{ background: `radial-gradient(circle at 60% 40%, ${track.color}33, transparent 70%)` }}
+    >
+      <TargetLines color={track.color} />
+
+      <div className="absolute top-3 left-4 z-10 font-[family-name:var(--font-tech)] font-semibold leading-none text-[var(--track)] [font-variant-numeric:slashed-zero]">
+        <span className="block text-lg tracking-wider">EVA</span>
+        <span className="block text-4xl">{track.eva}</span>
+      </div>
+
+      <Image
+        src={track.character}
+        alt=""
+        width={250}
+        height={370}
+        className="absolute bottom-0 left-1/2 h-[88%] w-auto -translate-x-1/2 object-contain object-bottom drop-shadow-[0_10px_30px_rgba(0,0,0,0.6)] transition-transform duration-500 group-hover:scale-105 origin-bottom"
+      />
+
+      {/* Small corner triangle from the poster */}
+      <span className="absolute bottom-0 left-0 size-0 border-b-[18px] border-r-[18px] border-b-[var(--track)] border-r-transparent" />
+    </div>
+
+    <div className="mt-3 flex items-center justify-between rounded-xl border border-[var(--track)]/60 px-4 py-3">
+      <div>
+        <h3 className="font-[family-name:var(--font-tech)] text-2xl font-semibold uppercase tracking-[0.12em] text-[var(--track)]">
+          {track.name}
+        </h3>
+        <p className="mt-0.5 flex items-center gap-1.5 text-sm text-neutral-400">
+          <Trophy size={14} />
+          {track.winners.length} winning teams
+        </p>
+      </div>
+      <ArrowRight size={22} className="text-[var(--track)] transition-transform duration-300 group-hover:translate-x-1" />
+    </div>
+  </Link>
+);
+
 // All three tracks, each card leads to that track's winners
 export const Genesis2Tracks = () => {
   useEffect(() => {
@@ -71,7 +141,9 @@ export const Genesis2Tracks = () => {
             text="Three tracks, one 24-hour hackathon. Pick a track to meet the teams that built the best solutions. 🎉"
           />
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-14">
+          <TracksHeading />
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-14 max-w-sm sm:max-w-none mx-auto">
             {genesis2_tracks.map((track, index) => (
               <motion.div
                 key={track.slug}
@@ -79,26 +151,7 @@ export const Genesis2Tracks = () => {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.2 * (index + 1), duration: 0.6 }}
               >
-                <Link
-                  href={`/genesis-2-winners/${track.slug}`}
-                  className="group relative flex h-full flex-col rounded-2xl border-2 border-orange-500/40 bg-neutral-900 p-6 lg:p-8 shadow-lg shadow-orange-500/10 transition-all duration-300 hover:-translate-y-1 hover:border-orange-400 hover:shadow-2xl hover:shadow-orange-500/30"
-                >
-                  <span className="text-sm font-semibold tracking-[0.3em] text-orange-400">
-                    TRACK {String(index + 1).padStart(2, "0")}
-                  </span>
-                  <h2 className="mt-3 text-3xl lg:text-4xl font-bold text-white">{track.name}</h2>
-                  <p className="mt-3 flex-1 text-neutral-400">{track.tagline}</p>
-
-                  <div className="mt-8 flex items-center justify-between">
-                    <span className="flex items-center gap-2 text-neutral-300">
-                      <Trophy size={18} className="text-orange-400" />
-                      {track.winners.length} winning teams
-                    </span>
-                    <span className="flex size-10 items-center justify-center rounded-full bg-gradient-to-r from-orange-500 to-amber-600 text-white transition-transform duration-300 group-hover:translate-x-1">
-                      <ArrowRight size={20} />
-                    </span>
-                  </div>
-                </Link>
+                <TrackCard track={track} />
               </motion.div>
             ))}
           </div>

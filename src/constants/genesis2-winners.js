@@ -2,6 +2,7 @@
 // Each winning team has one team photo in /images/genesis2_winners/<track>/
 // Photos fill the whole screen, so landscape photos with faces in the upper half work best
 // Placeholder values (TBA) are to be replaced once the results are out
+// Each track card uses its EVA number, colour and character from the Genesis 2.0 poster
 
 const PLACEHOLDER_PHOTO = "/images/Genesis2.0banner.webp";
 
@@ -17,6 +18,9 @@ const genesis2_tracks = [
   {
     slug: "launchpad",
     name: "Launchpad",
+    eva: "01",
+    color: "#4f8bff",
+    character: "/images/genesis2_tracks/shinji.webp",
     tagline: "Track description TBA",
     winners: [
       placeholder_team("1st Place"),
@@ -27,7 +31,10 @@ const genesis2_tracks = [
   },
   {
     slug: "core-system",
-    name: "Core System",
+    name: "Core Systems",
+    eva: "02",
+    color: "#ff4d4d",
+    character: "/images/genesis2_tracks/asuka.webp",
     tagline: "Track description TBA",
     winners: [
       placeholder_team("1st Place"),
@@ -38,6 +45,9 @@ const genesis2_tracks = [
   {
     slug: "ascension",
     name: "Ascension",
+    eva: "03",
+    color: "#c9ccd6",
+    character: "/images/genesis2_tracks/kaworu.webp",
     tagline: "Track description TBA",
     winners: [
       placeholder_team("1st Place"),
