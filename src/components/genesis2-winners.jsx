@@ -57,7 +57,7 @@ const GenesisHeader = ({ heading, text }) => (
 
 // "TRACKS" title between two bracket lines, like on the Genesis 2.0 poster
 const TracksHeading = () => (
-  <div className="mb-8 flex items-center gap-3 text-orange-400/70">
+  <div className="mb-5 flex items-center gap-3 text-orange-400/70">
     <span className="h-px flex-1 bg-current" />
     <span className="h-3 w-px bg-current" />
     <h2 className="px-2 font-[family-name:var(--font-tech)] text-xl sm:text-2xl font-semibold tracking-[0.25em] text-orange-300">
@@ -112,7 +112,7 @@ const TrackCard = ({ track }) => (
 
     <div className="mt-3 flex items-center justify-between rounded-xl border border-[var(--track)]/60 px-4 py-3">
       <div>
-        <h3 className="font-[family-name:var(--font-tech)] text-xl font-semibold uppercase tracking-[0.12em] text-[var(--track)]">
+        <h3 className="whitespace-nowrap font-[family-name:var(--font-tech)] text-xl lg:text-lg font-semibold uppercase tracking-[0.1em] text-[var(--track)]">
           {track.name}
         </h3>
         <p className="mt-0.5 flex items-center gap-1.5 text-sm text-neutral-400">
@@ -134,16 +134,33 @@ export const Genesis2Tracks = () => {
 
   return (
     <MotionConfig reducedMotion="user">
-      <div className="min-h-screen bg-black pt-24 pb-20 px-4 sm:px-6 lg:px-8">
+      <div className="min-h-screen bg-black pt-32 lg:pt-40 pb-16 px-4 sm:px-6 lg:px-8">
         <div className="max-w-6xl mx-auto">
-          <GenesisHeader
-            heading="Genesis 2.0 Winners"
-            text="Three tracks, one 24-hour hackathon. Pick a track to meet the teams that built the best solutions. 🎉"
-          />
+          {/* Kept short so the track cards fit on the first screen without scrolling */}
+          <motion.div
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8 }}
+            className="mb-6 flex flex-col items-center text-center"
+          >
+            <Image
+              src="/images/Genesis2.0logo-600.webp"
+              alt="Genesis 2.0"
+              width={600}
+              height={600}
+              className="w-28 sm:w-32 h-auto object-contain"
+              priority
+            />
+            <h1 className="-mt-1 font-[family-name:var(--font-poster)] text-3xl sm:text-4xl uppercase tracking-[0.4em] pl-[0.4em] bg-gradient-to-r from-orange-400 via-amber-300 to-orange-500 bg-clip-text text-transparent">
+              Winners
+            </h1>
+            <p className="mt-2 text-sm sm:text-base text-neutral-400">Pick a track to meet its winning teams 🎉</p>
+          </motion.div>
 
           <TracksHeading />
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 mb-14 max-w-[18rem] sm:max-w-2xl lg:max-w-4xl mx-auto">
+          {/* On laptops the row narrows on shorter screens, so the whole cards stay visible without scrolling */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 mb-14 max-w-[18rem] sm:max-w-2xl lg:max-w-[min(48rem,calc((100svh-31rem)*2.4+2.5rem))] mx-auto">
             {genesis2_tracks.map((track, index) => (
               <motion.div
                 key={track.slug}
