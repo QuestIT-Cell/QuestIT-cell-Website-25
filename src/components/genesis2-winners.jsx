@@ -94,8 +94,8 @@ const TrackCard = ({ track }) => (
       <TargetLines color={track.color} />
 
       <div className="absolute top-3 left-4 z-10 font-[family-name:var(--font-tech)] font-semibold leading-none text-[var(--track)] [font-variant-numeric:slashed-zero]">
-        <span className="block text-lg tracking-wider">EVA</span>
-        <span className="block text-4xl">{track.eva}</span>
+        <span className="block text-base tracking-wider">EVA</span>
+        <span className="block text-3xl">{track.eva}</span>
       </div>
 
       <Image
@@ -112,7 +112,7 @@ const TrackCard = ({ track }) => (
 
     <div className="mt-3 flex items-center justify-between rounded-xl border border-[var(--track)]/60 px-4 py-3">
       <div>
-        <h3 className="font-[family-name:var(--font-tech)] text-2xl font-semibold uppercase tracking-[0.12em] text-[var(--track)]">
+        <h3 className="font-[family-name:var(--font-tech)] text-xl font-semibold uppercase tracking-[0.12em] text-[var(--track)]">
           {track.name}
         </h3>
         <p className="mt-0.5 flex items-center gap-1.5 text-sm text-neutral-400">
@@ -143,7 +143,7 @@ export const Genesis2Tracks = () => {
 
           <TracksHeading />
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-14 max-w-sm sm:max-w-none mx-auto">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 mb-14 max-w-[18rem] sm:max-w-2xl lg:max-w-4xl mx-auto">
             {genesis2_tracks.map((track, index) => (
               <motion.div
                 key={track.slug}
