@@ -1,5 +1,13 @@
 const events = [
   {
+    date: "February 2027",
+    title: "GENESIS 2.0",
+    image: "/images/Genesis2.0banner.webp",
+    description:
+      "GENESIS 2.0 is QuestIT's flagship hackathon, bringing together curious minds, creative thinkers, and problem solvers to build impactful solutions over 24 hours. Building upon the legacy of Genesis 1.0, this edition features multi-domain tracks including Artificial Intelligence & Machine Learning (AI/ML), Web3 & Blockchain, and Sustainable Tech, offering an intensive platform for teams to ideate, build, and collaborate while competing for massive prize pools, sponsor rewards, and industry mentorship.",
+    website: "https://questit.vesit.ves.ac.in/genesis-cour2/",
+  },
+  {
     date: "August 2026",
     title: "Vibe W Quest",
     speakers: [

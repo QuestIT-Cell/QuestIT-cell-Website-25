@@ -68,6 +68,11 @@ const groupEventsByAcademicYear = (events) => {
   return grouped;
 };
 
+// Helper checks for Genesis hackathon iterations
+const isGenesis1 = (title) => title === "GENESIS 2026" || title === "GENESIS 1.0" || title === "Genesis 1.0";
+const isGenesis2 = (title) => title === "GENESIS 2.0" || title === "Genesis 2.0";
+const isGenesis = (title) => isGenesis1(title) || isGenesis2(title);
+
 const CloseIcon = () => {
   return (
     <motion.svg
@@ -177,8 +182,8 @@ const Events = ({ featured = false }) => {
     if (active && typeof active === "object") {
       document.body.style.overflow = "hidden";
       
-      // Trigger confetti for GENESIS 2026
-      if (active.title === "GENESIS 2026") {
+      // Trigger confetti for GENESIS editions
+      if (isGenesis(active.title)) {
         triggerConfetti();
       }
     } else {
@@ -260,7 +265,8 @@ const Events = ({ featured = false }) => {
                 transition={{ type: "spring", stiffness: 120, damping: 20 }}
                 className={cn(
                   "w-full max-w-[500px] h-full md:h-fit md:max-h-[100%] flex flex-col bg-neutral-900 sm:rounded-3xl overflow-hidden relative",
-                  active.title === "GENESIS 2026" && "bg-cyan-600 shadow-[0_0_40px_rgba(6,182,212,0.6)]"
+                  isGenesis1(active.title) && "bg-cyan-600 shadow-[0_0_40px_rgba(6,182,212,0.6)]",
+                  isGenesis2(active.title) && "bg-orange-600 shadow-[0_0_40px_rgba(249,115,22,0.6)]"
                 )}
               >
                 <div>
@@ -280,7 +286,7 @@ const Events = ({ featured = false }) => {
                     <h3
                       className={cn(
                         "font-medium text-neutral-200 text-xl",
-                        active.title === "GENESIS 2026" && "text-white"
+                        isGenesis(active.title) && "text-white"
                       )}
                     >
                       {active.title}
@@ -290,10 +296,10 @@ const Events = ({ featured = false }) => {
                       <p
                         className={cn(
                           "text-neutral-400 text-center md:text-left text-base flex gap-2 items-center",
-                          active.title === "GENESIS 2026" && "text-white/90"
+                          isGenesis(active.title) && "text-white/90"
                         )}
                       >
-                        <CalendarRange size={20} className={cn(active.title === "GENESIS 2026" && "text-white")} /> {active.date}
+                        <CalendarRange size={20} className={cn(isGenesis(active.title) && "text-white")} /> {active.date}
                       </p>
 
                       {active.website && (
@@ -312,11 +318,17 @@ const Events = ({ featured = false }) => {
                             rel="noopener noreferrer"
                             className={cn(
                               "flex items-center gap-2 text-cyan-400 hover:text-cyan-300 transition-colors text-base",
-                              active.title === "GENESIS 2026" && "text-white hover:text-white/80 underline decoration-white/30"
+                              isGenesis(active.title) && "text-white hover:text-white/80 underline decoration-white/30"
                             )}
                           >
                             <ExternalLink size={16} />
-                            <span>{active.title === "GENESIS 2026" ? "Genesis Website" : "Event Website"}</span>
+                            <span>
+                              {isGenesis2(active.title)
+                                ? "Genesis 2.0 Website"
+                                : isGenesis1(active.title)
+                                ? "Genesis Website"
+                                : "Event Website"}
+                            </span>
                           </Link>
                         )
                       )}
@@ -327,7 +339,7 @@ const Events = ({ featured = false }) => {
                     <div
                       className={cn(
                         "text-base flex-1 h-full max-h-[50vh] md:max-h-[60vh] pb-5 text-ellipsis flex flex-col items-start gap-4 overflow-y-auto text-neutral-400",
-                        active.title === "GENESIS 2026" && "text-white/90"
+                        isGenesis(active.title) && "text-white/90"
                       )}
                     >
                       {active.description}
@@ -337,7 +349,7 @@ const Events = ({ featured = false }) => {
                           <h3
                             className={cn(
                               "font-medium text-neutral-200 text-xl mt-4",
-                              active.title === "GENESIS 2026" && "text-white"
+                              isGenesis(active.title) && "text-white"
                             )}
                           >
                             Speakers
@@ -352,6 +364,30 @@ const Events = ({ featured = false }) => {
                       )}
                     </div>
                   </div>
+
+                  {/* Genesis 2.0 Special Button (Featured) */}
+                  {isGenesis2(active.title) && active.website && (
+                    <div className="px-4 pb-4">
+                      <Link href={active.website} target="_blank" rel="noopener noreferrer">
+                        <Button className="w-full bg-gradient-to-r from-orange-500 to-amber-600 hover:from-orange-600 hover:to-amber-700 text-white font-semibold py-3 rounded-lg transition-all duration-300 flex items-center justify-center gap-2 shadow-lg">
+                          <ExternalLink size={18} />
+                          Explore Genesis 2.0
+                        </Button>
+                      </Link>
+                    </div>
+                  )}
+
+                  {/* Genesis 1.0 Special Button (Featured) */}
+                  {isGenesis1(active.title) && active.website && (
+                    <div className="px-4 pb-4">
+                      <Link href={active.website} target="_blank" rel="noopener noreferrer">
+                        <Button className="w-full bg-gradient-to-r from-cyan-500 to-teal-600 hover:from-cyan-600 hover:to-teal-700 text-white font-semibold py-3 rounded-lg transition-all duration-300 flex items-center justify-center gap-2 shadow-lg">
+                          <ExternalLink size={18} />
+                          Explore Genesis 1.0
+                        </Button>
+                      </Link>
+                    </div>
+                  )}
 
                   {/* Vibe W Quest Special Button (Featured) */}
                   {active.title === "Vibe W Quest" && (
@@ -385,7 +421,8 @@ const Events = ({ featured = false }) => {
                   layoutId={`event-${event.title}-${id}`}
                   className={cn(
                     "p-4 flex flex-col hover:bg-neutral-900 rounded-xl cursor-pointer",
-                    event.title === "GENESIS 2026" && "bg-cyan-600 hover:bg-cyan-500 shadow-[0_0_30px_rgba(6,182,212,0.5)]"
+                    isGenesis1(event.title) && "bg-cyan-600 hover:bg-cyan-500 shadow-[0_0_30px_rgba(6,182,212,0.5)]",
+                    isGenesis2(event.title) && "bg-orange-600 hover:bg-orange-500 shadow-[0_0_30px_rgba(249,115,22,0.5)]"
                   )}
                 >
                   <div className="flex gap-4 flex-col w-full">
@@ -404,7 +441,7 @@ const Events = ({ featured = false }) => {
                       <h3
                         className={cn(
                           "font-medium text-neutral-200 text-center md:text-left text-xl",
-                          event.title === "GENESIS 2026" && "text-white"
+                          isGenesis(event.title) && "text-white"
                         )}
                       >
                         {event.title}
@@ -413,10 +450,10 @@ const Events = ({ featured = false }) => {
                       <p
                         className={cn(
                           "text-neutral-400 text-center md:text-left text-base flex gap-2 items-center",
-                          event.title === "GENESIS 2026" && "text-white/90"
+                          isGenesis(event.title) && "text-white/90"
                         )}
                       >
-                        <CalendarRange size={20} className={cn(event.title === "GENESIS 2026" && "text-white")} /> {event.date}
+                        <CalendarRange size={20} className={cn(isGenesis(event.title) && "text-white")} /> {event.date}
                       </p>
                     </div>
                   </div>
@@ -527,7 +564,8 @@ const Events = ({ featured = false }) => {
               transition={{ type: "spring", stiffness: 120, damping: 20 }}
               className={cn(
                 "w-full max-w-[500px] h-full md:h-fit md:max-h-[100%] flex flex-col bg-neutral-900 sm:rounded-3xl overflow-hidden relative",
-                active.title === "GENESIS 2026" && "bg-cyan-600 shadow-[0_0_40px_rgba(6,182,212,0.6)]"
+                isGenesis1(active.title) && "bg-cyan-600 shadow-[0_0_40px_rgba(6,182,212,0.6)]",
+                isGenesis2(active.title) && "bg-orange-600 shadow-[0_0_40px_rgba(249,115,22,0.6)]"
               )}
             >
               <div>
@@ -547,7 +585,7 @@ const Events = ({ featured = false }) => {
                   <h3
                     className={cn(
                       "font-medium text-neutral-200 text-xl",
-                      active.title === "GENESIS 2026" && "text-white"
+                      isGenesis(active.title) && "text-white"
                     )}
                   >
                     {active.title}
@@ -557,10 +595,10 @@ const Events = ({ featured = false }) => {
                     <p
                       className={cn(
                         "text-neutral-400 text-center md:text-left text-base flex gap-2 items-center",
-                        active.title === "GENESIS 2026" && "text-white/90"
+                        isGenesis(active.title) && "text-white/90"
                       )}
                     >
-                      <CalendarRange size={20} className={cn(active.title === "GENESIS 2026" && "text-white")} /> {active.date}
+                      <CalendarRange size={20} className={cn(isGenesis(active.title) && "text-white")} /> {active.date}
                     </p>
 
                     {active.title === "Vibe W Quest" ? (
@@ -578,11 +616,17 @@ const Events = ({ featured = false }) => {
                         rel="noopener noreferrer"
                         className={cn(
                           "flex items-center gap-2 text-cyan-400 hover:text-cyan-300 transition-colors text-base",
-                          active.title === "GENESIS 2026" && "text-white hover:text-white/80 underline decoration-white/30"
+                          isGenesis(active.title) && "text-white hover:text-white/80 underline decoration-white/30"
                         )}
                       >
                         <ExternalLink size={16} />
-                        <span>{active.title === "GENESIS 2026" ? "Genesis Website" : "Event Website"}</span>
+                        <span>
+                          {isGenesis2(active.title)
+                            ? "Genesis 2.0 Website"
+                            : isGenesis1(active.title)
+                            ? "Genesis Website"
+                            : "Event Website"}
+                        </span>
                       </Link>
                     ) : null}
                   </div>
@@ -592,7 +636,7 @@ const Events = ({ featured = false }) => {
                   <div
                     className={cn(
                       "text-base flex-1 h-full max-h-[50vh] md:max-h-[60vh] pb-5 text-ellipsis flex flex-col items-start gap-4 overflow-y-auto text-neutral-400",
-                      active.title === "GENESIS 2026" && "text-white/90"
+                      isGenesis(active.title) && "text-white/90"
                     )}
                   >
                     {active.description}
@@ -602,7 +646,7 @@ const Events = ({ featured = false }) => {
                         <motion.h3
                           className={cn(
                             "font-medium text-neutral-200 text-xl mt-4",
-                            active.title === "GENESIS 2026" && "text-white"
+                            isGenesis(active.title) && "text-white"
                           )}
                         >
                           Speakers
@@ -617,6 +661,30 @@ const Events = ({ featured = false }) => {
                     )}
                   </div>
                 </div>
+
+                {/* Genesis 2.0 Special Button */}
+                {isGenesis2(active.title) && active.website && (
+                  <div className="px-4 pb-4">
+                    <Link href={active.website} target="_blank" rel="noopener noreferrer">
+                      <Button className="w-full bg-gradient-to-r from-orange-500 to-amber-600 hover:from-orange-600 hover:to-amber-700 text-white font-semibold py-3 rounded-lg transition-all duration-300 flex items-center justify-center gap-2 shadow-lg">
+                        <ExternalLink size={18} />
+                        Explore Genesis 2.0
+                      </Button>
+                    </Link>
+                  </div>
+                )}
+
+                {/* Genesis 1.0 Special Button */}
+                {isGenesis1(active.title) && active.website && (
+                  <div className="px-4 pb-4">
+                    <Link href={active.website} target="_blank" rel="noopener noreferrer">
+                      <Button className="w-full bg-gradient-to-r from-cyan-500 to-teal-600 hover:from-cyan-600 hover:to-teal-700 text-white font-semibold py-3 rounded-lg transition-all duration-300 flex items-center justify-center gap-2 shadow-lg">
+                        <ExternalLink size={18} />
+                        Explore Genesis 1.0
+                      </Button>
+                    </Link>
+                  </div>
+                )}
 
                 {/* Vibe W Quest Special Link */}
                 {active.title === "Vibe W Quest" && (
@@ -678,7 +746,8 @@ const Events = ({ featured = false }) => {
                     layoutId={`event-${event.title}-${id}`}
                     className={cn(
                       "p-3 sm:p-4 flex flex-col hover:bg-neutral-900 rounded-xl cursor-pointer transition-all",
-                      event.title === "GENESIS 2026" && "bg-cyan-600 hover:bg-cyan-500 shadow-[0_0_30px_rgba(6,182,212,0.5)]"
+                      isGenesis1(event.title) && "bg-cyan-600 hover:bg-cyan-500 shadow-[0_0_30px_rgba(6,182,212,0.5)]",
+                      isGenesis2(event.title) && "bg-orange-600 hover:bg-orange-500 shadow-[0_0_30px_rgba(249,115,22,0.5)]"
                     )}
                   >
                     <div className="flex gap-3 sm:gap-4 flex-col w-full">
@@ -697,7 +766,7 @@ const Events = ({ featured = false }) => {
                         <h3
                           className={cn(
                             "font-medium text-neutral-200 text-center md:text-left text-lg sm:text-xl",
-                            event.title === "GENESIS 2026" && "text-white"
+                            isGenesis(event.title) && "text-white"
                           )}
                         >
                           {event.title}
@@ -706,10 +775,10 @@ const Events = ({ featured = false }) => {
                         <p
                           className={cn(
                             "text-neutral-400 text-center md:text-left text-sm sm:text-base flex gap-1.5 sm:gap-2 items-center",
-                            event.title === "GENESIS 2026" && "text-white/90"
+                            isGenesis(event.title) && "text-white/90"
                           )}
                         >
-                          <CalendarRange size={18} className={cn("sm:w-5 sm:h-5", event.title === "GENESIS 2026" && "text-white")} /> {event.date}
+                          <CalendarRange size={18} className={cn("sm:w-5 sm:h-5", isGenesis(event.title) && "text-white")} /> {event.date}
                         </p>
                       </div>
                     </div>
