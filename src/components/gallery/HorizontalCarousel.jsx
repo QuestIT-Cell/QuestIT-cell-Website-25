@@ -7,15 +7,15 @@ import PhotoLightboxModal from "./PhotoLightboxModal";
 
 /* ─── Projector Exhibition Images ──────────────────────────────────────────── */
 const PROJECTOR_IMAGES = [
-  "/images/gallery-images/projector/DSC04678_1920x1080.webp",
-  "/images/gallery-images/projector/DSC04689_1920x1080.webp",
-  "/images/gallery-images/projector/Faculty_grp_photo_1920x1080.webp",
-  "/images/gallery-images/projector/genesis-explaination_1920x1080.webp",
+  "/images/gallery-images/projector/DSC04678_1920x1080.jpeg",
+  "/images/gallery-images/projector/DSC04689_1920x1080.jpg",
+  "/images/gallery-images/projector/Faculty_grp_photo_1920x1080.jpeg",
+  "/images/gallery-images/projector/genesis-explaination_1920x1080.JPG",
   "/images/gallery-images/projector/genesis1.0_1920x1080.webp",
-  "/images/gallery-images/projector/genesis_event_1920x1080.webp",
-  "/images/gallery-images/projector/quest_council_faculty_pic_1920x1080.webp",
+  "/images/gallery-images/projector/genesis_event_1920x1080.jpg",
+  "/images/gallery-images/projector/quest_council_faculty_pic_1920x1080.jpg",
   "/images/gallery-images/projector/SIH_insider_2_1920x1080.webp",
-  "/images/gallery-images/projector/sliding_1.webp",
+  "/images/gallery-images/projector/sliding_1.jpg",
   "/images/gallery-images/projector/sliding_8.webp",
   "/images/gallery-images/projector/vibewquest_participants_1920x1080.webp",
   "/images/gallery-images/projector/vibwwquest_participants_1920x1080.webp",
@@ -257,20 +257,18 @@ const HorizontalCarousel = () => {
           playIntro();
         }
       },
-      { threshold: 0.35 }
+      { threshold: 0.15 }
     );
     io.observe(section);
     return () => {
       io.disconnect();
-      introTimersRef.current.forEach(clearTimeout);
-      if (timerRef.current) clearInterval(timerRef.current);
     };
   }, [playIntro]);
 
-  // Auto-carousel only starts after intro completes (handled in playIntro)
-  // We still need the startTimer cleanup:
+  // Clean up all timers on unmount only
   useEffect(() => {
     return () => {
+      introTimersRef.current.forEach(clearTimeout);
       if (timerRef.current) clearInterval(timerRef.current);
     };
   }, []);
@@ -1215,7 +1213,7 @@ const HorizontalCarousel = () => {
           3D INTERACTIVE PROJECTOR MODEL & CASSETTES
       ══════════════════════════════════════════════════════════════════════ */}
       <div
-        className="absolute left-1/2 select-none"
+        className="absolute left-1/2 -translate-x-1/2 select-none"
         style={{
           bottom: "0px",
           width: isVertical ? "min(56vw, 240px)" : "min(56vw, 460px)",
