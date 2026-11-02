@@ -155,38 +155,41 @@ const WinnerPoster = ({ winner, track_name, number, on_right }) => {
   const name_x = useTransform(scrollYProgress, [0, 1], [on_right ? "100%" : "-100%", "0%"]);
 
   return (
-    <section ref={ref} className="sticky top-0 h-svh w-full overflow-hidden bg-neutral-900">
-      <div className="absolute inset-0">
-        <Image
-          src={winner.photo}
-          alt={`${winner.team} - ${winner.place}, ${track_name}`}
-          fill
-          sizes="100vw"
-          className="object-cover"
-        />
-      </div>
-      {/* Soft shade at the top and bottom so the white text stays readable on bright photos */}
-      <div className="absolute inset-0 bg-gradient-to-b from-black/55 via-transparent to-black/45" />
+    <section ref={ref} className="sticky top-0 flex h-svh w-full items-center justify-center px-4 sm:px-8 pt-20 pb-6">
+      {/* The photo sits in a rounded frame; the next frame slides up over this one like a stack of prints */}
+      <div className="relative h-full w-full max-w-6xl overflow-hidden rounded-2xl border border-orange-500/30 bg-neutral-900 shadow-2xl shadow-black/70">
+        <div className="absolute inset-0">
+          <Image
+            src={winner.photo}
+            alt={`${winner.team} - ${winner.place}, ${track_name}`}
+            fill
+            sizes="(max-width: 1152px) 100vw, 1152px"
+            className="object-cover"
+          />
+        </div>
+        {/* Soft shade at the top and bottom so the white text stays readable on bright photos */}
+        <div className="absolute inset-0 bg-gradient-to-b from-black/55 via-transparent to-black/45" />
 
-      <div className="relative flex h-full flex-col justify-between px-4 sm:px-6 pt-24 pb-3 sm:pb-5 text-white">
-        <div>
-          <div className="grid grid-cols-3 items-center text-[10px] sm:text-xs font-semibold uppercase tracking-[0.15em]">
-            <span>{winner.place}</span>
-            <span className="text-center">Genesis 2.0 · {track_name}</span>
-            <span className="text-right">{number}</span>
+        <div className="relative flex h-full flex-col justify-between px-4 sm:px-6 pt-5 pb-1 sm:pb-3 text-white">
+          <div>
+            <div className="grid grid-cols-3 items-center text-[10px] sm:text-xs font-semibold uppercase tracking-[0.15em]">
+              <span>{winner.place}</span>
+              <span className="text-center">Genesis 2.0 · {track_name}</span>
+              <span className="text-right">{number}</span>
+            </div>
+
+            <p className="mx-auto mt-5 max-w-3xl text-center font-[family-name:var(--font-serif)] text-lg sm:text-2xl lg:text-4xl leading-tight">
+              {winner.project}, built by {winner.members.join(", ")}.
+            </p>
           </div>
 
-          <p className="mx-auto mt-5 max-w-4xl text-center font-[family-name:var(--font-serif)] text-xl sm:text-3xl lg:text-[2.6rem] leading-tight">
-            {winner.project}, built by {winner.members.join(", ")}.
-          </p>
+          <motion.h2
+            style={{ x: reduce_motion ? 0 : name_x }}
+            className="w-full pb-4 sm:pb-6 font-[family-name:var(--font-poster)] uppercase leading-none tracking-[0.06em]"
+          >
+            <FitText text={winner.team} align_right={on_right} />
+          </motion.h2>
         </div>
-
-        <motion.h2
-          style={{ x: reduce_motion ? 0 : name_x }}
-          className="w-full pb-4 sm:pb-6 font-[family-name:var(--font-poster)] uppercase leading-none tracking-[0.06em]"
-        >
-          <FitText text={winner.team} align_right={on_right} />
-        </motion.h2>
       </div>
     </section>
   );
@@ -212,8 +215,8 @@ export const Genesis2TrackWinners = ({ slug }) => {
 
         </div>
 
-        {/* Poster-style winner photos: each fills the screen and the next one slides up over it */}
-        <div className="-mx-4 sm:-mx-6 lg:-mx-8 mb-16">
+        {/* Poster-style winner photos: each sits in a frame and the next one slides up over it */}
+        <div className="genesis-winner-posters -mx-4 sm:-mx-6 lg:-mx-8 mb-16">
           {track.winners.map((winner, index) => (
             <WinnerPoster
               key={winner.place}
