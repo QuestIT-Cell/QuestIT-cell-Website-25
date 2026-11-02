@@ -95,7 +95,7 @@ const LogoSection = () => {
               className="relative w-[95px] h-[95px] sm:w-[130px] sm:h-[130px] md:w-[165px] md:h-[165px] lg:w-[185px] lg:h-[185px]"
             >
               <Image
-                src="/images/quest-badge-logo.png"
+                src="/images/quest-badge-logo.webp"
                 alt="QUEST IT Badge Logo"
                 fill
                 priority

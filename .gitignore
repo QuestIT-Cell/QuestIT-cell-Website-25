@@ -17,6 +17,7 @@ public/sw.js
 public/workbox-*.js
 /out
 .vercel
+.DS_Store
 
 # Local backups
 public/images/gallery-images/diagonal_images/original_backup/
