@@ -199,11 +199,15 @@ const Events = ({ featured = false }) => {
         triggerConfetti();
       }
     } else {
-      document.body.style.overflow = "auto";
+      document.body.style.overflow = "";
     }
 
     window.addEventListener("keydown", on_key_down);
-    return () => window.removeEventListener("keydown", on_key_down);
+    return () => {
+      window.removeEventListener("keydown", on_key_down);
+      // Unlock scrolling when leaving the page with a card open, so the lock doesn't follow to the next page
+      document.body.style.overflow = "";
+    };
   }, [active]);
 
   // Close modal on scroll
