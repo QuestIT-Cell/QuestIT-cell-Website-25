@@ -190,8 +190,8 @@ const WIDTH_SHARE = 0.55;
 // Lower = the team name slides in more slowly
 const NAME_STIFFNESS = 40;
 
-// Sizes the text so that size_by (the longest team name of the track) spans about half the width,
-// which gives every team name on a track the same size
+// Sizes the text so that size_by (the longest team name) spans about half the width,
+// which gives every team name the same size
 const FitText = ({ text, size_by = text, align_right, className = "" }) => {
   const ref = useRef(null);
 
@@ -276,10 +276,14 @@ const WinnerPoster = ({ winner, track_name, number, on_right, longest_team }) =>
   );
 };
 
+// Team names on every track are sized by the longest one overall, so all three tracks match
+const LONGEST_TEAM = genesis2_tracks
+  .flatMap((t) => t.winners)
+  .reduce((a, w) => (w.team.length > a.length ? w.team : a), "");
+
 // One track's winning teams, each shown with its team photo
 export const Genesis2TrackWinners = ({ slug }) => {
   const track = genesis2_tracks.find((t) => t.slug === slug);
-  const longest_team = track.winners.reduce((a, w) => (w.team.length > a.length ? w.team : a), "");
 
   useEffect(() => {
     const timer = setTimeout(celebrate, 500);
@@ -305,7 +309,7 @@ export const Genesis2TrackWinners = ({ slug }) => {
               winner={winner}
               track_name={track.name}
               on_right={index % 2 === 1}
-              longest_team={longest_team}
+              longest_team={LONGEST_TEAM}
               number={`${String(index + 1).padStart(2, "0")} / ${String(track.winners.length).padStart(2, "0")}`}
             />
           ))}
