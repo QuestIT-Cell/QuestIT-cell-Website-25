@@ -1,17 +1,11 @@
 // Genesis 2.0 winners, grouped by track
 // Each winning team has one team photo in /images/genesis2_winners/<track>/
 // Photos fill a large frame with the team name over the bottom, so landscape photos with faces in the upper half work best
-// Placeholder values (TBA) are to be replaced once the results are out
+// The first member of each team is its team leader
+// PLACEHOLDER_PHOTO and the TBA taglines are to be replaced once the team photos and track details are in
 // Each track card uses its EVA number, colour and character from the Genesis 2.0 poster
 
 const PLACEHOLDER_PHOTO = "/images/Genesis2.0banner.webp";
-
-const placeholder_team = (place) => ({
-  place,
-  team: "Team TBA",
-  members: ["Member 1", "Member 2", "Member 3", "Member 4"],
-  photo: PLACEHOLDER_PHOTO,
-});
 
 const genesis2_tracks = [
   {
@@ -23,25 +17,25 @@ const genesis2_tracks = [
     tagline: "Track description TBA",
     winners: [
       {
-        place: "1st Place",
+        place: "Problem Statement 1 Winner",
         team: "Syntax Squad",
         members: ["Bhargav Chougule", "Shrishant Kharat", "Nayan Kulal", "Anshal Nikhade"],
         photo: PLACEHOLDER_PHOTO,
       },
       {
-        place: "2nd Place",
+        place: "Problem Statement 2 Winner",
         team: "Kaizen",
         members: ["Parth Khot", "Saket Chaudhari", "Yug Bonde"],
         photo: PLACEHOLDER_PHOTO,
       },
       {
-        place: "3rd Place",
+        place: "Problem Statement 3 Winner",
         team: "Scanning Void",
         members: ["Gaurang Malekar", "Indraneel Kolas", "Sunkia Prasad", "Arnav Shettigar"],
         photo: PLACEHOLDER_PHOTO,
       },
       {
-        place: "4th Place",
+        place: "Problem Statement 4 Winner",
         team: "Infinite Loop",
         members: ["Trisha Choudhary", "Neel Daswani", "Vidisha Athalye", "Janhavi Rangire"],
         photo: PLACEHOLDER_PHOTO,
@@ -56,9 +50,24 @@ const genesis2_tracks = [
     character: "/images/genesis2_tracks/asuka.webp",
     tagline: "Track description TBA",
     winners: [
-      placeholder_team("1st Place"),
-      placeholder_team("2nd Place"),
-      placeholder_team("3rd Place"),
+      {
+        place: "Winner",
+        team: "Code Yatri",
+        members: ["Adarsh Singh", "Piyush Shukla", "Mayuresh Sarkale", "Vidushi Singh"],
+        photo: PLACEHOLDER_PHOTO,
+      },
+      {
+        place: "First Runner-Up",
+        team: "Karna",
+        members: ["Rugved Vichare", "Shreyash Singh", "Saman Pandey", "Soham Raorane"],
+        photo: PLACEHOLDER_PHOTO,
+      },
+      {
+        place: "Second Runner-Up",
+        team: "Code Yodha",
+        members: ["Alina Khan", "Tanay Patil", "Twinkle Gupta", "Harshal Pednekar"],
+        photo: PLACEHOLDER_PHOTO,
+      },
     ],
   },
   {
@@ -69,9 +78,24 @@ const genesis2_tracks = [
     character: "/images/genesis2_tracks/kaworu.webp",
     tagline: "Track description TBA",
     winners: [
-      placeholder_team("1st Place"),
-      placeholder_team("2nd Place"),
-      placeholder_team("3rd Place"),
+      {
+        place: "Winner",
+        team: "Gossip Gurls :)",
+        members: ["Rishi Mahajan", "Supriya Kushwaha", "Krutika Wagh", "Roshni Aga"],
+        photo: PLACEHOLDER_PHOTO,
+      },
+      {
+        place: "First Runner-Up",
+        team: "Techno Titans",
+        members: ["Siddharth Jagdale", "Sahil Nirmal", "Madhavan Nadar", "Rishi Dembla"],
+        photo: PLACEHOLDER_PHOTO,
+      },
+      {
+        place: "Second Runner-Up",
+        team: "Smurfs",
+        members: ["Afnan Kazi", "Arnav Choudhari", "Rutuja Bhalekar", "Siddharth Gupta"],
+        photo: PLACEHOLDER_PHOTO,
+      },
     ],
   },
 ];
