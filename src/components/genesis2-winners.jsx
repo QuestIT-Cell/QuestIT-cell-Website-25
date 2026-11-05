@@ -190,16 +190,22 @@ const WIDTH_SHARE = 0.55;
 // Lower = the team name slides in more slowly
 const NAME_STIFFNESS = 40;
 
-// Shrinks or grows the text so it spans about half the width of its box in one line
-const FitText = ({ text, align_right, className = "" }) => {
+// Sizes the text so that size_by (the longest team name of the track) spans about half the width,
+// which gives every team name on a track the same size
+const FitText = ({ text, size_by = text, align_right, className = "" }) => {
   const ref = useRef(null);
 
   useLayoutEffect(() => {
     const el = ref.current;
     const box = el.parentElement;
     const fit = () => {
-      el.style.fontSize = "100px";
-      const width_at_100 = el.scrollWidth;
+      // Measure size_by in a hidden copy of the text at 100px
+      const probe = el.cloneNode();
+      probe.textContent = size_by;
+      Object.assign(probe.style, { position: "absolute", visibility: "hidden", fontSize: "100px" });
+      box.appendChild(probe);
+      const width_at_100 = probe.scrollWidth;
+      probe.remove();
       if (!width_at_100 || !box.clientWidth) return;
       // Take up about half the width, and cap short names so they don't get taller than a fifth of the screen
       const size = Math.min((100 * box.clientWidth * WIDTH_SHARE) / width_at_100, window.innerHeight * 0.2);
@@ -210,7 +216,7 @@ const FitText = ({ text, align_right, className = "" }) => {
     const observer = new ResizeObserver(fit);
     observer.observe(box);
     return () => observer.disconnect();
-  }, [text]);
+  }, [size_by]);
 
   return (
     <span ref={ref} className={`${align_right ? "ml-auto" : ""} block w-max whitespace-nowrap ${className}`}>
@@ -219,7 +225,7 @@ const FitText = ({ text, align_right, className = "" }) => {
   );
 };
 
-const WinnerPoster = ({ winner, track_name, number, on_right }) => {
+const WinnerPoster = ({ winner, track_name, number, on_right, longest_team }) => {
   const ref = useRef(null);
   const reduce_motion = useReducedMotion();
   // While the photo slides up into view, the team name slides in from its own corner
@@ -245,24 +251,25 @@ const WinnerPoster = ({ winner, track_name, number, on_right }) => {
         <div className="absolute inset-0 bg-gradient-to-b from-black/55 via-transparent to-black/45" />
 
         <div className="relative flex h-full flex-col justify-between px-4 sm:px-6 pt-5 pb-1 sm:pb-3 text-white">
-          <div>
-            <div className="grid grid-cols-3 items-center text-[10px] sm:text-xs font-semibold uppercase tracking-[0.15em]">
-              <span>{winner.place}</span>
-              <span className="text-center">Genesis 2.0 · {track_name}</span>
-              <span className="text-right">{number}</span>
-            </div>
-
-            <p className="mx-auto mt-5 max-w-3xl text-center font-[family-name:var(--font-serif)] text-lg sm:text-2xl lg:text-4xl leading-tight">
-              {winner.project}, built by {winner.members.join(", ")}.
-            </p>
+          <div className="grid grid-cols-3 items-center text-[10px] sm:text-xs font-semibold uppercase tracking-[0.15em]">
+            <span>{winner.place}</span>
+            <span className="text-center">Genesis 2.0 · {track_name}</span>
+            <span className="text-right">{number}</span>
           </div>
 
-          <motion.h2
+          {/* Team name with its members underneath, sliding in together from their corner;
+              the right-hand ones leave room for the site's back-to-top button */}
+          <motion.div
             style={{ x: reduce_motion ? 0 : name_x }}
-            className="w-full pb-4 sm:pb-6 font-[family-name:var(--font-poster)] uppercase leading-none tracking-[0.06em]"
+            className={`pb-4 sm:pb-6 ${on_right ? "pr-12 sm:pr-14 text-right" : "text-left"}`}
           >
-            <FitText text={winner.team} align_right={on_right} />
-          </motion.h2>
+            <h2 className="w-full font-[family-name:var(--font-poster)] uppercase leading-none tracking-[0.06em]">
+              <FitText text={winner.team} size_by={longest_team} align_right={on_right} />
+            </h2>
+            <p className={`mt-2 max-w-xl font-[family-name:var(--font-serif)] text-base sm:text-xl text-white/85 ${on_right ? "ml-auto" : ""}`}>
+              {winner.members.join(" · ")}
+            </p>
+          </motion.div>
         </div>
       </div>
     </section>
@@ -272,6 +279,7 @@ const WinnerPoster = ({ winner, track_name, number, on_right }) => {
 // One track's winning teams, each shown with its team photo
 export const Genesis2TrackWinners = ({ slug }) => {
   const track = genesis2_tracks.find((t) => t.slug === slug);
+  const longest_team = track.winners.reduce((a, w) => (w.team.length > a.length ? w.team : a), "");
 
   useEffect(() => {
     const timer = setTimeout(celebrate, 500);
@@ -297,6 +305,7 @@ export const Genesis2TrackWinners = ({ slug }) => {
               winner={winner}
               track_name={track.name}
               on_right={index % 2 === 1}
+              longest_team={longest_team}
               number={`${String(index + 1).padStart(2, "0")} / ${String(track.winners.length).padStart(2, "0")}`}
             />
           ))}
