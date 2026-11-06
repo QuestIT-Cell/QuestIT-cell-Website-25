@@ -133,7 +133,7 @@ const EventModal = ({
       <div className="fixed inset-0 grid place-items-center z-[11001] p-3 sm:p-6 pointer-events-none">
         <motion.div
           ref={modalRef}
-          layoutId={`event-${active.title}-${id}`}
+          layoutId={`event-${active.title}-${active.date}-${id}`}
           transition={{ type: "spring", stiffness: 140, damping: 22 }}
           onTouchStart={handleTouchStart}
           onTouchEnd={handleTouchEnd}
@@ -222,6 +222,11 @@ const EventModal = ({
                   <Trophy size={14} />
                   <span>Vibe W Quest Winners 🏆</span>
                 </Link>
+              ) : active.title === "SIH Insider" && active.date?.includes("2026") ? (
+                <span className="flex items-center gap-1.5 text-cyan-400 text-xs sm:text-sm font-medium">
+                  <Trophy size={14} />
+                  <span>SIH 2026 Preparation</span>
+                </span>
               ) : active.website ? (
                 <Link
                   href={active.website}
@@ -306,6 +311,15 @@ const EventModal = ({
                     Vibe W Quest Winners 🏆
                   </Button>
                 </Link>
+              </div>
+            )}
+
+            {active.title === "SIH Insider" && active.date?.includes("2026") && (
+              <div className="pt-2">
+                <Button className="w-full bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white font-semibold py-2.5 text-xs sm:text-sm rounded-lg transition-all duration-300 flex items-center justify-center gap-2 shadow-lg cursor-default">
+                  <Trophy size={16} />
+                  SIH Insider 2026
+                </Button>
               </div>
             )}
           </div>
@@ -528,17 +542,17 @@ const Events = ({ featured = false }) => {
 
         <ul className="w-full max-w-none px-4 md:px-10 mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 items-start gap-4">
           {sortedFeaturedEvents.map((event, index) => (
-              active?.title === event.title ? (
+              active?.title === event.title && active?.date === event.date ? (
                 <motion.div
                   key={index}
-                  layoutId={`event-${event.title}-${id}`}
+                  layoutId={`event-${event.title}-${event.date}-${id}`}
                   className="h-60 w-full"
                 />
               ) : (
                 <motion.div
                   key={index}
                   onClick={() => set_active(event)}
-                  layoutId={`event-${event.title}-${id}`}
+                  layoutId={`event-${event.title}-${event.date}-${id}`}
                   className={cn(
                     "p-4 flex flex-col hover:bg-neutral-900 rounded-xl cursor-pointer",
                     isGenesis1(event.title) && "bg-cyan-600 hover:bg-cyan-500 shadow-[0_0_30px_rgba(6,182,212,0.5)]",
@@ -679,17 +693,17 @@ const Events = ({ featured = false }) => {
             {/* Events Grid */}
             <ul className="w-full max-w-none px-4 sm:px-6 md:px-10 mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 items-start gap-3 sm:gap-4">
               {groupedEvents[academicYear].map((event, index) => (
-                active?.title === event.title ? (
+                active?.title === event.title && active?.date === event.date ? (
                   <motion.div
                     key={index}
-                    layoutId={`event-${event.title}-${id}`}
+                    layoutId={`event-${event.title}-${event.date}-${id}`}
                     className="h-48 sm:h-56 md:h-60 w-full"
                   />
                 ) : (
                   <motion.div
                     key={index}
                     onClick={() => set_active(event)}
-                    layoutId={`event-${event.title}-${id}`}
+                    layoutId={`event-${event.title}-${event.date}-${id}`}
                     className={cn(
                       "p-3 sm:p-4 flex flex-col hover:bg-neutral-900 rounded-xl cursor-pointer transition-all",
                       isGenesis1(event.title) && "bg-cyan-600 hover:bg-cyan-500 shadow-[0_0_30px_rgba(6,182,212,0.5)]",
