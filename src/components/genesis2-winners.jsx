@@ -228,6 +228,8 @@ const FitText = ({ text, size_by = text, align_right, className = "" }) => {
   );
 };
 
+const LABEL_PILL = "whitespace-nowrap rounded-full bg-black/60 px-3 py-1.5 ring-1 ring-white/15 backdrop-blur-sm";
+
 const WinnerPoster = ({ winner, track_name, number, on_right, longest_team }) => {
   const ref = useRef(null);
   const reduce_motion = useReducedMotion();
@@ -240,7 +242,7 @@ const WinnerPoster = ({ winner, track_name, number, on_right, longest_team }) =>
   return (
     <section
       ref={ref}
-      className="sticky top-0 flex h-svh w-full items-center justify-center bg-black landscape:bg-transparent px-4 sm:px-8 pt-20 pb-6"
+      className="sticky top-0 flex h-svh w-full items-center justify-center bg-black landscape:bg-transparent px-4 sm:px-8 pt-20 landscape:pt-[9.5rem] pb-6"
     >
       {/* Landscape screens: the photo fills a rounded frame with the text over it, and the next frame slides up over
           this one like a stack of prints. Portrait screens (phones): the frame takes the photo's own shape so none of
@@ -258,10 +260,14 @@ const WinnerPoster = ({ winner, track_name, number, on_right, longest_team }) =>
         <div className="absolute inset-0 hidden bg-gradient-to-b from-black/55 via-transparent to-black/45 landscape:block" />
 
         <div className="contents text-white landscape:relative landscape:flex landscape:h-full landscape:flex-col landscape:justify-between landscape:px-4 sm:landscape:px-6 landscape:pt-5 landscape:pb-1 sm:landscape:pb-3">
-          <div className="order-first grid grid-cols-3 items-center gap-2 px-4 py-3 text-[10px] sm:text-xs font-semibold uppercase tracking-[0.15em] text-white landscape:order-none landscape:p-0">
-            <span>{winner.place}</span>
-            <span className="text-center">Genesis 2.0 · {track_name}</span>
-            <span className="text-right">{number}</span>
+          {/* Each label sits on its own dark pill so it stays readable on bright photos. On phones the place and
+              number share the first row and the track name gets its own row, so nothing gets squeezed */}
+          <div className="order-first grid grid-cols-[1fr_auto] items-center gap-x-3 gap-y-2 px-4 py-3 text-[11px] sm:text-xs font-semibold uppercase tracking-[0.12em] text-white landscape:order-none landscape:grid-cols-[1fr_auto_1fr] landscape:p-0">
+            <span className={`${LABEL_PILL} justify-self-start`}>{winner.place}</span>
+            <span className={`${LABEL_PILL} order-last col-span-2 justify-self-start landscape:order-none landscape:col-span-1 landscape:justify-self-center`}>
+              Genesis 2.0 · {track_name}
+            </span>
+            <span className={`${LABEL_PILL} justify-self-end`}>{number}</span>
           </div>
 
           {/* Team name with its members underneath, sliding in together from their corner;
