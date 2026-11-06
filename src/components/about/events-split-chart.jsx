@@ -212,6 +212,7 @@ const EventsSplitChart = () => {
               dataKey="category"
               axisLine={false}
               tickLine={false}
+              interval={0}
               tick={({ x, y, payload }) => {
                 const item = currentData.find(
                   (d) => d.category === payload.value
@@ -220,27 +221,21 @@ const EventsSplitChart = () => {
                 const isHovered = hoveredCategory === payload.value;
 
                 return (
-                  <g transform={`translate(${x},${y + 12})`}>
+                  <g
+                    transform={`translate(${x},${y + 12})`}
+                    onClick={() => handleCategoryClick(payload.value)}
+                    style={{ cursor: "pointer" }}
+                  >
                     <text
                       x={0}
                       y={0}
                       dy={0}
                       textAnchor="middle"
                       fill={isHovered ? item?.fill || "#f5f5f5" : "#a3a3a3"}
-                      className="text-xs font-semibold transition-colors duration-200"
+                      className="text-[11px] sm:text-xs font-semibold transition-colors duration-200 select-none"
                     >
                       {payload.value}
                     </text>
-                    {isUpcoming && (
-                      <text
-                        x={0}
-                        y={14}
-                        textAnchor="middle"
-                        fill="#22D3EE"
-                        className="text-[9px] font-mono font-semibold uppercase tracking-wider"
-                      >
-                      </text>
-                    )}
                   </g>
                 );
               }}
