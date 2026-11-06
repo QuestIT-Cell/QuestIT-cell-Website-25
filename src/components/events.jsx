@@ -37,18 +37,28 @@ import { ArrowRight, CalendarRange, ExternalLink, Trophy } from "lucide-react";
 import events from "@/constants/events";
 
 // Helper function to parse date and assign academic year
+const parseEventDate = (dateString) => {
+  if (!dateString) return new Date(0);
+  const parts = dateString.split(/[\s–-]+/).filter(Boolean);
+  const year = parseInt(parts[parts.length - 1], 10);
+  const month = parts.length > 2 ? parts[parts.length - 2] : parts[0];
+  const d = new Date(`${month} 1, ${year}`);
+  return isNaN(d.getTime()) ? new Date(dateString) : d;
+};
+
 const getAcademicYear = (dateString) => {
   const months = {
     January: 1, February: 2, March: 3, April: 4, May: 5, June: 6,
     July: 7, August: 8, September: 9, October: 10, November: 11, December: 12
   };
   
-  const parts = dateString.split(' ');
-  const month = months[parts[0]];
-  const year = parseInt(parts[1]);
+  const parts = dateString.split(/[\s–-]+/).filter(Boolean);
+  const month = months[parts[0]] || 1;
+  const year = parseInt(parts[parts.length - 1], 10);
+  if (isNaN(year)) return "2026-27";
   
   // Academic year runs from June to May
-  // June 2025 to May 2026 = 2025-26
+  // June 2026 to May 2027 = 2026-27
   if (month >= 6) {
     return `${year}-${String(year + 1).slice(2)}`;
   } else {
@@ -71,8 +81,8 @@ const groupEventsByAcademicYear = (events) => {
   // Sort events within each academic year by date (newest first)
   Object.keys(grouped).forEach(year => {
     grouped[year].sort((a, b) => {
-      const dateA = new Date(a.date);
-      const dateB = new Date(b.date);
+      const dateA = parseEventDate(a.date);
+      const dateB = parseEventDate(b.date);
       return dateB - dateA;
     });
   });
@@ -127,7 +137,7 @@ const Events = ({ featured = false }) => {
   // Memoize sorted featured events so we don't mutate imported events array or re-sort every render
   const sortedFeaturedEvents = useMemo(() => {
     return [...events]
-      .sort((a, b) => new Date(b.date) - new Date(a.date))
+      .sort((a, b) => parseEventDate(b.date) - parseEventDate(a.date))
       .slice(0, 6);
   }, []);
 
@@ -252,7 +262,7 @@ const Events = ({ featured = false }) => {
               transition={{ duration: 0.2 }}
             >
               <motion.button
-                key={`button-${active.title}-${id}`}
+                key={`button-${active.title}-${active.date}-${id}`}
                 initial={{
                   opacity: 0,
                 }}
@@ -273,7 +283,7 @@ const Events = ({ featured = false }) => {
 
               <motion.div
                 ref={ref}
-                layoutId={`event-${active.title}-${id}`}
+                layoutId={`event-${active.title}-${active.date}-${id}`}
                 transition={{ type: "spring", stiffness: 120, damping: 20 }}
                 className={cn(
                   "w-full max-w-[500px] h-full md:h-fit md:max-h-[100%] flex flex-col bg-neutral-900 sm:rounded-3xl overflow-hidden relative",
@@ -314,36 +324,39 @@ const Events = ({ featured = false }) => {
                         <CalendarRange size={20} className={cn(isGenesis(active.title) && "text-white")} /> {active.date}
                       </p>
 
-                      {active.website && (
-                        active.title === "Vibe W Quest" ? (
-                          <Link
-                            href="/vibe-w-quest-winners"
-                            className="flex items-center gap-2 text-cyan-400 hover:text-cyan-300 transition-colors text-base"
-                          >
-                            <Trophy size={16} />
-                            <span>Vibe W Quest Winners 🏆</span>
-                          </Link>
-                        ) : (
-                          <Link
-                            href={active.website}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className={cn(
-                              "flex items-center gap-2 text-cyan-400 hover:text-cyan-300 transition-colors text-base",
-                              isGenesis(active.title) && "text-white hover:text-white/80 underline decoration-white/30"
-                            )}
-                          >
-                            <ExternalLink size={16} />
-                            <span>
-                              {isGenesis2(active.title)
-                                ? "Genesis 2.0 Website"
-                                : isGenesis1(active.title)
-                                ? "Genesis Website"
-                                : "Event Website"}
-                            </span>
-                          </Link>
-                        )
-                      )}
+                      {active.title === "Vibe W Quest" ? (
+                        <Link
+                          href="/vibe-w-quest-winners"
+                          className="flex items-center gap-2 text-cyan-400 hover:text-cyan-300 transition-colors text-base"
+                        >
+                          <Trophy size={16} />
+                          <span>Vibe W Quest Winners 🏆</span>
+                        </Link>
+                      ) : active.title === "SIH Insider" && active.date?.includes("2026") ? (
+                        <span className="flex items-center gap-2 text-cyan-400 text-base">
+                          <Trophy size={16} />
+                          <span>SIH 2026 Preparation</span>
+                        </span>
+                      ) : active.website ? (
+                        <Link
+                          href={active.website}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className={cn(
+                            "flex items-center gap-2 text-cyan-400 hover:text-cyan-300 transition-colors text-base",
+                            isGenesis(active.title) && "text-white hover:text-white/80 underline decoration-white/30"
+                          )}
+                        >
+                          <ExternalLink size={16} />
+                          <span>
+                            {isGenesis2(active.title)
+                              ? "Genesis 2.0 Website"
+                              : isGenesis1(active.title)
+                              ? "Genesis Website"
+                              : "Event Website"}
+                          </span>
+                        </Link>
+                      ) : null}
                     </div>
                   </div>
 
@@ -412,6 +425,16 @@ const Events = ({ featured = false }) => {
                       </Link>
                     </div>
                   )}
+
+                  {/* SIH Insider Special Button (Featured) */}
+                  {active.title === "SIH Insider" && active.date?.includes("2026") && (
+                    <div className="px-4 pb-4">
+                      <Button className="w-full bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white font-semibold py-3 rounded-lg transition-all duration-300 flex items-center justify-center gap-2 shadow-lg cursor-default">
+                        <Trophy size={18} />
+                        SIH Insider
+                      </Button>
+                    </div>
+                  )}
                 </div>
               </motion.div>
             </motion.div>
@@ -420,17 +443,17 @@ const Events = ({ featured = false }) => {
 
         <ul className="w-full max-w-none px-4 md:px-10 mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 items-start gap-4">
           {sortedFeaturedEvents.map((event, index) => (
-              active?.title === event.title ? (
+              active?.title === event.title && active?.date === event.date ? (
                 <motion.div
                   key={index}
-                  layoutId={`event-${event.title}-${id}`}
+                  layoutId={`event-${event.title}-${event.date}-${id}`}
                   className="h-60 w-full"
                 />
               ) : (
                 <motion.div
                   key={index}
                   onClick={() => set_active(event)}
-                  layoutId={`event-${event.title}-${id}`}
+                  layoutId={`event-${event.title}-${event.date}-${id}`}
                   className={cn(
                     "p-4 flex flex-col hover:bg-neutral-900 rounded-xl cursor-pointer",
                     isGenesis1(event.title) && "bg-cyan-600 hover:bg-cyan-500 shadow-[0_0_30px_rgba(6,182,212,0.5)]",
@@ -550,7 +573,7 @@ const Events = ({ featured = false }) => {
             transition={{ duration: 0.2 }}
           >
             <motion.button
-              key={`button-${active.title}-${id}`}
+              key={`button-${active.title}-${active.date}-${id}`}
               layout
               initial={{
                 opacity: 0,
@@ -572,7 +595,7 @@ const Events = ({ featured = false }) => {
 
             <motion.div
               ref={ref}
-              layoutId={`event-${active.title}-${id}`}
+              layoutId={`event-${active.title}-${active.date}-${id}`}
               transition={{ type: "spring", stiffness: 120, damping: 20 }}
               className={cn(
                 "w-full max-w-[500px] h-full md:h-fit md:max-h-[100%] flex flex-col bg-neutral-900 sm:rounded-3xl overflow-hidden relative",
@@ -621,6 +644,11 @@ const Events = ({ featured = false }) => {
                         <Trophy size={16} />
                         <span>Vibe W Quest Winners 🏆</span>
                       </Link>
+                    ) : active.title === "SIH Insider" && active.date?.includes("2026") ? (
+                      <span className="flex items-center gap-2 text-cyan-400 text-base">
+                        <Trophy size={16} />
+                        <span>SIH 2026 Preparation</span>
+                      </span>
                     ) : active.website ? (
                       <Link
                         href={active.website}
@@ -709,6 +737,16 @@ const Events = ({ featured = false }) => {
                     </Link>
                   </div>
                 )}
+
+                {/* SIH Insider Special Button */}
+                {active.title === "SIH Insider" && active.date?.includes("2026") && (
+                  <div className="px-4 pb-4">
+                    <Button className="w-full bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white font-semibold py-3 rounded-lg transition-all duration-300 flex items-center justify-center gap-2 shadow-lg cursor-default">
+                      <Trophy size={18} />
+                      SIH Insider
+                    </Button>
+                  </div>
+                )}
               </div>
             </motion.div>
           </motion.div>
@@ -745,17 +783,17 @@ const Events = ({ featured = false }) => {
             {/* Events Grid */}
             <ul className="w-full max-w-none px-4 sm:px-6 md:px-10 mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 items-start gap-3 sm:gap-4">
               {groupedEvents[academicYear].map((event, index) => (
-                active?.title === event.title ? (
+                active?.title === event.title && active?.date === event.date ? (
                   <motion.div
                     key={index}
-                    layoutId={`event-${event.title}-${id}`}
+                    layoutId={`event-${event.title}-${event.date}-${id}`}
                     className="h-48 sm:h-56 md:h-60 w-full"
                   />
                 ) : (
                   <motion.div
                     key={index}
                     onClick={() => set_active(event)}
-                    layoutId={`event-${event.title}-${id}`}
+                    layoutId={`event-${event.title}-${event.date}-${id}`}
                     className={cn(
                       "p-3 sm:p-4 flex flex-col hover:bg-neutral-900 rounded-xl cursor-pointer transition-all",
                       isGenesis1(event.title) && "bg-cyan-600 hover:bg-cyan-500 shadow-[0_0_30px_rgba(6,182,212,0.5)]",
