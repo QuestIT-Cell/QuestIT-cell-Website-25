@@ -49,14 +49,40 @@ const Header = () => {
     };
   }, []);
 
-  // Prevent scroll when sidebar is open
+  // Prevent background scroll when mobile sidebar is open
   useEffect(() => {
     if (is_sidebar_open) {
+      const scrollY = window.scrollY;
+      document.body.dataset.scrollY = scrollY.toString();
+      document.documentElement.style.overflow = "hidden";
       document.body.style.overflow = "hidden";
+      document.body.style.position = "fixed";
+      document.body.style.top = `-${scrollY}px`;
+      document.body.style.width = "100%";
+      document.body.style.touchAction = "none";
     } else {
-      document.body.style.overflow = "unset";
+      const savedScrollY = document.body.dataset.scrollY;
+      document.documentElement.style.overflow = "";
+      document.body.style.overflow = "";
+      document.body.style.position = "";
+      document.body.style.top = "";
+      document.body.style.width = "";
+      document.body.style.touchAction = "";
+      if (savedScrollY) {
+        window.scrollTo(0, parseInt(savedScrollY, 10));
+        delete document.body.dataset.scrollY;
+      }
       set_open_dropdown(null); // Reset dropdown when closing sidebar
     }
+
+    return () => {
+      document.documentElement.style.overflow = "";
+      document.body.style.overflow = "";
+      document.body.style.position = "";
+      document.body.style.top = "";
+      document.body.style.width = "";
+      document.body.style.touchAction = "";
+    };
   }, [is_sidebar_open]);
 
   const toggle_dropdown = (name) => {
@@ -165,14 +191,16 @@ const Header = () => {
       >
         {/* Backdrop - Click to close */}
         <div
-          className="absolute inset-0 bg-black/80"
+          className="absolute inset-0 bg-black/80 touch-none"
           onClick={() => set_is_sidebar_open(false)}
+          onTouchMove={(e) => e.preventDefault()}
         />
 
         {/* Sidebar Content */}
         <div
-          className={`absolute top-0 left-0 h-full w-[310px] bg-gradient-to-b from-black via-zinc-950 to-black border-r border-neutral-800 shadow-2xl transition-transform duration-500 ease-in-out ${is_sidebar_open ? "translate-x-0" : "-translate-x-full"
-            } flex flex-col p-6 overflow-y-auto`}
+          className={`absolute top-0 left-0 h-full w-[310px] bg-gradient-to-b from-black via-zinc-950 to-black border-r border-neutral-800 shadow-2xl transition-transform duration-500 ease-in-out ${
+            is_sidebar_open ? "translate-x-0" : "-translate-x-full"
+          } flex flex-col p-6 overflow-y-auto overscroll-contain`}
         >
           <div className="flex justify-between items-center mb-2">
             <div className="w-[190px]">

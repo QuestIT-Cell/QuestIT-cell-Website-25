@@ -34,11 +34,10 @@ const ScrollToTop = () => {
 
   return (
     <div
-      className={`fixed bottom-28 lg:bottom-8 right-8 z-[999] ${
-        is_visible ? "visible" : "invisible"
-      }`}
+      className={`fixed bottom-6 sm:bottom-8 right-4 sm:right-8 z-[999] transition-all duration-300 ${is_visible ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
+        }`}
     >
-      <Button aria-label="Scroll To Top" onClick={handle_scroll_to_top}>
+      <Button aria-label="Scroll To Top" onClick={handle_scroll_to_top} className="shadow-lg hover:shadow-cyan-500/20">
         <span className="mt-[6px] h-3 w-3 rotate-45 border-l-2 border-t-2 border-zinc-900"></span>
       </Button>
     </div>
