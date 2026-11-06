@@ -370,22 +370,22 @@ const MembersSplitChart = () => {
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -4 }}
           transition={{ duration: 0.2 }}
-          className="mt-3 p-2.5 rounded-xl bg-neutral-950/60 border border-neutral-800/60 flex items-center justify-between text-xs"
+          className="mt-3 p-3 rounded-xl bg-neutral-950/70 border border-neutral-800/70 flex flex-col sm:flex-row sm:items-center justify-between gap-2 sm:gap-4 text-xs"
         >
           {activeItemDetails ? (
             <>
               <div className="flex items-center gap-2">
                 <span
-                  className="w-2.5 h-2.5 rounded-full shadow-sm"
+                  className="w-2.5 h-2.5 rounded-full shadow-sm flex-shrink-0"
                   style={{ backgroundColor: activeItemDetails.fill }}
                 />
-                <span className="font-semibold text-neutral-200">
+                <span className="font-semibold text-neutral-100 text-xs sm:text-sm">
                   {activeItemDetails.category} — {activeItemDetails.label}
                 </span>
               </div>
-              <div className="flex items-center gap-3 font-mono text-neutral-300">
+              <div className="flex flex-wrap items-center gap-x-2.5 gap-y-1 font-mono text-neutral-300 text-[11px] sm:text-xs">
                 <span>
-                  <strong className="text-neutral-100 font-bold text-sm">
+                  <strong className="text-neutral-100 font-bold text-xs sm:text-sm">
                     {activeItemDetails.members}
                   </strong>{" "}
                   members
@@ -394,15 +394,15 @@ const MembersSplitChart = () => {
                 <span className="font-bold text-neutral-200">
                   {activePercentage}% of members
                 </span>
-                <span className="text-neutral-500 text-[11px]">
+                <span className="text-neutral-500">
                   ({activeYear})
                 </span>
               </div>
             </>
           ) : (
-            <div className="flex items-center justify-between w-full text-neutral-400 text-[11px]">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between w-full text-neutral-400 text-[11px] gap-1.5">
               <span className="flex items-center gap-1.5">
-                <Sparkles className="w-3.5 h-3.5 text-cyan-400/80" />
+                <Sparkles className="w-3.5 h-3.5 text-cyan-400/80 flex-shrink-0" />
                 <span>Hover or tap designation to view distribution percentage</span>
               </span>
               <span className="text-emerald-400 font-medium font-mono text-[11px]">

@@ -12,7 +12,7 @@ import { motion } from "framer-motion";
 const Home = () => {
   return (
     <>
-      <HeroHighlight id="home" className="relative">
+      <HeroHighlight id="home" className="relative" containerClassName="h-[100svh] md:h-[40rem]">
         <motion.h1
           initial={{
             y: 20,
@@ -36,9 +36,20 @@ const Home = () => {
             what&apos;s possible in tech.
           </Highlight>
         </motion.h1>
+
+        {/* Subtle mobile scroll indicator */}
+        <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-20 flex flex-col items-center gap-1.5 opacity-60 md:hidden pointer-events-none">
+          <motion.div
+            animate={{ y: [0, 6, 0] }}
+            transition={{ repeat: Infinity, duration: 1.6, ease: "easeInOut" }}
+            className="w-4 h-7 rounded-full border border-white/50 flex items-start justify-center p-1"
+          >
+            <div className="w-1 h-1.5 bg-white/80 rounded-full" />
+          </motion.div>
+        </div>
       </HeroHighlight>
 
-      <div className="relative left-1/2 w-[100vw] -translate-x-1/2 flex z-10 min-h-[70vh] lg:min-h-[85vh] -mt-4 md:-mt-8 lg:-mt-10">
+      <div className="relative left-1/2 w-[100vw] -translate-x-1/2 flex z-10 min-h-[70vh] lg:min-h-[85vh] mt-0 md:-mt-8 lg:-mt-10">
         <Image
           src="/images/Genesis2.0banner.webp"
           alt="Genesis 2.0 Banner"
@@ -61,7 +72,7 @@ const Home = () => {
             transition={{ duration: 0.7, ease: "easeOut", delay: 0.2 }}
             className="flex flex-col items-start max-w-2xl"
           >
-            <p className="text-white/60 tracking-[0.3em] uppercase text-xs md:text-sm mb-4 ml-1">
+            <p className="text-white/60 tracking-[0.3em] uppercase text-xs md:text-sm mb-4 ml-4 sm:ml-1">
               Upcoming Event
             </p>
 
@@ -74,7 +85,7 @@ const Home = () => {
               loading="lazy"
             />
 
-            <p className="text-sm md:text-base text-gray-300 mb-8 leading-relaxed max-w-xl">
+            <p className="text-sm md:text-base text-cyan-300 md:text-gray-300 font-medium md:font-normal drop-shadow-[0_2px_4px_rgba(0,0,0,0.9)] md:drop-shadow-none mb-8 leading-relaxed max-w-xl">
               Genesis 2.0 is QuestIT&apos;s flagship hackathon, bringing together
               curious minds, creative thinkers and problem solvers to build
               impactful solutions over 24 hours. Ideate. Build. Collaborate. Create
