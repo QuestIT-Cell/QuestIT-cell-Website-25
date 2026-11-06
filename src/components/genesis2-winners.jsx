@@ -32,12 +32,12 @@ const GenesisHeader = ({ heading, text }) => (
     transition={{ duration: 0.8 }}
     className="text-center mb-14 mt-20"
   >
-    <div className="flex justify-center items-center gap-3 sm:gap-4 mb-8">
-      <Trophy className="w-10 h-10 sm:w-14 sm:h-14 text-orange-400" />
-      <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold bg-gradient-to-r from-orange-400 via-amber-400 to-orange-600 bg-clip-text text-transparent">
+    <div className="flex justify-center items-center gap-2.5 sm:gap-4 mb-6 sm:mb-8 px-2">
+      <Trophy className="w-7 h-7 sm:w-14 sm:h-14 text-orange-400 shrink-0" />
+      <h1 className="text-2xl sm:text-5xl md:text-6xl font-bold bg-gradient-to-r from-orange-400 via-amber-400 to-orange-600 bg-clip-text text-transparent text-center">
         {heading}
       </h1>
-      <Trophy className="w-10 h-10 sm:w-14 sm:h-14 text-orange-400" />
+      <Trophy className="w-7 h-7 sm:w-14 sm:h-14 text-orange-400 shrink-0" />
     </div>
 
     <div className="flex justify-center mb-8">
@@ -187,8 +187,6 @@ export const Genesis2Tracks = () => {
 };
 
 const WIDTH_SHARE = 0.55;
-// On portrait screens (phones) the name sits under the photo, so it can use more of the width
-const PORTRAIT_WIDTH_SHARE = 0.8;
 // Lower = the team name slides in more slowly
 const NAME_STIFFNESS = 40;
 
@@ -209,8 +207,10 @@ const FitText = ({ text, size_by = text, align_right, className = "" }) => {
       const width_at_100 = probe.scrollWidth;
       probe.remove();
       if (!width_at_100 || !box.clientWidth) return;
-      const share = window.matchMedia("(orientation: portrait)").matches ? PORTRAIT_WIDTH_SHARE : WIDTH_SHARE;
-      // Take up about half the width, and cap short names so they don't get taller than a fifth of the screen
+      // Take up about half the width on desktop, and slightly more on mobile so it stays legible
+      const is_mobile = box.clientWidth < 640;
+      const share = is_mobile ? 0.72 : WIDTH_SHARE;
+      // Cap short names so they don't get taller than a fifth of the screen
       const size = Math.min((100 * box.clientWidth * share) / width_at_100, window.innerHeight * 0.2);
       el.style.fontSize = `${size}px`;
     };
@@ -240,46 +240,73 @@ const WinnerPoster = ({ winner, track_name, number, on_right, longest_team }) =>
   const name_x = useTransform(slow_progress, [0, 1], [on_right ? "100%" : "-100%", "0%"]);
 
   return (
-    <section
-      ref={ref}
-      className="sticky top-0 flex h-svh w-full items-center justify-center bg-black landscape:bg-transparent px-4 sm:px-8 pt-20 landscape:pt-[9.5rem] pb-6"
-    >
-      {/* Landscape screens: the photo fills a rounded frame with the text over it, and the next frame slides up over
-          this one like a stack of prints. Portrait screens (phones): the frame takes the photo's own shape so none of
-          it is cut off, with the labels above and the names below it */}
-      <div className="relative flex w-full max-w-6xl flex-col overflow-hidden rounded-2xl border border-orange-500/30 bg-neutral-900 shadow-2xl shadow-black/70 landscape:h-full">
-        <Image
-          src={winner.photo}
-          alt={`${winner.team} - ${winner.place}, ${track_name}`}
-          width={1600}
-          height={1067}
-          sizes="(max-width: 1152px) 100vw, 1152px"
-          className="h-auto w-full landscape:absolute landscape:inset-0 landscape:size-full landscape:object-cover"
-        />
-        {/* Soft shade at the top and bottom so the white text stays readable on bright photos */}
-        <div className="absolute inset-0 hidden bg-gradient-to-b from-black/55 via-transparent to-black/45 landscape:block" />
+    <section ref={ref} className="sticky top-0 flex h-svh w-full items-center justify-center px-3 sm:px-8 pt-20 lg:pt-[9.5rem] pb-5 sm:pb-6">
+      {/* The photo sits in a rounded frame; the next frame slides up over this one like a stack of prints.
+          On laptops the frame starts below the tall menu bar so the labels at its top aren't hidden */}
+      <div className="relative h-full w-full max-w-6xl overflow-hidden rounded-2xl border border-orange-500/30 bg-neutral-950 shadow-2xl shadow-black/70">
+        
+        {/* LAPTOP / DESKTOP VIEW (sm and up): Unchanged full-bleed object-cover photo */}
+        <div className="hidden sm:block absolute inset-0">
+          <Image
+            src={winner.photo}
+            alt={`${winner.team} - ${winner.place}, ${track_name}`}
+            fill
+            sizes="(max-width: 1152px) 100vw, 1152px"
+            className="object-cover"
+          />
+          {/* Soft shade at the top and bottom so the white text stays readable on bright photos */}
+          <div className="absolute inset-0 bg-gradient-to-b from-black/55 via-transparent to-black/45" />
+        </div>
 
-        <div className="contents text-white landscape:relative landscape:flex landscape:h-full landscape:flex-col landscape:justify-between landscape:px-4 sm:landscape:px-6 landscape:pt-5 landscape:pb-1 sm:landscape:pb-3">
-          {/* Each label sits on its own dark pill so it stays readable on bright photos. On phones the place and
-              number share the first row and the track name gets its own row, so nothing gets squeezed */}
-          <div className="order-first grid grid-cols-[1fr_auto] items-center gap-x-3 gap-y-2 px-4 py-3 text-[11px] sm:text-xs font-semibold uppercase tracking-[0.12em] text-white landscape:order-none landscape:grid-cols-[1fr_auto_1fr] landscape:p-0">
+        {/* PHONE VIEW (mobile < sm): Ambient blurred background fill */}
+        <div className="sm:hidden absolute inset-0 overflow-hidden pointer-events-none">
+          <Image
+            src={winner.photo}
+            alt=""
+            fill
+            aria-hidden="true"
+            className="object-cover blur-2xl opacity-25 scale-110"
+          />
+          <div className="absolute inset-0 bg-gradient-to-b from-black/80 via-black/40 to-black/90" />
+        </div>
+
+        {/* Card Content Overlay */}
+        <div className="relative flex h-full flex-col justify-between p-4 sm:px-6 sm:pt-5 sm:pb-3 text-white z-10">
+          
+          {/* Top Metadata Bar: each label sits on its own dark pill so it stays readable on bright photos. On phones
+              the place and number share the first row and the track name gets its own row, so nothing gets cut off */}
+          <div className="grid shrink-0 grid-cols-[1fr_auto] items-center gap-x-3 gap-y-2 text-[11px] sm:text-xs font-semibold uppercase tracking-[0.12em] sm:grid-cols-[1fr_auto_1fr]">
             <span className={`${LABEL_PILL} justify-self-start`}>{winner.place}</span>
-            <span className={`${LABEL_PILL} order-last col-span-2 justify-self-start landscape:order-none landscape:col-span-1 landscape:justify-self-center`}>
+            <span className={`${LABEL_PILL} order-last col-span-2 justify-self-start sm:order-none sm:col-span-1 sm:justify-self-center`}>
               Genesis 2.0 · {track_name}
             </span>
-            <span className={`${LABEL_PILL} justify-self-end`}>{number}</span>
+            <span className={`${LABEL_PILL} justify-self-end font-mono`}>{number}</span>
+          </div>
+
+          {/* PHONE VIEW ONLY: Full uncropped winner photo framed in center */}
+          <div className="sm:hidden relative flex-1 min-h-0 w-full my-3 flex items-center justify-center">
+            <div className="relative w-full h-full max-h-[52vh] flex items-center justify-center">
+              <Image
+                src={winner.photo}
+                alt={`${winner.team} - ${winner.place}, ${track_name}`}
+                fill
+                sizes="100vw"
+                className="object-contain rounded-xl drop-shadow-[0_12px_28px_rgba(0,0,0,0.9)]"
+                priority={number.startsWith("01")}
+              />
+            </div>
           </div>
 
           {/* Team name with its members underneath, sliding in together from their corner;
               the right-hand ones leave room for the site's back-to-top button */}
           <motion.div
             style={{ x: reduce_motion ? 0 : name_x }}
-            className={`px-4 pt-4 pb-5 text-white landscape:px-0 landscape:pt-0 landscape:pb-4 sm:landscape:pb-6 ${on_right ? "landscape:pr-12 sm:landscape:pr-14 text-right" : "text-left"}`}
+            className={`shrink-0 pb-3 sm:pb-6 ${on_right ? "pr-10 sm:pr-14 text-right" : "text-left"}`}
           >
             <h2 className="w-full font-[family-name:var(--font-poster)] uppercase leading-none tracking-[0.06em]">
               <FitText text={winner.team} size_by={longest_team} align_right={on_right} />
             </h2>
-            <p className={`mt-2 max-w-xl font-[family-name:var(--font-serif)] text-base sm:text-xl text-white/85 ${on_right ? "ml-auto" : ""}`}>
+            <p className={`mt-1.5 sm:mt-2 max-w-xl font-[family-name:var(--font-serif)] text-xs sm:text-xl text-white/85 leading-snug sm:leading-normal ${on_right ? "ml-auto" : ""}`}>
               {winner.members.join(" · ")}
             </p>
           </motion.div>
