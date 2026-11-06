@@ -7,18 +7,18 @@ import PhotoLightboxModal from "./PhotoLightboxModal";
 
 /* ─── Projector Exhibition Images ──────────────────────────────────────────── */
 const PROJECTOR_IMAGES = [
-  "/images/gallery-images/projector/DSC04678_1920x1080.jpeg",
-  "/images/gallery-images/projector/DSC04689_1920x1080.jpg",
-  "/images/gallery-images/projector/Faculty_grp_photo_1920x1080.jpeg",
-  "/images/gallery-images/projector/genesis-explaination_1920x1080.JPG",
+  "/images/gallery-images/projector/quest_council_faculty_pic_1920x1080.webp",
+  "/images/gallery-images/projector/Faculty_grp_photo_1920x1080.webp",
+  "/images/gallery-images/projector/genesis_2.0.webp",
   "/images/gallery-images/projector/genesis1.0_1920x1080.webp",
-  "/images/gallery-images/projector/genesis_event_1920x1080.jpg",
-  "/images/gallery-images/projector/quest_council_faculty_pic_1920x1080.jpg",
+  "/images/gallery-images/projector/track01-winners.webp",
+  "/images/gallery-images/projector/track02-winners.webp",
+  "/images/gallery-images/projector/track03-winners.webp",
   "/images/gallery-images/projector/SIH_insider_2_1920x1080.webp",
-  "/images/gallery-images/projector/sliding_1.jpg",
-  "/images/gallery-images/projector/sliding_8.webp",
   "/images/gallery-images/projector/vibewquest_participants_1920x1080.webp",
   "/images/gallery-images/projector/vibwwquest_participants_1920x1080.webp",
+  "/images/gallery-images/projector/shivam-as-a-thinker.webp",
+  "/images/gallery-images/projector/faculty-photo.webp",
 ];
 
 /* ─── Constants & Configuration ────────────────────────────────────────────── */
@@ -620,6 +620,39 @@ const HorizontalCarousel = () => {
         <line x1="280" y1="65" x2="720" y2="65" stroke="#22d3ee" strokeWidth="1.4" opacity="0.75" />
       </svg>
       )}
+
+      {/* ── Central Background Quest Logo Watermark & Ambient Radial Cyan Glow ── */}
+      <div
+        aria-hidden="true"
+        className="absolute left-1/2 pointer-events-none select-none flex items-center justify-center"
+        style={{
+          top: isVertical ? "50%" : "45%",
+          transform: "translate3d(-50%, -50%, 0px)",
+          zIndex: 1,
+          opacity: introComplete || chromeVisible ? 1 : 0,
+          transition: "opacity 0.6s ease-out",
+        }}
+      >
+        {/* Ambient Cyan Backlight Glow */}
+        <div
+          className="absolute w-[220px] h-[220px] sm:w-[320px] sm:h-[320px] md:w-[480px] md:h-[380px] rounded-full blur-[45px] md:blur-[75px] pointer-events-none"
+          style={{
+            background:
+              "radial-gradient(circle, rgba(0, 212, 255, 0.22) 0%, rgba(34, 211, 238, 0.08) 50%, transparent 75%)",
+          }}
+        />
+
+        {/* Glowing Quest Logo */}
+        <div className="relative w-[180px] h-[75px] sm:w-[250px] sm:h-[105px] md:w-[400px] md:h-[160px] lg:w-[480px] lg:h-[190px] opacity-25 md:opacity-30">
+          <Image
+            src="/images/logo.webp"
+            alt="Quest-IT Logo Watermark"
+            fill
+            className="object-contain filter drop-shadow-[0_0_25px_rgba(0,212,255,0.45)]"
+            priority
+          />
+        </div>
+      </div>
 
       {/* ── Section Title / Middle Wall Branding (Desktop only; on mobile top-left HUD is used) ── */}
       {!isVertical && (

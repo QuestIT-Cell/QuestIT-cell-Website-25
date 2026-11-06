@@ -14,9 +14,9 @@ import PhotoLightboxModal from "./PhotoLightboxModal";
 
 /* ─── Orbital Memories Exhibition Images ───────────────────────────────────── */
 const ORBITAL_IMAGES = [
+  "/images/gallery-images/Orbital/diagonal_9.webp",
   "/images/gallery-images/Orbital/diagonal_12.webp",
-  "/images/gallery-images/Orbital/diagonal_9.jpg",
-  "/images/gallery-images/Orbital/dinner-photo_1920x1080.webp",
+  "/images/gallery-images/Orbital/Council_photos_genesis.webp",
   "/images/gallery-images/Orbital/download_1920x1080.webp",
   "/images/gallery-images/Orbital/firstmeet_1920x1080.webp",
   "/images/gallery-images/Orbital/IMG_1633_1920x1080.webp",
@@ -673,9 +673,9 @@ const MemoriesSection = () => {
           {/* Central Background Quest Logo Watermark & Ambient Radial Cyan Glow */}
           <div
             aria-hidden="true"
-            className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none select-none flex items-center justify-center"
+            className="absolute left-1/2 top-1/2 pointer-events-none select-none flex items-center justify-center"
             style={{
-              transform: "translateZ(-20px)",
+              transform: "translate3d(-50%, -50%, -20px)",
               zIndex: 0,
             }}
           >
