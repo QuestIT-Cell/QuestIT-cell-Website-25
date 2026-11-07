@@ -212,6 +212,7 @@ const EventsSplitChart = () => {
               dataKey="category"
               axisLine={false}
               tickLine={false}
+              interval={0}
               tick={({ x, y, payload }) => {
                 const item = currentData.find(
                   (d) => d.category === payload.value
@@ -220,27 +221,21 @@ const EventsSplitChart = () => {
                 const isHovered = hoveredCategory === payload.value;
 
                 return (
-                  <g transform={`translate(${x},${y + 12})`}>
+                  <g
+                    transform={`translate(${x},${y + 12})`}
+                    onClick={() => handleCategoryClick(payload.value)}
+                    style={{ cursor: "pointer" }}
+                  >
                     <text
                       x={0}
                       y={0}
                       dy={0}
                       textAnchor="middle"
                       fill={isHovered ? item?.fill || "#f5f5f5" : "#a3a3a3"}
-                      className="text-xs font-semibold transition-colors duration-200"
+                      className="text-[11px] sm:text-xs font-semibold transition-colors duration-200 select-none"
                     >
                       {payload.value}
                     </text>
-                    {isUpcoming && (
-                      <text
-                        x={0}
-                        y={14}
-                        textAnchor="middle"
-                        fill="#22D3EE"
-                        className="text-[9px] font-mono font-semibold uppercase tracking-wider"
-                      >
-                      </text>
-                    )}
                   </g>
                 );
               }}
@@ -297,34 +292,34 @@ const EventsSplitChart = () => {
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -4 }}
           transition={{ duration: 0.2 }}
-          className="mt-3 p-2.5 rounded-xl bg-neutral-950/60 border border-neutral-800/60 flex items-center justify-between text-xs"
+          className="mt-3 p-3 rounded-xl bg-neutral-950/70 border border-neutral-800/70 flex flex-col sm:flex-row sm:items-center justify-between gap-2 sm:gap-4 text-xs"
         >
           {activeItemDetails ? (
             <>
               <div className="flex items-center gap-2">
                 <span
-                  className="w-2.5 h-2.5 rounded-full shadow-sm"
+                  className="w-2.5 h-2.5 rounded-full shadow-sm flex-shrink-0"
                   style={{ backgroundColor: activeItemDetails.fill }}
                 />
-                <span className="font-semibold text-neutral-200">
+                <span className="font-semibold text-neutral-100 text-xs sm:text-sm">
                   {activeItemDetails.category} Events
                 </span>
               </div>
-              <div className="flex items-center gap-3 font-mono text-neutral-300">
+              <div className="flex flex-wrap items-center gap-x-2.5 gap-y-1 font-mono text-neutral-300 text-[11px] sm:text-xs">
                 <span>
-                  <strong className="text-neutral-100 font-bold text-sm">
+                  <strong className="text-neutral-100 font-bold text-xs sm:text-sm">
                     {activeItemDetails.events}
                   </strong>{" "}
                   {activeItemDetails.events === 1 ? "event" : "events"}
                 </span>
                 <span className="text-neutral-600">•</span>
-                <span className="text-neutral-400 text-[11px]">
+                <span className="text-neutral-400">
                   {EVENT_ACCESS_DATA.labels[activeYear]}
                 </span>
               </div>
             </>
           ) : (
-            <div className="flex items-center justify-center w-full text-neutral-400 text-[11px]">
+            <div className="flex items-center justify-center w-full text-neutral-400 text-[11px] py-0.5">
               <span className="flex items-center gap-1.5">
                 <Sparkles className="w-3.5 h-3.5 text-amber-400/80" />
                 <span>Balanced event curation across technical and core domains</span>
