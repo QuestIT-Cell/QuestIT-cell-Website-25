@@ -2,6 +2,7 @@
 
 // Next's Imports
 import Image from "next/image";
+import Link from "next/link";
 
 // App's Internal Imports
 import { Highlight, HeroHighlight } from "@/components/ui/hero-highlight";
@@ -72,9 +73,6 @@ const Home = () => {
             transition={{ duration: 0.7, ease: "easeOut", delay: 0.2 }}
             className="flex flex-col items-start max-w-2xl"
           >
-            <p className="text-white/60 tracking-[0.3em] uppercase text-xs md:text-sm mb-4 ml-4 sm:ml-1">
-              Upcoming Event
-            </p>
 
             <Image
               src="/images/Genesis2.0logo-600.webp"
@@ -92,15 +90,21 @@ const Home = () => {
               what&apos;s next.
             </p>
 
-            <a 
-              href="https://questit.vesit.ves.ac.in/genesis-cour2/"
-              target="_blank"
-              rel="noopener noreferrer"
+            <Link 
+              href="/#genesis-2-0"
+              onClick={(e) => {
+                const el = document.getElementById("genesis-2-0") || document.getElementById("genesis-2.0");
+                if (el) {
+                  e.preventDefault();
+                  el.scrollIntoView({ behavior: "smooth", block: "center" });
+                  window.history.pushState(null, "", "#genesis-2-0");
+                }
+              }}
               className="w-fit group flex items-center gap-3 border border-orange-500/40 bg-black/40 hover:bg-orange-500/40 hover:border-orange-400 hover:shadow-[0_0_20px_rgba(249,115,22,0.4)] backdrop-blur-sm px-10 py-4 text-base md:text-lg text-orange-100 hover:text-white transition-all duration-300 rounded-lg"
             >
               Explore Genesis 2.0
               <span className="text-2xl leading-none group-hover:translate-x-1 transition-transform">&rarr;</span>
-            </a>
+            </Link>
           </motion.div>
         </div>
       </div>
