@@ -110,17 +110,17 @@ const TrackCard = ({ track }) => (
       <span className="absolute bottom-0 left-0 size-0 border-b-[18px] border-r-[18px] border-b-[var(--track)] border-r-transparent" />
     </div>
 
-    <div className="mt-3 flex items-center justify-between rounded-xl border border-[var(--track)]/60 px-4 py-3">
-      <div>
-        <h3 className="whitespace-nowrap font-[family-name:var(--font-tech)] text-xl lg:text-lg font-semibold uppercase tracking-[0.1em] text-[var(--track)]">
+    <div className="mt-3 flex items-center justify-between gap-3 rounded-xl border border-[var(--track)]/60 px-4 py-3">
+      <div className="min-w-0 flex-1">
+        <h3 className="truncate font-[family-name:var(--font-tech)] text-lg sm:text-xl font-semibold uppercase tracking-[0.08em] text-[var(--track)]">
           {track.name}
         </h3>
-        <p className="mt-0.5 flex items-center gap-1.5 text-sm text-neutral-400">
-          <Trophy size={14} />
-          {track.winners.length} winning teams
+        <p className="mt-0.5 flex items-center gap-1.5 text-xs sm:text-sm text-neutral-400">
+          <Trophy size={14} className="shrink-0 text-amber-400" />
+          <span className="truncate">{track.winners.length} winning teams</span>
         </p>
       </div>
-      <ArrowRight size={22} className="text-[var(--track)] transition-transform duration-300 group-hover:translate-x-1" />
+      <ArrowRight size={20} className="shrink-0 text-[var(--track)] transition-transform duration-300 group-hover:translate-x-1" />
     </div>
   </Link>
 );
@@ -159,8 +159,8 @@ export const Genesis2Tracks = () => {
 
           <TracksHeading />
 
-          {/* On laptops the row narrows on shorter screens, so the whole cards stay visible without scrolling */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 mb-14 max-w-[18rem] sm:max-w-2xl lg:max-w-[min(48rem,calc((100svh-31rem)*2.4+2.5rem))] mx-auto">
+          {/* Responsive grid with comfortable card widths so all text fits without overflow */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6 mb-14 max-w-sm sm:max-w-2xl lg:max-w-5xl mx-auto">
             {genesis2_tracks.map((track, index) => (
               <motion.div
                 key={track.slug}
@@ -186,63 +186,102 @@ export const Genesis2Tracks = () => {
   );
 };
 
-const WIDTH_SHARE = 0.55;
-// Lower = the team name slides in more slowly
-const NAME_STIFFNESS = 40;
-
-// Sizes the text so that size_by (the longest team name) spans about half the width,
-// which gives every team name the same size
-const FitText = ({ text, size_by = text, align_right, className = "" }) => {
+// Sizes the text so team names stay balanced and strictly within the card frame without overflowing
+const FitText = ({ text, size_by = text, className = "" }) => {
   const ref = useRef(null);
 
   useLayoutEffect(() => {
     const el = ref.current;
+    if (!el) return;
     const box = el.parentElement;
+    if (!box) return;
+
     const fit = () => {
-      // Measure size_by in a hidden copy of the text at 100px
-      const probe = el.cloneNode();
-      probe.textContent = size_by;
-      Object.assign(probe.style, { position: "absolute", visibility: "hidden", fontSize: "100px" });
-      box.appendChild(probe);
-      const width_at_100 = probe.scrollWidth;
+      if (!box.clientWidth) return;
+
+      // Measure text in a hidden clone with exact CSS typography properties
+      const probe = document.createElement("span");
+      probe.textContent = text;
+      Object.assign(probe.style, {
+        position: "absolute",
+        visibility: "hidden",
+        whiteSpace: "nowrap",
+        fontSize: "100px",
+        letterSpacing: "0.06em",
+        textTransform: "uppercase",
+        fontFamily: "var(--font-poster), 'Cormorant Garamond', Georgia, serif",
+      });
+      document.body.appendChild(probe);
+      const text_width_at_100 = probe.scrollWidth || 1;
       probe.remove();
-      if (!width_at_100 || !box.clientWidth) return;
-      // Take up about half the width on desktop, and slightly more on mobile so it stays legible
+
+      // Measure reference size_by for visual balance across cards
+      let ref_width_at_100 = text_width_at_100;
+      if (size_by && size_by !== text) {
+        const refProbe = document.createElement("span");
+        refProbe.textContent = size_by;
+        Object.assign(refProbe.style, {
+          position: "absolute",
+          visibility: "hidden",
+          whiteSpace: "nowrap",
+          fontSize: "100px",
+          letterSpacing: "0.06em",
+          textTransform: "uppercase",
+          fontFamily: "var(--font-poster), 'Cormorant Garamond', Georgia, serif",
+        });
+        document.body.appendChild(refProbe);
+        ref_width_at_100 = refProbe.scrollWidth || text_width_at_100;
+        refProbe.remove();
+      }
+
       const is_mobile = box.clientWidth < 640;
-      const share = is_mobile ? 0.72 : WIDTH_SHARE;
-      // Cap short names so they don't get taller than a fifth of the screen
-      const size = Math.min((100 * box.clientWidth * share) / width_at_100, window.innerHeight * 0.2);
-      el.style.fontSize = `${size}px`;
+      // Target share: 90% of card width on mobile, 68% on desktop
+      const target_share = is_mobile ? 0.90 : 0.68;
+      const size_from_ref = (100 * box.clientWidth * target_share) / ref_width_at_100;
+
+      // Hard cap: this specific text must never exceed 92% of container width
+      const max_size_for_text = (100 * box.clientWidth * 0.92) / text_width_at_100;
+      const ideal_size = Math.min(size_from_ref, max_size_for_text);
+
+      // Bound between readable minimum and aesthetic maximum based on viewport
+      const min_size = is_mobile ? 24 : 34;
+      const max_size = is_mobile ? Math.min(window.innerHeight * 0.1, 52) : Math.min(window.innerHeight * 0.14, 82);
+      const final_size = Math.max(min_size, Math.min(ideal_size, max_size));
+
+      el.style.fontSize = `${final_size}px`;
     };
+
     fit();
     document.fonts?.ready.then(fit);
+
     const observer = new ResizeObserver(fit);
     observer.observe(box);
     return () => observer.disconnect();
-  }, [size_by]);
+  }, [text, size_by]);
 
   return (
-    <span ref={ref} className={`${align_right ? "ml-auto" : ""} block w-max whitespace-nowrap ${className}`}>
+    <span
+      ref={ref}
+      className={`block w-fit max-w-full truncate whitespace-nowrap ${className}`}
+    >
       {text}
     </span>
   );
 };
 
-const LABEL_PILL = "whitespace-nowrap rounded-full bg-black/60 px-3 py-1.5 ring-1 ring-white/15 backdrop-blur-sm";
+const LABEL_PILL = "whitespace-nowrap rounded-full bg-black/60 px-3 py-1 sm:py-1.5 ring-1 ring-white/15 backdrop-blur-sm";
 
-const WinnerPoster = ({ winner, track_name, number, on_right, longest_team }) => {
+const WinnerPoster = ({ winner, track_name, number, longest_team }) => {
   const ref = useRef(null);
   const reduce_motion = useReducedMotion();
-  // While the photo slides up into view, the team name slides in from its own corner
-  const { scrollYProgress } = useScroll({ target: ref, offset: ["start end", "start start"] });
-  // The spring makes the name trail behind the scroll, so it glides in slowly instead of racing the page
-  const slow_progress = useSpring(scrollYProgress, { stiffness: NAME_STIFFNESS, damping: 20, restDelta: 0.001 });
-  const name_x = useTransform(slow_progress, [0, 1], [on_right ? "100%" : "-100%", "0%"]);
+  // While the photo slides into view, the team name glides subtly into position
+  const { scrollYProgress } = useScroll({ target: ref, offset: ["start end", "start 45%"] });
+  const name_x = useTransform(scrollYProgress, [0, 1], [reduce_motion ? 0 : -25, 0]);
+  const name_opacity = useTransform(scrollYProgress, [0, 0.7, 1], [reduce_motion ? 1 : 0.2, 0.8, 1]);
 
   return (
-    <section ref={ref} className="sticky top-0 flex h-svh w-full items-center justify-center px-3 sm:px-8 pt-20 lg:pt-[9.5rem] pb-5 sm:pb-6">
-      {/* The photo sits in a rounded frame; the next frame slides up over this one like a stack of prints.
-          On laptops the frame starts below the tall menu bar so the labels at its top aren't hidden */}
+    <section ref={ref} className="sticky top-0 flex h-svh w-full items-center justify-center px-3 sm:px-8 pt-20 lg:pt-[8.5rem] pb-5 sm:pb-6">
+      {/* The photo sits in a rounded frame; the next frame slides up over this one like a stack of prints */}
       <div className="relative h-full w-full max-w-6xl overflow-hidden rounded-2xl border border-orange-500/30 bg-neutral-950 shadow-2xl shadow-black/70">
         
         {/* LAPTOP / DESKTOP VIEW (sm and up): Unchanged full-bleed object-cover photo */}
@@ -253,9 +292,10 @@ const WinnerPoster = ({ winner, track_name, number, on_right, longest_team }) =>
             fill
             sizes="(max-width: 1152px) 100vw, 1152px"
             className="object-cover"
+            priority={number.startsWith("01")}
           />
-          {/* Soft shade at the top and bottom so the white text stays readable on bright photos */}
-          <div className="absolute inset-0 bg-gradient-to-b from-black/55 via-transparent to-black/45" />
+          {/* Soft shade at top and bottom so text stays readable on bright photos */}
+          <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-transparent to-black/85" />
         </div>
 
         {/* PHONE VIEW (mobile < sm): Ambient blurred background fill */}
@@ -271,21 +311,26 @@ const WinnerPoster = ({ winner, track_name, number, on_right, longest_team }) =>
         </div>
 
         {/* Card Content Overlay */}
-        <div className="relative flex h-full flex-col justify-between p-4 sm:px-6 sm:pt-5 sm:pb-3 text-white z-10">
+        <div className="relative flex h-full flex-col justify-between p-4 sm:p-6 text-white z-10">
           
-          {/* Top Metadata Bar: each label sits on its own dark pill so it stays readable on bright photos. On phones
-              the place and number share the first row and the track name gets its own row, so nothing gets cut off */}
-          <div className="grid shrink-0 grid-cols-[1fr_auto] items-center gap-x-3 gap-y-2 text-[11px] sm:text-xs font-semibold uppercase tracking-[0.12em] sm:grid-cols-[1fr_auto_1fr]">
-            <span className={`${LABEL_PILL} justify-self-start`}>{winner.place}</span>
-            <span className={`${LABEL_PILL} order-last col-span-2 justify-self-start sm:order-none sm:col-span-1 sm:justify-self-center`}>
-              Genesis 2.0 · {track_name}
+          {/* Top Metadata Bar: place, track name and index pills fitting cleanly on any screen */}
+          <div className="shrink-0 flex items-center justify-between gap-2 text-[10px] sm:text-xs font-semibold uppercase tracking-wider sm:tracking-[0.12em] w-full">
+            <span className={`${LABEL_PILL} max-w-[65%] sm:max-w-none truncate text-amber-300 ring-amber-400/30`}>
+              {winner.place}
             </span>
-            <span className={`${LABEL_PILL} justify-self-end font-mono`}>{number}</span>
+            <div className="flex items-center gap-2 shrink-0">
+              <span className={`${LABEL_PILL} hidden sm:inline-flex text-neutral-300`}>
+                Genesis 2.0 · {track_name}
+              </span>
+              <span className={`${LABEL_PILL} font-mono text-neutral-200`}>
+                {number}
+              </span>
+            </div>
           </div>
 
           {/* PHONE VIEW ONLY: Full uncropped winner photo framed in center */}
           <div className="sm:hidden relative flex-1 min-h-0 w-full my-3 flex items-center justify-center">
-            <div className="relative w-full h-full max-h-[52vh] flex items-center justify-center">
+            <div className="relative w-full h-full max-h-[50vh] flex items-center justify-center">
               <Image
                 src={winner.photo}
                 alt={`${winner.team} - ${winner.place}, ${track_name}`}
@@ -297,16 +342,15 @@ const WinnerPoster = ({ winner, track_name, number, on_right, longest_team }) =>
             </div>
           </div>
 
-          {/* Team name with its members underneath, sliding in together from their corner;
-              the right-hand ones leave room for the site's back-to-top button */}
+          {/* Team name with its members underneath: clean left alignment across all cards */}
           <motion.div
-            style={{ x: reduce_motion ? 0 : name_x }}
-            className={`shrink-0 pb-3 sm:pb-6 ${on_right ? "pr-10 sm:pr-14 text-right" : "text-left"}`}
+            style={{ x: name_x, opacity: name_opacity }}
+            className="shrink-0 pb-2 sm:pb-5 text-left max-w-full"
           >
             <h2 className="w-full font-[family-name:var(--font-poster)] uppercase leading-none tracking-[0.06em]">
-              <FitText text={winner.team} size_by={longest_team} align_right={on_right} />
+              <FitText text={winner.team} size_by={longest_team} />
             </h2>
-            <p className={`mt-1.5 sm:mt-2 max-w-xl font-[family-name:var(--font-serif)] text-xs sm:text-xl text-white/85 leading-snug sm:leading-normal ${on_right ? "ml-auto" : ""}`}>
+            <p className="mt-1.5 sm:mt-2.5 max-w-2xl font-[family-name:var(--font-serif)] text-xs sm:text-lg md:text-xl text-white/90 leading-snug sm:leading-normal">
               {winner.members.join(" · ")}
             </p>
           </motion.div>
@@ -348,7 +392,6 @@ export const Genesis2TrackWinners = ({ slug }) => {
               key={winner.place}
               winner={winner}
               track_name={track.name}
-              on_right={index % 2 === 1}
               longest_team={LONGEST_TEAM}
               number={`${String(index + 1).padStart(2, "0")} / ${String(track.winners.length).padStart(2, "0")}`}
             />
