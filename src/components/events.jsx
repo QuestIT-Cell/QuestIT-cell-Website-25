@@ -535,15 +535,6 @@ const EventModal = ({
                     </Link>
                   </div>
                 )}
-
-                {active.title === "SIH Insider" && active.date?.includes("2026") && (
-                  <div className="pt-2 pb-2">
-                    <Button className="w-full bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white font-semibold py-2.5 text-xs sm:text-sm rounded-lg transition-all duration-300 flex items-center justify-center gap-2 shadow-lg cursor-default">
-                      <Trophy size={16} />
-                      SIH Insider 2026
-                    </Button>
-                  </div>
-                )}
               </div>
 
               {/* Bottom Navigation & Swipe Indicator Bar */}
