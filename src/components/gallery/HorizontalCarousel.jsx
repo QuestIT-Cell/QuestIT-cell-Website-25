@@ -340,26 +340,22 @@ const HorizontalCarousel = () => {
   const displayPrevIndex = (!introComplete && isSlotSpinning) ? (((slotIndex - 1) % TOTAL + TOTAL) % TOTAL) : prevIndex;
   const displayNextIndex = (!introComplete && isSlotSpinning) ? ((slotIndex + 1) % TOTAL) : nextIndex;
 
-  /* ── Continuous visible track positions ─────────────────────────────────── */
-  const visiblePositions = [-3, -2, -1, 0, 1, 2, 3].map((off) => activePage + off);
+  /* ── Continuous visible track positions covering all slides seamlessly ── */
+  const visiblePositions = [-6, -5, -4, -3, -2, -1, 0, 1, 2, 3, 4, 5, 6].map((off) => activePage + off);
 
-  /* ── Card Content for Middle Wall Viewport ──────────────────────────────── */
-  const renderMiddleCard = (slideIdx, isCenter) => (
+  /* ── Unified Exhibition Card (Seamless across all 3 walls) ──────────────── */
+  const renderCard = (slideIdx, isCenter = false) => (
     <div
-      className={`relative w-full h-full overflow-hidden rounded-[3px] select-none${isCenter && isTvExpanding ? ' tv-power-on' : ''}`}
+      className={`relative w-full h-full overflow-hidden rounded-[4px] select-none border${
+        isCenter && isTvExpanding ? " tv-power-on" : ""
+      }`}
       style={{
         boxShadow: isCenter
-          ? "0 0 55px rgba(47,107,255,0.55), 0 0 120px rgba(47,107,255,0.3), inset 0 0 30px rgba(0,0,0,0.6)"
+          ? "0 0 50px rgba(0,212,255,0.45), 0 0 100px rgba(47,107,255,0.25), inset 0 0 25px rgba(0,0,0,0.5)"
           : "inset 0 0 25px rgba(0,0,0,0.7)",
-        WebkitMaskImage: isCenter
-          ? "radial-gradient(ellipse 96% 96% at 50% 50%, black 82%, rgba(0,0,0,0.7) 93%, transparent 100%)"
-          : "none",
-        maskImage: isCenter
-          ? "radial-gradient(ellipse 96% 96% at 50% 50%, black 82%, rgba(0,0,0,0.7) 93%, transparent 100%)"
-          : "none",
-        /* No images reflect on walls before stage 2 (TV power-on) */
-        opacity: (!introComplete && introStage < 2) ? 0 : 1,
-        transition: introStage <= 1 ? 'none' : 'opacity 0.4s',
+        borderColor: isCenter ? "rgba(34, 211, 238, 0.75)" : "rgba(34, 211, 238, 0.2)",
+        opacity: !introComplete && introStage < 2 ? 0 : 1,
+        transition: "box-shadow 0.6s ease, border-color 0.6s ease, opacity 0.4s ease",
       }}
     >
       <Image
@@ -367,8 +363,8 @@ const HorizontalCarousel = () => {
         alt={`Slide ${slideIdx + 1}`}
         fill
         className="object-cover"
-        sizes="480px"
-        quality={80}
+        sizes="(max-width: 768px) 360px, 480px"
+        quality={82}
         priority={isCenter}
       />
       <div
@@ -376,9 +372,10 @@ const HorizontalCarousel = () => {
         className="absolute inset-0 pointer-events-none z-10"
         style={{
           background: isCenter
-            ? "linear-gradient(135deg, rgba(47,107,255,0.3) 0%, rgba(76,255,138,0.15) 100%)"
-            : "linear-gradient(135deg, rgba(47,107,255,0.2) 0%, rgba(76,255,138,0.1) 100%)",
+            ? "linear-gradient(135deg, rgba(0,212,255,0.25) 0%, rgba(76,255,138,0.12) 100%)"
+            : "linear-gradient(135deg, rgba(47,107,255,0.2) 0%, rgba(76,255,138,0.08) 100%)",
           mixBlendMode: "color",
+          transition: "background 0.6s ease",
         }}
       />
       {isCenter && (
@@ -391,94 +388,6 @@ const HorizontalCarousel = () => {
           }}
         />
       )}
-    </div>
-  );
-
-  /* ── Card Content for Side Wall Viewports (Left & Right) ─────────────────── */
-  const renderSideCard = (slideIdx, side) => (
-    <div
-      className={`relative w-full h-full overflow-hidden rounded-[3px] select-none${isSideTvExpanding ? ' tv-power-on' : ''}`}
-      style={{
-        filter: "brightness(0.68) contrast(120%) grayscale(25%)",
-        boxShadow:
-          side === "left"
-            ? "inset 0 0 35px rgba(0,0,0,0.9), -8px 0 25px rgba(0,0,0,0.85)"
-            : "inset 0 0 35px rgba(0,0,0,0.9), 8px 0 25px rgba(0,0,0,0.85)",
-        borderLeft: side === "left" ? "1px solid rgba(34, 211, 238, 0.55)" : "none",
-        borderRight: side === "right" ? "1px solid rgba(34, 211, 238, 0.55)" : "none",
-        /* Hidden until TV power-on or intro complete */
-        opacity: (!introComplete && !isSideTvExpanding) ? 0 : 1,
-        transition: introStage <= 1 ? 'none' : 'opacity 0.4s',
-      }}
-    >
-      <Image
-        src={imgSrc(slideIdx)}
-        alt=""
-        fill
-        className="object-cover"
-        sizes="480px"
-        quality={75}
-      />
-      <div
-        aria-hidden="true"
-        className="absolute inset-0 pointer-events-none z-10"
-        style={{
-          background:
-            "linear-gradient(135deg, rgba(47,107,255,0.4) 0%, rgba(76,255,138,0.15) 100%)",
-          mixBlendMode: "color",
-        }}
-      />
-      <div
-        aria-hidden="true"
-        className={`absolute inset-0 pointer-events-none z-20 ${
-          side === "left"
-            ? "bg-gradient-to-r from-transparent via-black/15 to-black/85"
-            : "bg-gradient-to-l from-transparent via-black/15 to-black/85"
-        }`}
-      />
-      <div
-        aria-hidden="true"
-        className="absolute inset-0 pointer-events-none z-20 bg-gradient-to-b from-black/60 via-transparent to-black/75"
-      />
-    </div>
-  );
-
-  /* ── Card Content for Vertical Top/Bottom Wall Viewports ──────────────── */
-  const renderTopCard = (slideIdx) => (
-    <div
-      className={`relative w-full h-full overflow-hidden rounded-[3px] select-none${isSideTvExpanding ? ' tv-power-on' : ''}`}
-      style={{
-        filter: "brightness(0.62) contrast(120%) grayscale(30%)",
-        boxShadow: "inset 0 0 35px rgba(0,0,0,0.9), 0 -8px 25px rgba(0,0,0,0.85)",
-        borderBottom: "1.5px solid rgba(34, 211, 238, 0.55)",
-        opacity: (!introComplete && !isSideTvExpanding) ? 0 : 1,
-        transition: introStage <= 1 ? 'none' : 'opacity 0.4s',
-      }}
-    >
-      <Image src={imgSrc(slideIdx)} alt="" fill className="object-cover" sizes="480px" quality={75} />
-      <div aria-hidden="true" className="absolute inset-0 pointer-events-none z-10"
-        style={{ background: "linear-gradient(135deg, rgba(47,107,255,0.4) 0%, rgba(76,255,138,0.15) 100%)", mixBlendMode: "color" }}
-      />
-      <div aria-hidden="true" className="absolute inset-0 pointer-events-none z-20 bg-gradient-to-b from-black/85 via-black/20 to-transparent" />
-    </div>
-  );
-
-  const renderBottomCard = (slideIdx) => (
-    <div
-      className={`relative w-full h-full overflow-hidden rounded-[3px] select-none${isSideTvExpanding ? ' tv-power-on' : ''}`}
-      style={{
-        filter: "brightness(0.62) contrast(120%) grayscale(30%)",
-        boxShadow: "inset 0 0 35px rgba(0,0,0,0.9), 0 8px 25px rgba(0,0,0,0.85)",
-        borderTop: "1.5px solid rgba(34, 211, 238, 0.55)",
-        opacity: (!introComplete && !isSideTvExpanding) ? 0 : 1,
-        transition: introStage <= 1 ? 'none' : 'opacity 0.4s',
-      }}
-    >
-      <Image src={imgSrc(slideIdx)} alt="" fill className="object-cover" sizes="480px" quality={75} />
-      <div aria-hidden="true" className="absolute inset-0 pointer-events-none z-10"
-        style={{ background: "linear-gradient(135deg, rgba(47,107,255,0.4) 0%, rgba(76,255,138,0.15) 100%)", mixBlendMode: "color" }}
-      />
-      <div aria-hidden="true" className="absolute inset-0 pointer-events-none z-20 bg-gradient-to-t from-black/85 via-black/20 to-transparent" />
     </div>
   );
 
@@ -798,7 +707,7 @@ const HorizontalCarousel = () => {
               <motion.div
                 animate={{ y: -activePage * vSpacingPx }}
                 transition={{ duration: TRANSITION_DURATION, ease: TRANSITION_EASE }}
-                style={{ position: "absolute", left: 0, top: 0, width: "100%", height: `${H}px` }}
+                style={{ position: "absolute", left: 0, top: 0, width: "100%", height: `${H}px`, willChange: "transform" }}
               >
                 {visiblePositions.map((p) => {
                   const slideIdx = getCardIndex(p);
@@ -811,11 +720,19 @@ const HorizontalCarousel = () => {
                       width: `${vCardW}px`,
                       height: `${vCardH}px`,
                     }}>
-                      {renderTopCard(slideIdx)}
+                      {renderCard(slideIdx, false)}
                     </div>
                   );
                 })}
               </motion.div>
+              {/* Top Wall Perspective Depth Ambient Overlay (fades out at seam) */}
+              <div
+                aria-hidden="true"
+                className="absolute inset-0 pointer-events-none z-20"
+                style={{
+                  background: "linear-gradient(to top, transparent 0%, rgba(0,0,0,0.2) 30%, rgba(0,0,0,0.65) 100%)",
+                }}
+              />
             </div>
 
             {/* MIDDLE WALL — flat, back wall, main image */}
@@ -830,7 +747,7 @@ const HorizontalCarousel = () => {
               <motion.div
                 animate={{ y: -activePage * vSpacingPx }}
                 transition={{ duration: TRANSITION_DURATION, ease: TRANSITION_EASE }}
-                style={{ position: "absolute", left: 0, top: `-${vTopSeam}px`, width: "100%", height: `${H}px` }}
+                style={{ position: "absolute", left: 0, top: `-${vTopSeam}px`, width: "100%", height: `${H}px`, willChange: "transform" }}
               >
                 {visiblePositions.map((p) => {
                   const slideIdx = getCardIndex(p);
@@ -859,7 +776,7 @@ const HorizontalCarousel = () => {
                         cursor: isCenter ? "zoom-in" : "pointer",
                       }}
                     >
-                      {renderMiddleCard(slideIdx, isCenter)}
+                      {renderCard(slideIdx, isCenter)}
                     </div>
                   );
                 })}
@@ -883,7 +800,7 @@ const HorizontalCarousel = () => {
               <motion.div
                 animate={{ y: -activePage * vSpacingPx }}
                 transition={{ duration: TRANSITION_DURATION, ease: TRANSITION_EASE }}
-                style={{ position: "absolute", left: 0, top: `-${vBottomSeam}px`, width: "100%", height: `${H}px` }}
+                style={{ position: "absolute", left: 0, top: `-${vBottomSeam}px`, width: "100%", height: `${H}px`, willChange: "transform" }}
               >
                 {visiblePositions.map((p) => {
                   const slideIdx = getCardIndex(p);
@@ -896,11 +813,19 @@ const HorizontalCarousel = () => {
                       width: `${vCardW}px`,
                       height: `${vCardH}px`,
                     }}>
-                      {renderBottomCard(slideIdx)}
+                      {renderCard(slideIdx, false)}
                     </div>
                   );
                 })}
               </motion.div>
+              {/* Bottom Wall Perspective Depth Ambient Overlay (fades out at seam) */}
+              <div
+                aria-hidden="true"
+                className="absolute inset-0 pointer-events-none z-20"
+                style={{
+                  background: "linear-gradient(to bottom, transparent 0%, rgba(0,0,0,0.2) 30%, rgba(0,0,0,0.65) 100%)",
+                }}
+              />
             </div>
 
             {/* Top seam crease line */}
@@ -970,6 +895,7 @@ const HorizontalCarousel = () => {
               top: 0,
               width: `${W}px`,
               height: "100%",
+              willChange: "transform",
             }}
           >
             {visiblePositions.map((p) => {
@@ -986,11 +912,19 @@ const HorizontalCarousel = () => {
                     height: "min(36vh, 340px)",
                   }}
                 >
-                  {renderSideCard(slideIdx, "left")}
+                  {renderCard(slideIdx, false)}
                 </div>
               );
             })}
           </motion.div>
+          {/* Left Wall Perspective Depth Ambient Overlay (fades out completely at seam) */}
+          <div
+            aria-hidden="true"
+            className="absolute inset-0 pointer-events-none z-20"
+            style={{
+              background: "linear-gradient(to right, rgba(0,0,0,0.65) 0%, rgba(0,0,0,0.18) 80%, transparent 100%)",
+            }}
+          />
         </div>
 
         {/* ── 2. MIDDLE WALL VIEWPORT (leftSeam to rightSeam, flat at rotateY(0deg)) ── */}
@@ -1013,6 +947,7 @@ const HorizontalCarousel = () => {
               top: 0,
               width: `${W}px`,
               height: "100%",
+              willChange: "transform",
             }}
           >
             {visiblePositions.map((p) => {
@@ -1042,7 +977,7 @@ const HorizontalCarousel = () => {
                     cursor: isCenter ? "zoom-in" : "pointer",
                   }}
                 >
-                  {renderMiddleCard(slideIdx, isCenter)}
+                  {renderCard(slideIdx, isCenter)}
                 </div>
               );
             })}
@@ -1078,6 +1013,7 @@ const HorizontalCarousel = () => {
               top: 0,
               width: `${W}px`,
               height: "100%",
+              willChange: "transform",
             }}
           >
             {visiblePositions.map((p) => {
@@ -1094,11 +1030,19 @@ const HorizontalCarousel = () => {
                     height: "min(36vh, 340px)",
                   }}
                 >
-                  {renderSideCard(slideIdx, "right")}
+                  {renderCard(slideIdx, false)}
                 </div>
               );
             })}
           </motion.div>
+          {/* Right Wall Perspective Depth Ambient Overlay (fades out completely at seam) */}
+          <div
+            aria-hidden="true"
+            className="absolute inset-0 pointer-events-none z-20"
+            style={{
+              background: "linear-gradient(to left, rgba(0,0,0,0.65) 0%, rgba(0,0,0,0.18) 80%, transparent 100%)",
+            }}
+          />
         </div>
 
         {/* ── Room Corner Crease Accent Vertex Lines (Locked to Room Corner) ── */}

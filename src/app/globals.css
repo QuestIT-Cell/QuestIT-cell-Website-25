@@ -238,9 +238,3 @@ body[data-clothesline-open] header {
 body[data-clothesline-open][data-menu-hidden] header {
   transform: translateY(-100%);
 }
-
-/* overflow-x: hidden turns the body into its own scroll box, which stops the winner photos from sticking;
-   clip still hides sideways overflow without doing that (important to beat mobile-responsive.css) */
-body:has(.genesis-winner-posters) {
-  overflow-x: clip !important;
-}
