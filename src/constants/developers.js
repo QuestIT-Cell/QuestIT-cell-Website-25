@@ -79,7 +79,37 @@ const developers = [
     linkedin: "https://www.linkedin.com/in/chaitalirane1707",
     image: "/images/dev_images/chaitali_rane.webp",
     description:
-      "Managed council member photos, standardized team media via cropping and format conversion, enforced consistent naming conventions, and implemented smooth card entrance transitions with interactive hover effects.",
+      "Built Council 2026–27 team section, managed member photos, standardized media through cropping and format conversion with consistent naming, and delivered smooth card entrance transitions plus interactive hover effects. Refined mobile responsiveness for stats bar, contact section, and footer.",
+  },
+  {
+    name: "Manish Awari",
+    role: "Frontend Developer",
+    email: "2025.manish.awari@ves.ac.in",
+    github: "https://github.com/themanishawari",
+    linkedin: "https://www.linkedin.com/in/manishawari/",
+    image: "/images/dev_images/manish_awari.webp",
+    description:
+      "Created Genesis 2.0 advertisement banner linking Quest website to Genesis microsite. Kept Genesis 2.0 banner prominent on homepage with event button, and added distinct Genesis 2.0 KPI card under 2026–27 section, visually differentiated from regular event cards.",
+  },
+  {
+    name: "Sarra Khadse",
+    role: "Frontend Developer",
+    email: "2025.sarra.khadse@ves.ac.in",
+    github: "https://github.com/sarrakhadse07",
+    linkedin: "https://www.linkedin.com/in/sarra-khadse-0b7719386",
+    image: "/images/dev_images/sarra_khadse.webp",
+    description:
+      "Updated website statistics, redesigned Event Split section with improved visualization and refined styling, and enhanced Member Split section presentation for UI consistency. Refined mobile responsiveness ensuring proper text display across devices.",
+  },
+  {
+    name: "Sankalp Mane",
+    role: "Frontend Developer",
+    email: "2025.sankalp.mane@ves.ac.in",
+    github: "https://github.com/Sankymane",
+    linkedin: "https://www.linkedin.com/in/sankalp-mane-53175936b",
+    image: "/images/dev_images/sankalp_mane.webp",
+    description:
+      "Developed and integrated SIH Insider tab within events section featuring detailed event and speaker information with custom visual assets. Refined mobile responsiveness for stats bar, contact section, and footer to ensure proper display.",
   },
 ];
 

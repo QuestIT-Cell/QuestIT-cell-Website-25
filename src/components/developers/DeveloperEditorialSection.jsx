@@ -16,6 +16,9 @@ const DEVELOPER_WORK_TITLES = {
   "Karthik Kotian": "Gallery & Developer Section Redesign",
   "Avani Killekar": "Council 2026–27 Team Section Architecture",
   "Chaitali Rane": "Council 2026–27 Media Standardisation",
+  "Manish Awari": "Event Campaign Integration & Metrics UI",
+  "Sarra Khadse": "Data Analytics Visualization & Responsive Splits UI",
+  "Sankalp Mane": "Cross-Device Layout Optimization & Event Modules",
 };
 
 // Compute physical card stack transformation based on offset relative to active card
@@ -341,7 +344,7 @@ const DeveloperEditorialSection = () => {
   const nameParts = currentDev.name.split(" ");
   const firstName = nameParts[0];
   const lastName = nameParts.slice(1).join(" ");
-  const workTitle = DEVELOPER_WORK_TITLES[currentDev.name] || `${currentDev.role} Contribution`;
+  const workTitle = DEVELOPER_WORK_TITLES[currentDev.name] || currentDev.role;
 
   return (
     <div ref={sectionRef} className="relative w-full min-h-screen bg-black text-white select-none overflow-x-hidden">
