@@ -104,24 +104,271 @@ const isGenesis2 = (title) => title === "GENESIS 2.0" || title === "Genesis 2.0"
 const isVibeWQuest = (title) => title === "Vibe W Quest" || title?.toLowerCase()?.includes("vibe");
 const isGenesis = (title) => isGenesis1(title) || isGenesis2(title) || title?.toLowerCase()?.includes("genesis");
 
-// Specialized cyberpunk / mecha themed EventCard for Genesis 1.0 (Genesis 2026)
-const Genesis1EventCard = ({ event, onClick, isCompact = false }) => {
+// Color schemes for each event - defines gradient borders and accent colors
+const getEventColorScheme = (title) => {
+  // Flagship events with custom colors
+  if (isGenesis2(title)) {
+    return {
+      borderGradient: "from-orange-400 via-orange-500 to-amber-500",
+      borderGradientHover: "from-orange-300 via-orange-400 to-amber-400",
+      accentColor: "orange-400",
+      glowColor: "rgba(249,115,22,0.5)",
+      glowColorSecondary: "rgba(249,115,22,0.25)",
+      ambientGlow: "from-orange-500/15",
+      shadowGlow: "rgba(249,115,22,0.8)",
+      insetShadow: "rgba(249,115,22,0.18)",
+      textHover: "text-orange-200",
+      textShadow: "rgba(249,115,22,0.3)",
+    };
+  }
+  
+  if (isVibeWQuest(title)) {
+    return {
+      borderGradient: "from-purple-400 via-fuchsia-500 to-violet-500",
+      borderGradientHover: "from-purple-300 via-fuchsia-400 to-violet-400",
+      accentColor: "purple-400",
+      glowColor: "rgba(168,85,247,0.5)",
+      glowColorSecondary: "rgba(168,85,247,0.25)",
+      ambientGlow: "from-purple-500/15",
+      shadowGlow: "rgba(168,85,247,0.8)",
+      insetShadow: "rgba(168,85,247,0.18)",
+      textHover: "text-purple-200",
+      textShadow: "rgba(168,85,247,0.3)",
+    };
+  }
+  
+  if (isGenesis1(title)) {
+    return {
+      borderGradient: "from-cyan-400 via-cyan-500 to-teal-400",
+      borderGradientHover: "from-cyan-300 via-cyan-400 to-teal-300",
+      accentColor: "cyan-400",
+      glowColor: "rgba(6,182,212,0.5)",
+      glowColorSecondary: "rgba(6,182,212,0.25)",
+      ambientGlow: "from-cyan-500/15",
+      shadowGlow: "rgba(6,182,212,0.8)",
+      insetShadow: "rgba(6,182,212,0.18)",
+      textHover: "text-cyan-200",
+      textShadow: "rgba(6,182,212,0.3)",
+    };
+  }
+  
+  // Other events with designated colors
+  const eventColorMap = {
+    "SIH Insider": {
+      borderGradient: "from-blue-400 via-blue-500 to-indigo-500",
+      borderGradientHover: "from-blue-300 via-blue-400 to-indigo-400",
+      accentColor: "blue-400",
+      glowColor: "rgba(59,130,246,0.5)",
+      glowColorSecondary: "rgba(59,130,246,0.25)",
+      ambientGlow: "from-blue-500/15",
+      shadowGlow: "rgba(59,130,246,0.8)",
+      insetShadow: "rgba(59,130,246,0.18)",
+      textHover: "text-blue-200",
+      textShadow: "rgba(59,130,246,0.3)",
+    },
+    "Bridge The Gap": {
+      borderGradient: "from-green-400 via-emerald-500 to-teal-500",
+      borderGradientHover: "from-green-300 via-emerald-400 to-teal-400",
+      accentColor: "emerald-400",
+      glowColor: "rgba(16,185,129,0.5)",
+      glowColorSecondary: "rgba(16,185,129,0.25)",
+      ambientGlow: "from-emerald-500/15",
+      shadowGlow: "rgba(16,185,129,0.8)",
+      insetShadow: "rgba(16,185,129,0.18)",
+      textHover: "text-emerald-200",
+      textShadow: "rgba(16,185,129,0.3)",
+    },
+    "Career Connect": {
+      borderGradient: "from-rose-400 via-pink-500 to-fuchsia-500",
+      borderGradientHover: "from-rose-300 via-pink-400 to-fuchsia-400",
+      accentColor: "pink-400",
+      glowColor: "rgba(236,72,153,0.5)",
+      glowColorSecondary: "rgba(236,72,153,0.25)",
+      ambientGlow: "from-pink-500/15",
+      shadowGlow: "rgba(236,72,153,0.8)",
+      insetShadow: "rgba(236,72,153,0.18)",
+      textHover: "text-pink-200",
+      textShadow: "rgba(236,72,153,0.3)",
+    },
+    "TestDrive - From Manual to Automation": {
+      borderGradient: "from-yellow-400 via-amber-500 to-orange-400",
+      borderGradientHover: "from-yellow-300 via-amber-400 to-orange-300",
+      accentColor: "amber-400",
+      glowColor: "rgba(251,191,36,0.5)",
+      glowColorSecondary: "rgba(251,191,36,0.25)",
+      ambientGlow: "from-amber-500/15",
+      shadowGlow: "rgba(251,191,36,0.8)",
+      insetShadow: "rgba(251,191,36,0.18)",
+      textHover: "text-amber-200",
+      textShadow: "rgba(251,191,36,0.3)",
+    },
+    "CodeFlix: ML Special": {
+      borderGradient: "from-red-400 via-rose-500 to-pink-500",
+      borderGradientHover: "from-red-300 via-rose-400 to-pink-400",
+      accentColor: "rose-400",
+      glowColor: "rgba(244,63,94,0.5)",
+      glowColorSecondary: "rgba(244,63,94,0.25)",
+      ambientGlow: "from-rose-500/15",
+      shadowGlow: "rgba(244,63,94,0.8)",
+      insetShadow: "rgba(244,63,94,0.18)",
+      textHover: "text-rose-200",
+      textShadow: "rgba(244,63,94,0.3)",
+    },
+    "Invictus 2025": {
+      borderGradient: "from-violet-400 via-purple-500 to-indigo-500",
+      borderGradientHover: "from-violet-300 via-purple-400 to-indigo-400",
+      accentColor: "violet-400",
+      glowColor: "rgba(139,92,246,0.5)",
+      glowColorSecondary: "rgba(139,92,246,0.25)",
+      ambientGlow: "from-violet-500/15",
+      shadowGlow: "rgba(139,92,246,0.8)",
+      insetShadow: "rgba(139,92,246,0.18)",
+      textHover: "text-violet-200",
+      textShadow: "rgba(139,92,246,0.3)",
+    },
+    "Code Crack": {
+      borderGradient: "from-lime-400 via-green-500 to-emerald-500",
+      borderGradientHover: "from-lime-300 via-green-400 to-emerald-400",
+      accentColor: "lime-400",
+      glowColor: "rgba(163,230,53,0.5)",
+      glowColorSecondary: "rgba(163,230,53,0.25)",
+      ambientGlow: "from-lime-500/15",
+      shadowGlow: "rgba(163,230,53,0.8)",
+      insetShadow: "rgba(163,230,53,0.18)",
+      textHover: "text-lime-200",
+      textShadow: "rgba(163,230,53,0.3)",
+    },
+    "Flutter Voyage": {
+      borderGradient: "from-sky-400 via-blue-500 to-cyan-500",
+      borderGradientHover: "from-sky-300 via-blue-400 to-cyan-400",
+      accentColor: "sky-400",
+      glowColor: "rgba(56,189,248,0.5)",
+      glowColorSecondary: "rgba(56,189,248,0.25)",
+      ambientGlow: "from-sky-500/15",
+      shadowGlow: "rgba(56,189,248,0.8)",
+      insetShadow: "rgba(56,189,248,0.18)",
+      textHover: "text-sky-200",
+      textShadow: "rgba(56,189,248,0.3)",
+    },
+    "Project Apex": {
+      borderGradient: "from-indigo-400 via-blue-500 to-purple-500",
+      borderGradientHover: "from-indigo-300 via-blue-400 to-purple-400",
+      accentColor: "indigo-400",
+      glowColor: "rgba(99,102,241,0.5)",
+      glowColorSecondary: "rgba(99,102,241,0.25)",
+      ambientGlow: "from-indigo-500/15",
+      shadowGlow: "rgba(99,102,241,0.8)",
+      insetShadow: "rgba(99,102,241,0.18)",
+      textHover: "text-indigo-200",
+      textShadow: "rgba(99,102,241,0.3)",
+    },
+    "WebDev Odyssey": {
+      borderGradient: "from-teal-400 via-cyan-500 to-sky-500",
+      borderGradientHover: "from-teal-300 via-cyan-400 to-sky-400",
+      accentColor: "teal-400",
+      glowColor: "rgba(20,184,166,0.5)",
+      glowColorSecondary: "rgba(20,184,166,0.25)",
+      ambientGlow: "from-teal-500/15",
+      shadowGlow: "rgba(20,184,166,0.8)",
+      insetShadow: "rgba(20,184,166,0.18)",
+      textHover: "text-teal-200",
+      textShadow: "rgba(20,184,166,0.3)",
+    },
+    "Intern Quest": {
+      borderGradient: "from-fuchsia-400 via-purple-500 to-pink-500",
+      borderGradientHover: "from-fuchsia-300 via-purple-400 to-pink-400",
+      accentColor: "fuchsia-400",
+      glowColor: "rgba(217,70,239,0.5)",
+      glowColorSecondary: "rgba(217,70,239,0.25)",
+      ambientGlow: "from-fuchsia-500/15",
+      shadowGlow: "rgba(217,70,239,0.8)",
+      insetShadow: "rgba(217,70,239,0.18)",
+      textHover: "text-fuchsia-200",
+      textShadow: "rgba(217,70,239,0.3)",
+    },
+    "Code Matrix": {
+      borderGradient: "from-slate-400 via-gray-500 to-zinc-500",
+      borderGradientHover: "from-slate-300 via-gray-400 to-zinc-400",
+      accentColor: "slate-400",
+      glowColor: "rgba(148,163,184,0.5)",
+      glowColorSecondary: "rgba(148,163,184,0.25)",
+      ambientGlow: "from-slate-500/15",
+      shadowGlow: "rgba(148,163,184,0.8)",
+      insetShadow: "rgba(148,163,184,0.18)",
+      textHover: "text-slate-200",
+      textShadow: "rgba(148,163,184,0.3)",
+    },
+    "Invictus 2024": {
+      borderGradient: "from-violet-400 via-purple-500 to-indigo-500",
+      borderGradientHover: "from-violet-300 via-purple-400 to-indigo-400",
+      accentColor: "violet-400",
+      glowColor: "rgba(139,92,246,0.5)",
+      glowColorSecondary: "rgba(139,92,246,0.25)",
+      ambientGlow: "from-violet-500/15",
+      shadowGlow: "rgba(139,92,246,0.8)",
+      insetShadow: "rgba(139,92,246,0.18)",
+      textHover: "text-violet-200",
+      textShadow: "rgba(139,92,246,0.3)",
+    },
+    "API Alchemy": {
+      borderGradient: "from-emerald-400 via-teal-500 to-cyan-500",
+      borderGradientHover: "from-emerald-300 via-teal-400 to-cyan-400",
+      accentColor: "emerald-400",
+      glowColor: "rgba(52,211,153,0.5)",
+      glowColorSecondary: "rgba(52,211,153,0.25)",
+      ambientGlow: "from-emerald-500/15",
+      shadowGlow: "rgba(52,211,153,0.8)",
+      insetShadow: "rgba(52,211,153,0.18)",
+      textHover: "text-emerald-200",
+      textShadow: "rgba(52,211,153,0.3)",
+    },
+  };
+  
+  // Return specific color scheme or default
+  return eventColorMap[title] || {
+    // Default color scheme (neutral/white)
+    borderGradient: "from-neutral-400 via-neutral-500 to-gray-500",
+    borderGradientHover: "from-neutral-300 via-neutral-400 to-gray-400",
+    accentColor: "neutral-400",
+    glowColor: "rgba(163,163,163,0.5)",
+    glowColorSecondary: "rgba(163,163,163,0.25)",
+    ambientGlow: "from-neutral-500/15",
+    shadowGlow: "rgba(163,163,163,0.8)",
+    insetShadow: "rgba(163,163,163,0.18)",
+    textHover: "text-neutral-200",
+    textShadow: "rgba(163,163,163,0.3)",
+  };
+};
+
+// Universal styled EventCard with custom color scheme for each event
+const StyledEventCard = ({ event, onClick, isCompact = false }) => {
+  const colors = getEventColorScheme(event.title);
+  
+  // Generate ID from title
+  const eventId = event.title.toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, "");
+  
   return (
     <div
-      id="genesis-1-0"
+      id={eventId}
       onClick={onClick}
       style={{
-        filter:
-          "drop-shadow(0 0 14px rgba(6,182,212,0.5)) drop-shadow(0 0 28px rgba(6,182,212,0.25))",
+        filter: `drop-shadow(0 0 14px ${colors.glowColor}) drop-shadow(0 0 28px ${colors.glowColorSecondary})`,
       }}
       className="relative flex flex-col cursor-pointer scroll-mt-28 transition-all duration-300 group hover:scale-[1.02] active:scale-[0.99]"
     >
-      <span id="genesis-1.0" className="sr-only -top-28 relative" />
-      <span id="genesis-2026" className="sr-only -top-28 relative" />
+      {/* Additional IDs for backward compatibility */}
+      {isGenesis1(event.title) && (
+        <>
+          <span id="genesis-1.0" className="sr-only -top-28 relative" />
+          <span id="genesis-2026" className="sr-only -top-28 relative" />
+        </>
+      )}
+      {isGenesis2(event.title) && <span id="genesis-2.0" className="sr-only -top-28 relative" />}
+      {isVibeWQuest(event.title) && <span id="vibewquest" className="sr-only -top-28 relative" />}
 
       {/* Clipped Outer Border with Gradient Glow */}
       <div
-        className="w-full h-full p-[1.5px] bg-gradient-to-br from-cyan-400 via-cyan-500 to-teal-400 transition-all duration-300 group-hover:from-cyan-300 group-hover:via-cyan-400 group-hover:to-teal-300"
+        className={`w-full h-full p-[1.5px] bg-gradient-to-br ${colors.borderGradient} transition-all duration-300 group-hover:${colors.borderGradientHover}`}
         style={{
           clipPath:
             "polygon(0 0, calc(100% - 24px) 0, 100% 24px, 100% 100%, 24px 100%, 0 calc(100% - 24px))",
@@ -129,22 +376,39 @@ const Genesis1EventCard = ({ event, onClick, isCompact = false }) => {
       >
         {/* Inner Card Background & Content */}
         <div
-          className="w-full h-full bg-[#050505] flex flex-col justify-between overflow-hidden relative shadow-[inset_0_0_20px_rgba(6,182,212,0.18)]"
+          className="w-full h-full bg-[#050505] flex flex-col justify-between overflow-hidden relative"
           style={{
             clipPath:
               "polygon(0 0, calc(100% - 23px) 0, 100% 23px, 100% 100%, 23px 100%, 0 calc(100% - 23px))",
+            boxShadow: `inset 0 0 20px ${colors.insetShadow}`,
           }}
         >
           {/* Subtle Ambient Edge Glow Accents */}
-          <div className="absolute top-0 left-0 right-0 h-10 bg-gradient-to-b from-cyan-500/15 to-transparent pointer-events-none z-10" />
-          <div className="absolute bottom-0 left-0 right-0 h-12 bg-gradient-to-t from-cyan-500/15 to-transparent pointer-events-none z-10" />
+          <div className={`absolute top-0 left-0 right-0 h-10 bg-gradient-to-b ${colors.ambientGlow} to-transparent pointer-events-none z-10`} />
+          <div className={`absolute bottom-0 left-0 right-0 h-12 bg-gradient-to-t ${colors.ambientGlow} to-transparent pointer-events-none z-10`} />
 
-          {/* Corner Brackets */}
+          {/* Corner Brackets - Using inline styles for dynamic border colors */}
           {/* Top-left L-bracket ┌ */}
-          <div className="absolute top-2.5 left-2.5 w-3.5 h-3.5 border-t-2 border-l-2 border-cyan-400 pointer-events-none z-20 shadow-[0_0_10px_rgba(6,182,212,0.8)]" />
+          <div 
+            className="absolute top-2.5 left-2.5 w-3.5 h-3.5 border-t-2 border-l-2 pointer-events-none z-20"
+            style={{ 
+              borderColor: colors.accentColor.includes('-') 
+                ? `rgb(var(--color-${colors.accentColor}))` 
+                : colors.glowColor.replace('0.5', '1'),
+              boxShadow: `0 0 10px ${colors.shadowGlow}` 
+            }}
+          />
 
           {/* Bottom-right L-bracket ┘ */}
-          <div className="absolute bottom-2.5 right-2.5 w-3.5 h-3.5 border-b-2 border-r-2 border-cyan-400 pointer-events-none z-20 shadow-[0_0_10px_rgba(6,182,212,0.8)]" />
+          <div 
+            className="absolute bottom-2.5 right-2.5 w-3.5 h-3.5 border-b-2 border-r-2 pointer-events-none z-20"
+            style={{ 
+              borderColor: colors.accentColor.includes('-') 
+                ? `rgb(var(--color-${colors.accentColor}))` 
+                : colors.glowColor.replace('0.5', '1'),
+              boxShadow: `0 0 10px ${colors.shadowGlow}` 
+            }}
+          />
 
           {/* Artwork Banner */}
           <div
@@ -166,159 +430,19 @@ const Genesis1EventCard = ({ event, onClick, isCompact = false }) => {
 
           {/* Card Typography Footer */}
           <div className="px-4 pt-2.5 pb-4 sm:pb-5 flex flex-col items-center justify-center gap-1 z-10 bg-[#050505]">
-            <h3 className="font-medium text-white text-center text-lg sm:text-xl tracking-wide group-hover:text-cyan-200 transition-colors drop-shadow-[0_0_8px_rgba(6,182,212,0.3)]">
+            <h3 
+              className={`font-medium text-white text-center text-lg sm:text-xl tracking-wide group-hover:${colors.textHover} transition-colors`}
+              style={{ textShadow: `0 0 8px ${colors.textShadow}` }}
+            >
               {event.title}
             </h3>
             <p className="text-neutral-400 text-center text-xs sm:text-sm flex gap-1.5 items-center justify-center font-normal">
-              <CalendarRange size={16} className="text-cyan-400/80" /> {event.date}
-            </p>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-};
-
-// Specialized cyberpunk / mecha themed EventCard for Genesis 2.0
-const Genesis2EventCard = ({ event, onClick, isCompact = false }) => {
-  return (
-    <div
-      id="genesis-2-0"
-      onClick={onClick}
-      style={{
-        filter:
-          "drop-shadow(0 0 14px rgba(249,115,22,0.5)) drop-shadow(0 0 28px rgba(249,115,22,0.25))",
-      }}
-      className="relative flex flex-col cursor-pointer scroll-mt-28 transition-all duration-300 group hover:scale-[1.02] active:scale-[0.99]"
-    >
-      <span id="genesis-2.0" className="sr-only -top-28 relative" />
-
-      {/* Clipped Outer Border with Gradient Glow */}
-      <div
-        className="w-full h-full p-[1.5px] bg-gradient-to-br from-orange-400 via-orange-500 to-amber-500 transition-all duration-300 group-hover:from-orange-300 group-hover:via-orange-400 group-hover:to-amber-400"
-        style={{
-          clipPath:
-            "polygon(0 0, calc(100% - 24px) 0, 100% 24px, 100% 100%, 24px 100%, 0 calc(100% - 24px))",
-        }}
-      >
-        {/* Inner Card Background & Content */}
-        <div
-          className="w-full h-full bg-[#050505] flex flex-col justify-between overflow-hidden relative shadow-[inset_0_0_20px_rgba(249,115,22,0.18)]"
-          style={{
-            clipPath:
-              "polygon(0 0, calc(100% - 23px) 0, 100% 23px, 100% 100%, 23px 100%, 0 calc(100% - 23px))",
-          }}
-        >
-          {/* Subtle Ambient Edge Glow Accents */}
-          <div className="absolute top-0 left-0 right-0 h-10 bg-gradient-to-b from-orange-500/15 to-transparent pointer-events-none z-10" />
-          <div className="absolute bottom-0 left-0 right-0 h-12 bg-gradient-to-t from-orange-500/15 to-transparent pointer-events-none z-10" />
-
-          {/* Corner Brackets */}
-          {/* Top-left L-bracket ┌ */}
-          <div className="absolute top-2.5 left-2.5 w-3.5 h-3.5 border-t-2 border-l-2 border-orange-400 pointer-events-none z-20 shadow-[0_0_10px_rgba(249,115,22,0.8)]" />
-
-          {/* Bottom-right L-bracket ┘ */}
-          <div className="absolute bottom-2.5 right-2.5 w-3.5 h-3.5 border-b-2 border-r-2 border-orange-400 pointer-events-none z-20 shadow-[0_0_10px_rgba(249,115,22,0.8)]" />
-
-          {/* Artwork Banner */}
-          <div
-            className={cn(
-              "relative w-full overflow-hidden bg-black flex-shrink-0",
-              isCompact ? "h-48 sm:h-56 md:h-60" : "h-60"
-            )}
-          >
-            <Image
-              width={600}
-              unoptimized
-              height={380}
-              src={get_event_image(event.image)}
-              alt={event.title}
-              className="w-full h-full object-cover object-top transition-transform duration-500 group-hover:scale-105"
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-[#050505] via-transparent to-transparent pointer-events-none" />
-          </div>
-
-          {/* Card Typography Footer */}
-          <div className="px-4 pt-2.5 pb-4 sm:pb-5 flex flex-col items-center justify-center gap-1 z-10 bg-[#050505]">
-            <h3 className="font-medium text-white text-center text-lg sm:text-xl tracking-wide group-hover:text-orange-200 transition-colors drop-shadow-[0_0_8px_rgba(249,115,22,0.3)]">
-              {event.title}
-            </h3>
-            <p className="text-neutral-400 text-center text-xs sm:text-sm flex gap-1.5 items-center justify-center font-normal">
-              <CalendarRange size={16} className="text-orange-400/80" /> {event.date}
-            </p>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-};
-
-// Specialized cyberpunk / mecha themed EventCard for Vibe W Quest (Purple Theme)
-const VibeWQuestEventCard = ({ event, onClick, isCompact = false }) => {
-  return (
-    <div
-      id="vibe-w-quest"
-      onClick={onClick}
-      style={{
-        filter:
-          "drop-shadow(0 0 14px rgba(168,85,247,0.5)) drop-shadow(0 0 28px rgba(168,85,247,0.25))",
-      }}
-      className="relative flex flex-col cursor-pointer scroll-mt-28 transition-all duration-300 group hover:scale-[1.02] active:scale-[0.99]"
-    >
-      <span id="vibewquest" className="sr-only -top-28 relative" />
-
-      {/* Clipped Outer Border with Gradient Glow */}
-      <div
-        className="w-full h-full p-[1.5px] bg-gradient-to-br from-purple-400 via-fuchsia-500 to-violet-500 transition-all duration-300 group-hover:from-purple-300 group-hover:via-fuchsia-400 group-hover:to-violet-400"
-        style={{
-          clipPath:
-            "polygon(0 0, calc(100% - 24px) 0, 100% 24px, 100% 100%, 24px 100%, 0 calc(100% - 24px))",
-        }}
-      >
-        {/* Inner Card Background & Content */}
-        <div
-          className="w-full h-full bg-[#050505] flex flex-col justify-between overflow-hidden relative shadow-[inset_0_0_20px_rgba(168,85,247,0.18)]"
-          style={{
-            clipPath:
-              "polygon(0 0, calc(100% - 23px) 0, 100% 23px, 100% 100%, 23px 100%, 0 calc(100% - 23px))",
-          }}
-        >
-          {/* Subtle Ambient Edge Glow Accents */}
-          <div className="absolute top-0 left-0 right-0 h-10 bg-gradient-to-b from-purple-500/15 to-transparent pointer-events-none z-10" />
-          <div className="absolute bottom-0 left-0 right-0 h-12 bg-gradient-to-t from-purple-500/15 to-transparent pointer-events-none z-10" />
-
-          {/* Corner Brackets */}
-          {/* Top-left L-bracket ┌ */}
-          <div className="absolute top-2.5 left-2.5 w-3.5 h-3.5 border-t-2 border-l-2 border-purple-400 pointer-events-none z-20 shadow-[0_0_10px_rgba(168,85,247,0.8)]" />
-
-          {/* Bottom-right L-bracket ┘ */}
-          <div className="absolute bottom-2.5 right-2.5 w-3.5 h-3.5 border-b-2 border-r-2 border-purple-400 pointer-events-none z-20 shadow-[0_0_10px_rgba(168,85,247,0.8)]" />
-
-          {/* Artwork Banner */}
-          <div
-            className={cn(
-              "relative w-full overflow-hidden bg-black flex-shrink-0",
-              isCompact ? "h-48 sm:h-56 md:h-60" : "h-60"
-            )}
-          >
-            <Image
-              width={600}
-              unoptimized
-              height={380}
-              src={get_event_image(event.image)}
-              alt={event.title}
-              className="w-full h-full object-cover object-center transition-transform duration-500 group-hover:scale-105"
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-[#050505] via-transparent to-transparent pointer-events-none" />
-          </div>
-
-          {/* Card Typography Footer */}
-          <div className="px-4 pt-2.5 pb-4 sm:pb-5 flex flex-col items-center justify-center gap-1 z-10 bg-[#050505]">
-            <h3 className="font-medium text-white text-center text-lg sm:text-xl tracking-wide group-hover:text-purple-200 transition-colors drop-shadow-[0_0_8px_rgba(168,85,247,0.3)]">
-              {event.title}
-            </h3>
-            <p className="text-neutral-400 text-center text-xs sm:text-sm flex gap-1.5 items-center justify-center font-normal">
-              <CalendarRange size={16} className="text-purple-400/80" /> {event.date}
+              <CalendarRange 
+                size={16} 
+                className="opacity-80"
+                style={{ color: colors.glowColor.replace('0.5', '0.8') }}
+              /> 
+              {event.date}
             </p>
           </div>
         </div>
@@ -803,71 +927,13 @@ const Events = ({ featured = false }) => {
 
         <ul className="w-full max-w-none px-4 md:px-10 mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 items-start gap-4">
           {sortedFeaturedEvents.map((event, index) => (
-            isGenesis2(event.title) ? (
-              <Genesis2EventCard
-                key={index}
-                event={event}
-                onClick={() => set_active(event)}
-                isCompact={false}
-              />
-            ) : isGenesis1(event.title) ? (
-              <Genesis1EventCard
-                key={index}
-                event={event}
-                onClick={() => set_active(event)}
-                isCompact={false}
-              />
-            ) : isVibeWQuest(event.title) ? (
-              <VibeWQuestEventCard
-                key={index}
-                event={event}
-                onClick={() => set_active(event)}
-                isCompact={false}
-              />
-            ) : (
-              <motion.div
-                key={index}
-                onClick={() => set_active(event)}
-                className={cn(
-                  "p-4 flex flex-col hover:bg-neutral-900 rounded-xl cursor-pointer scroll-mt-28 transition-all",
-                  isGenesis1(event.title) && "bg-cyan-600 hover:bg-cyan-500 shadow-[0_0_30px_rgba(6,182,212,0.5)]"
-                )}
-              >
-                  <div className="flex gap-4 flex-col w-full">
-                    <div>
-                      <Image
-                        width={100}
-                        unoptimized
-                        height={100}
-                        src={get_event_image(event.image)}
-                        alt={event.title}
-                        className="h-60 w-full rounded-lg object-cover object-top"
-                      />
-                    </div>
-
-                    <div className="flex justify-center items-center flex-col gap-1">
-                      <h3
-                        className={cn(
-                          "font-medium text-neutral-200 text-center md:text-left text-xl",
-                          isGenesis(event.title) && "text-white"
-                        )}
-                      >
-                        {event.title}
-                      </h3>
-
-                      <p
-                        className={cn(
-                          "text-neutral-400 text-center md:text-left text-base flex gap-2 items-center",
-                          isGenesis(event.title) && "text-white/90"
-                        )}
-                      >
-                        <CalendarRange size={20} className={cn(isGenesis(event.title) && "text-white")} /> {event.date}
-                      </p>
-                    </div>
-                  </div>
-                </motion.div>
-              )
-            ))}
+            <StyledEventCard
+              key={index}
+              event={event}
+              onClick={() => set_active(event)}
+              isCompact={false}
+            />
+          ))}
         </ul>
 
         <div className="flex justify-center items-center mt-8 md:mt-12 mb-12 md:mb-16">
@@ -967,70 +1033,12 @@ const Events = ({ featured = false }) => {
             {/* Events Grid */}
             <ul className="w-full max-w-none px-4 sm:px-6 md:px-10 mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 items-start gap-3 sm:gap-4">
               {groupedEvents[academicYear].map((event, index) => (
-                isGenesis2(event.title) ? (
-                  <Genesis2EventCard
-                    key={index}
-                    event={event}
-                    onClick={() => set_active(event)}
-                    isCompact={true}
-                  />
-                ) : isGenesis1(event.title) ? (
-                  <Genesis1EventCard
-                    key={index}
-                    event={event}
-                    onClick={() => set_active(event)}
-                    isCompact={true}
-                  />
-                ) : isVibeWQuest(event.title) ? (
-                  <VibeWQuestEventCard
-                    key={index}
-                    event={event}
-                    onClick={() => set_active(event)}
-                    isCompact={true}
-                  />
-                ) : (
-                  <motion.div
-                    key={index}
-                    onClick={() => set_active(event)}
-                    className={cn(
-                      "p-3 sm:p-4 flex flex-col hover:bg-neutral-900 rounded-xl cursor-pointer transition-all scroll-mt-28",
-                      isGenesis1(event.title) && "bg-cyan-600 hover:bg-cyan-500 shadow-[0_0_30px_rgba(6,182,212,0.5)]"
-                    )}
-                  >
-                    <div className="flex gap-3 sm:gap-4 flex-col w-full">
-                      <div>
-                        <Image
-                          width={100}
-                          unoptimized
-                          height={100}
-                          src={get_event_image(event.image)}
-                          alt={event.title}
-                          className="h-48 sm:h-56 md:h-60 w-full rounded-lg object-cover object-top"
-                        />
-                      </div>
-
-                      <div className="flex justify-center items-center flex-col gap-1">
-                        <h3
-                          className={cn(
-                            "font-medium text-neutral-200 text-center md:text-left text-lg sm:text-xl",
-                            isGenesis(event.title) && "text-white"
-                          )}
-                        >
-                          {event.title}
-                        </h3>
-
-                        <p
-                          className={cn(
-                            "text-neutral-400 text-center md:text-left text-sm sm:text-base flex gap-1.5 sm:gap-2 items-center",
-                            isGenesis(event.title) && "text-white/90"
-                          )}
-                        >
-                          <CalendarRange size={18} className={cn("sm:w-5 sm:h-5", isGenesis(event.title) && "text-white")} /> {event.date}
-                        </p>
-                      </div>
-                    </div>
-                  </motion.div>
-                )
+                <StyledEventCard
+                  key={index}
+                  event={event}
+                  onClick={() => set_active(event)}
+                  isCompact={true}
+                />
               ))}
             </ul>
           </div>
