@@ -618,10 +618,8 @@ const EventModal = ({
                     >
                       Speakers
                     </h4>
-                    <div className="flex flex-row items-center gap-2 w-full">
-                      <div className="flex flex-row -space-x-3">
-                        <AnimatedTooltip items={active.speakers} />
-                      </div>
+                    <div className="flex flex-row items-center w-full pt-1">
+                      <AnimatedTooltip items={active.speakers} />
                     </div>
                   </div>
                 )}
