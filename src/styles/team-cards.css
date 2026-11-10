@@ -1050,14 +1050,20 @@
     gap: 36px;
   }
 
-  /* Upright, balanced 3D card presentation on mobile - no right tilt */
+  /* Upright, balanced 3D card presentation on mobile - no right tilt & GPU-only motion */
   .showcase-item {
     width: 230px;
+    filter: none !important;
+    transition: none !important;
     transform:
       perspective(1300px)
-      translateY(calc(var(--d) * 35px))
-      rotateY(calc(var(--d) * -5deg))
-      scale(calc(1.03 - var(--a) * 0.09));
+      translateY(calc(var(--d) * 30px))
+      rotateY(calc(var(--d) * -4deg))
+      scale(calc(1.03 - var(--a) * 0.08));
+  }
+
+  .showcase-item.is-center {
+    filter: none !important;
   }
 
   .showcase-footer {

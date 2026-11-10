@@ -418,7 +418,8 @@ export default function NewDeveloperSection() {
 
     const render = () => {
       const isMobile = window.innerWidth < 768;
-      const EASE = isMobile ? 0.07 : 0.085;
+      // High responsiveness on mobile for instant 1:1 finger tracking, zero lag
+      const EASE = isMobile ? 0.16 : 0.085;
 
       if (reduced) {
         current = target;
@@ -438,7 +439,7 @@ export default function NewDeveloperSection() {
 
       let nearest = 0;
       let nearestDist = Infinity;
-      const focusWidth = isMobile ? vw * 0.75 : vw * 0.45;
+      const focusWidth = isMobile ? vw * 0.6 : vw * 0.45;
 
       items.forEach((item, i) => {
         // d is normalized distance from center of viewport (-1 ... 0 ... +1)
@@ -491,10 +492,8 @@ export default function NewDeveloperSection() {
       // Calculate travel distance needed to translate all cards from first center to last center
       maxTravel = Math.max(0, track.scrollWidth - window.innerWidth);
 
-      // Slow down motion on mobile so each person gets adequate visibility without skipping:
-      // A multiplier of 2.6 on mobile requires 2.6x more vertical scroll per card transition,
-      // giving each person a smooth, dedicated viewing window.
-      const scrollMultiplier = isMobile ? 2.6 : 1.35;
+      // Balanced scroll ratio: on mobile, 1 natural thumb flick moves exactly 1 card
+      const scrollMultiplier = isMobile ? 1.55 : 1.35;
       const scrollTrackDistance = maxTravel * scrollMultiplier;
       section.style.height = `${window.innerHeight + scrollTrackDistance}px`;
 
