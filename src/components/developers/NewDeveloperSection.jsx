@@ -1,10 +1,8 @@
 "use client";
 
-import { useState, useRef, useEffect, useCallback } from "react";
+import { useState, useRef, useEffect } from "react";
 import {
   Sparkles,
-  ChevronLeft,
-  ChevronRight,
   RotateCcw,
   LayoutGrid,
   Layers,
@@ -99,6 +97,7 @@ function CollectibleTeamCard({
   const frameId = useRef(0);
   const [imgFailed, setImgFailed] = useState(false);
   const [isFlipped, setIsFlipped] = useState(false);
+  const [flipClass, setFlipClass] = useState("");
 
   const workTitle = DEVELOPER_WORK_TITLES[member.name] || member.role || "Developer";
   const stats = UNIFORM_STATS[member.name] || [
@@ -140,13 +139,25 @@ function CollectibleTeamCard({
     );
   };
 
-  const handleCardClick = () => {
-    setIsFlipped((prev) => !prev);
+  const handleCardClick = (e) => {
+    // Prevent flipping if clicking contact link
+    if (e.target.closest("a") || e.target.closest("button.dossier-contact-btn")) {
+      return;
+    }
+
+    const nextFlipped = !isFlipped;
+    setFlipClass(nextFlipped ? "is-flipping-to-back" : "is-flipping-to-front");
+    setIsFlipped(nextFlipped);
+
+    // Clear active animation class after full 3D vault completes
+    setTimeout(() => {
+      setFlipClass("");
+    }, 850);
   };
 
   return (
     <div
-      className={`team-card ${isCenter ? "is-center" : ""}`}
+      className={`team-card ${isCenter ? "is-center" : ""} ${flipClass}`}
       ref={cardRef}
       onPointerMove={handlePointerMove}
       onPointerEnter={handlePointerEnter}
@@ -157,13 +168,16 @@ function CollectibleTeamCard({
       onKeyDown={(e) => {
         if (e.key === "Enter" || e.key === " ") {
           e.preventDefault();
-          handleCardClick();
+          handleCardClick(e);
         }
       }}
-      aria-label={`Developer card for ${member.name}. Click to view dossier.`}
+      aria-label={`Developer card for ${member.name}. Click to flip in 3D.`}
     >
       <div className="card-3d">
         <div className={`card-flipper ${isFlipped ? "is-flipped" : ""}`}>
+          {/* Specular flip shine overlay */}
+          <div className="card-flip-shine" />
+
           {/* ══════════ FRONT FACE ══════════ */}
           <div className="card-face card-face-front">
             <div className="card-body">
@@ -234,7 +248,7 @@ function CollectibleTeamCard({
                     No. {pad(number)} / {pad(total)}
                   </span>
                   <span className="card-footer-action">
-                    ✦ TAP FOR DOSSIER
+                    ✦ CLICK TO FLIP
                   </span>
                   <span className="seal" />
                 </div>
@@ -353,143 +367,179 @@ function CollectibleTeamCard({
 
 export default function NewDeveloperSection() {
   const [viewMode, setViewMode] = useState("showcase"); // "showcase" | "grid"
-  const [activeIndex, setActiveIndex] = useState(0);
 
-  const containerRef = useRef(null);
+  const sectionRef = useRef(null);
   const trackRef = useRef(null);
-  const barRef = useRef(null);
   const headingRef = useRef(null);
+  const barRef = useRef(null);
+  const counterRef = useRef(null);
 
   const totalMembers = developers.length;
 
-  // Update scroll progress & active card
-  const handleScroll = useCallback(() => {
-    const container = containerRef.current;
-    const track = trackRef.current;
-    if (!container || !track) return;
-
-    const scrollLeft = container.scrollLeft;
-    const maxScroll = track.scrollWidth - container.clientWidth;
-    const progress = maxScroll > 0 ? scrollLeft / maxScroll : 0;
-
-    if (barRef.current) {
-      barRef.current.style.transform = `scaleX(${progress})`;
-    }
-
-    if (headingRef.current) {
-      headingRef.current.style.transform = `translate3d(${-scrollLeft * 0.15}px, 0, 0)`;
-    }
-
-    // Determine nearest item to center
-    const containerCenter = scrollLeft + container.clientWidth / 2;
-    const items = Array.from(track.children);
-    let nearestIndex = 0;
-    let minDistance = Infinity;
-
-    items.forEach((item, index) => {
-      const itemCenter = item.offsetLeft + item.offsetWidth / 2;
-      const dist = Math.abs(itemCenter - containerCenter);
-      if (dist < minDistance) {
-        minDistance = dist;
-        nearestIndex = index;
-      }
-    });
-
-    setActiveIndex(nearestIndex);
-  }, []);
-
-  const scrollToMember = (index) => {
-    const container = containerRef.current;
-    const track = trackRef.current;
-    if (!container || !track) return;
-
-    const items = Array.from(track.children);
-    if (!items[index]) return;
-
-    const item = items[index];
-    const targetScroll =
-      item.offsetLeft + item.offsetWidth / 2 - container.clientWidth / 2;
-
-    container.scrollTo({
-      left: Math.max(0, targetScroll),
-      behavior: "smooth",
-    });
-  };
-
-  const handlePrev = () => {
-    const nextIdx = Math.max(0, activeIndex - 1);
-    scrollToMember(nextIdx);
-  };
-
-  const handleNext = () => {
-    const nextIdx = Math.min(totalMembers - 1, activeIndex + 1);
-    scrollToMember(nextIdx);
-  };
-
   useEffect(() => {
-    const container = containerRef.current;
-    if (!container) return;
+    if (viewMode !== "showcase") return;
 
-    container.addEventListener("scroll", handleScroll, { passive: true });
-    handleScroll();
+    const section = sectionRef.current;
+    const track = trackRef.current;
+    const heading = headingRef.current;
+    const bar = barRef.current;
+    const counter = counterRef.current;
+    if (!section || !track) return;
+
+    const items = Array.from(track.children);
+    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+    const EASE = 0.085; // smooth inertial follow for natural scroll
+
+    let maxTravel = 0;
+    let centers = [];
+    let target = 0;
+    let current = 0;
+    let activeIndex = -1;
+    let raf = 0;
+    let running = false;
+
+    const readTarget = () => {
+      const rect = section.getBoundingClientRect();
+      const distance = section.offsetHeight - window.innerHeight;
+      target = distance > 0 ? Math.min(1, Math.max(0, -rect.top / distance)) : 0;
+    };
+
+    const render = () => {
+      if (reduced) {
+        current = target;
+      } else {
+        current += (target - current) * EASE;
+        if (Math.abs(target - current) < 0.0003) current = target;
+      }
+
+      const x = -current * maxTravel;
+      const vw = window.innerWidth;
+
+      track.style.transform = `translate3d(${x}px, 0, 0)`;
+
+      if (heading) {
+        heading.style.transform = `translate3d(${x * 0.16}px, 0, 0)`;
+      }
+
+      let nearest = 0;
+      let nearestDist = Infinity;
+
+      items.forEach((item, i) => {
+        // d is normalized distance from center of viewport (-1 ... 0 ... +1)
+        const d = (centers[i] + x - vw / 2) / (vw * 0.45);
+        const clampedD = Math.max(-1.8, Math.min(1.8, d));
+        const a = Math.min(1, Math.abs(clampedD));
+
+        item.style.setProperty("--d", clampedD.toFixed(4));
+        item.style.setProperty("--a", a.toFixed(4));
+
+        if (Math.abs(d) < nearestDist) {
+          nearestDist = Math.abs(d);
+          nearest = i;
+        }
+      });
+
+      if (nearest !== activeIndex) {
+        items.forEach((item, i) =>
+          item.classList.toggle("is-center", i === nearest)
+        );
+        activeIndex = nearest;
+        if (counter) counter.textContent = pad(nearest + 1);
+      }
+
+      if (bar) bar.style.transform = `scaleX(${current.toFixed(4)})`;
+    };
+
+    const tick = () => {
+      render();
+      if (Math.abs(current - target) > 0.0001) {
+        raf = requestAnimationFrame(tick);
+      } else {
+        running = false;
+      }
+    };
+
+    const kick = () => {
+      if (running) return;
+      running = true;
+      raf = requestAnimationFrame(tick);
+    };
+
+    const onScroll = () => {
+      readTarget();
+      kick();
+    };
+
+    const measure = () => {
+      // Calculate travel distance needed to translate all 11 cards cleanly
+      maxTravel = Math.max(0, track.scrollWidth - window.innerWidth + 140);
+      section.style.height = `${window.innerHeight + maxTravel}px`;
+      centers = items.map((el) => el.offsetLeft + el.offsetWidth / 2);
+      readTarget();
+      current = target;
+      render();
+    };
+
+    measure();
+
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", measure);
+
+    const observer = new ResizeObserver(measure);
+    observer.observe(track);
 
     return () => {
-      container.removeEventListener("scroll", handleScroll);
+      cancelAnimationFrame(raf);
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", measure);
+      observer.disconnect();
     };
-  }, [handleScroll, viewMode]);
+  }, [viewMode]);
 
   return (
-    <section className="dev-showcase-section">
-      {/* ───────── Top Hero Header ───────── */}
-      <div className="dev-section-hero">
-        <div className="dev-hero-badge">
-          <Sparkles size={12} />
-          <span>Collectible Corps ✦ 2026 Edition</span>
-        </div>
-
-        <h1 className="dev-hero-title">THE ARCHITECTS OF QUEST</h1>
-
-        <p className="dev-hero-subtitle">
-          The engineers, creators, and problem solvers shaping our platforms. Hover
-          to engage 3D holographic tilt, or tap any card to reveal its full developer dossier.
-        </p>
-
-        {/* View Mode Switcher */}
-        <div className="dev-view-switch" role="tablist" aria-label="View switch">
-          <button
-            className={`dev-view-btn ${viewMode === "showcase" ? "is-active" : ""}`}
-            onClick={() => setViewMode("showcase")}
-            role="tab"
-            aria-selected={viewMode === "showcase"}
-          >
-            <span className="flex items-center gap-1.5">
-              <Layers size={13} />
-              <span>Showcase</span>
-            </span>
-          </button>
-          <button
-            className={`dev-view-btn ${viewMode === "grid" ? "is-active" : ""}`}
-            onClick={() => setViewMode("grid")}
-            role="tab"
-            aria-selected={viewMode === "grid"}
-          >
-            <span className="flex items-center gap-1.5">
-              <LayoutGrid size={13} />
-              <span>Grid View</span>
-            </span>
-          </button>
-        </div>
-      </div>
-
-      {/* ───────── Showcase Mode ───────── */}
+    <section
+      className="dev-showcase-section"
+      ref={sectionRef}
+      style={{ minHeight: viewMode === "grid" ? "100vh" : undefined }}
+    >
       {viewMode === "showcase" ? (
         <div className="showcase-sticky">
-          {/* Background Typography */}
+          {/* Background Typography Parallax */}
           <div className="showcase-heading" ref={headingRef}>
             QUEST IT // ARCHITECTS
           </div>
 
-          {/* Timeline points */}
+          {/* Top Controls Bar */}
+          <div className="showcase-nav-bar">
+            <div className="dev-hero-badge">
+              <Sparkles size={12} />
+              <span>COLLECTIBLE CORPS ✦ 2026 EDITION</span>
+            </div>
+
+            <div className="dev-view-switch" role="tablist" aria-label="View switch">
+              <button
+                className={`dev-view-btn ${viewMode === "showcase" ? "is-active" : ""}`}
+                onClick={() => setViewMode("showcase")}
+                role="tab"
+                aria-selected={viewMode === "showcase"}
+              >
+                <Layers size={13} className="inline mr-1" />
+                <span>Showcase</span>
+              </button>
+              <button
+                className={`dev-view-btn ${viewMode === "grid" ? "is-active" : ""}`}
+                onClick={() => setViewMode("grid")}
+                role="tab"
+                aria-selected={viewMode === "grid"}
+              >
+                <LayoutGrid size={13} className="inline mr-1" />
+                <span>Grid View</span>
+              </button>
+            </div>
+          </div>
+
+          {/* Timeline Points in Background */}
           <div className="timeline">
             {[10, 20, 30, 40, 50].map((num) => (
               <div className="timeline-point" key={num}>
@@ -499,70 +549,71 @@ export default function NewDeveloperSection() {
             ))}
           </div>
 
-          {/* Arrow Navigation */}
-          <button
-            className="showcase-nav-btn showcase-nav-prev"
-            onClick={handlePrev}
-            aria-label="Previous developer card"
-            disabled={activeIndex === 0}
-            style={{ opacity: activeIndex === 0 ? 0.35 : 1 }}
-          >
-            <ChevronLeft size={20} />
-          </button>
+          {/* Horizontal Scroll Track (Scroll-Driven on Web) */}
+          <div className="showcase-track" ref={trackRef}>
+            {developers.map((member, index) => {
+              const workTitle = DEVELOPER_WORK_TITLES[member.name] || member.role;
 
-          <button
-            className="showcase-nav-btn showcase-nav-next"
-            onClick={handleNext}
-            aria-label="Next developer card"
-            disabled={activeIndex === totalMembers - 1}
-            style={{ opacity: activeIndex === totalMembers - 1 ? 0.35 : 1 }}
-          >
-            <ChevronRight size={20} />
-          </button>
-
-          {/* Horizontal Scroll Track */}
-          <div className="showcase-track-container" ref={containerRef}>
-            <div className="showcase-track" ref={trackRef}>
-              {developers.map((member, index) => {
-                const workTitle = DEVELOPER_WORK_TITLES[member.name] || member.role;
-                const isCenter = index === activeIndex;
-
-                return (
-                  <article
-                    className={`showcase-item ${isCenter ? "is-center" : ""}`}
-                    key={member.name}
-                  >
-                    <CollectibleTeamCard
-                      member={member}
-                      number={index + 1}
-                      total={totalMembers}
-                      isCenter={isCenter}
-                    />
-                    <p className="member-caption">{workTitle}</p>
-                  </article>
-                );
-              })}
-            </div>
+              return (
+                <article
+                  className="showcase-item"
+                  key={member.name}
+                  style={{ "--i": index }}
+                >
+                  <CollectibleTeamCard
+                    member={member}
+                    number={index + 1}
+                    total={totalMembers}
+                  />
+                  <p className="member-caption">{workTitle}</p>
+                </article>
+              );
+            })}
           </div>
 
-          {/* Showcase Footer Indicator */}
+          {/* Bottom Scroll Progress Bar */}
           <div className="showcase-footer">
-            <span>SCROLL OR USE ARROWS</span>
+            <span>SCROLL DOWN TO EXPLORE</span>
 
             <div className="progress">
-              <span>{pad(activeIndex + 1)}</span>
+              <span ref={counterRef}>01</span>
               <div className="progress-line">
                 <i ref={barRef} />
               </div>
               <span>{pad(totalMembers)}</span>
             </div>
 
-            <span>CLICK CARD FOR DOSSIER</span>
+            <span>CLICK CARD TO FLIP IN 3D</span>
           </div>
         </div>
       ) : (
         /* ───────── Grid Mode ───────── */
         <div className="dev-grid-section">
+          {/* Top Controls Bar for Grid View */}
+          <div className="flex justify-between items-center mb-8 px-4">
+            <div className="dev-hero-badge">
+              <Sparkles size={12} />
+              <span>COLLECTIBLE CORPS ✦ ALL 11 ARCHITECTS</span>
+            </div>
+
+            <div className="dev-view-switch" role="tablist">
+              <button
+                className={`dev-view-btn ${viewMode === "showcase" ? "is-active" : ""}`}
+                onClick={() => setViewMode("showcase")}
+              >
+                <Layers size={13} className="inline mr-1" />
+                <span>Showcase</span>
+              </button>
+              <button
+                className={`dev-view-btn ${viewMode === "grid" ? "is-active" : ""}`}
+                onClick={() => setViewMode("grid")}
+              >
+                <LayoutGrid size={13} className="inline mr-1" />
+                <span>Grid View</span>
+              </button>
+            </div>
+          </div>
+
           <div className="dev-grid-cards">
             {developers.map((member, index) => (
               <div key={member.name} className="flex flex-col items-center">
