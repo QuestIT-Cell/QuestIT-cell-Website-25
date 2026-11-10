@@ -565,7 +565,14 @@ const DeveloperEditorialSection = () => {
                     />
 
                     {/* Card Surface */}
-                    <div className="relative w-full h-full rounded-2xl md:rounded-3xl overflow-hidden border-[2px] md:border-[2.5px] border-[#22d3ee] bg-neutral-950">
+                    <div
+                      className="relative w-full h-full rounded-2xl md:rounded-3xl overflow-hidden border-[2px] md:border-[2.5px] border-[#22d3ee] bg-neutral-950"
+                      style={{
+                        backgroundImage: "url('/images/dev_card_bg.webp')",
+                        backgroundSize: "cover",
+                        backgroundPosition: "center",
+                      }}
+                    >
                       <Image
                         src={dev.image}
                         alt={dev.name}
@@ -817,7 +824,14 @@ const DeveloperEditorialSection = () => {
                     />
 
                     {/* Card Surface */}
-                    <div className="relative w-full h-full rounded-2xl overflow-hidden border-[2px] border-[#22d3ee] bg-neutral-950">
+                    <div
+                      className="relative w-full h-full rounded-2xl overflow-hidden border-[2px] border-[#22d3ee] bg-neutral-950"
+                      style={{
+                        backgroundImage: "url('/images/dev_card_bg.webp')",
+                        backgroundSize: "cover",
+                        backgroundPosition: "center",
+                      }}
+                    >
                       <Image
                         src={dev.image}
                         alt={dev.name}
