@@ -186,88 +186,12 @@ const Header = () => {
         @property --quest-a{syntax:'<angle>';inherits:false;initial-value:0deg}
       `}</style>
 
-      {/* ── 1. Top-Left Corner: Quest IT Logo & Text (Pushed to the corner) ── */}
-      <div
-        className="fixed top-0 left-0 z-[10001] pointer-events-none"
-        style={{
-          paddingTop: "calc(env(safe-area-inset-top, 0px) + 8px)",
-          paddingLeft: "clamp(10px, 1.5vw, 24px)",
-          transition: isHidden
-            ? "transform .55s cubic-bezier(.65,0,.35,1), opacity .35s .1s, filter .45s"
-            : "transform .7s cubic-bezier(.34,1.5,.64,1), opacity .4s, filter .5s",
-          transform: isHidden ? "translateY(-140%) scale(.9)" : "translateY(0) scale(1)",
-          opacity: isHidden ? 0 : 1,
-          filter: isHidden ? "blur(10px)" : "none",
-        }}
-      >
-        <Link
-          href="/"
-          aria-label="Quest IT Home"
-          className="pointer-events-auto block transition-transform duration-200 hover:scale-[1.03] active:scale-95"
-        >
-          <Image
-            priority
-            src="/images/logo-460.webp"
-            alt="Quest IT Logo"
-            width={240}
-            height={126}
-            unoptimized
-            className="w-[150px] sm:w-[175px] md:w-[200px] lg:w-[230px] h-auto object-contain filter drop-shadow-[0_2px_14px_rgba(0,0,0,0.85)]"
-          />
-        </Link>
-      </div>
-
-      {/* ── 2. Top-Right Corner: Mobile Menu Button (Pushed to the corner) ── */}
-      <div
-        className="md:hidden fixed top-0 right-0 z-[10001] pointer-events-none"
-        style={{
-          paddingTop: "calc(env(safe-area-inset-top, 0px) + 8px)",
-          paddingRight: "clamp(10px, 1.5vw, 20px)",
-          transition: isHidden
-            ? "transform .55s cubic-bezier(.65,0,.35,1), opacity .35s .1s, filter .45s"
-            : "transform .7s cubic-bezier(.34,1.5,.64,1), opacity .4s, filter .5s",
-          transform: isHidden ? "translateY(-140%) scale(.9)" : "translateY(0) scale(1)",
-          opacity: isHidden ? 0 : 1,
-          filter: isHidden ? "blur(10px)" : "none",
-        }}
-      >
-        <button
-          className="pointer-events-auto relative w-11 h-11 rounded-full border border-white/20 bg-black/75 backdrop-blur-xl cursor-pointer text-white flex items-center justify-center shadow-[0_8px_24px_rgba(0,0,0,0.7)] transition-all active:scale-90 hover:border-cyan-400/50"
-          aria-label="Menu"
-          aria-expanded={sheetOpen}
-          onClick={() => setSheetOpen((o) => !o)}
-        >
-          <span
-            className="absolute left-3 right-3 h-0.5 bg-current rounded-sm transition-all duration-300"
-            style={{
-              top: sheetOpen ? "21px" : "15px",
-              transform: sheetOpen ? "rotate(45deg)" : "none",
-            }}
-          />
-          <span
-            className="absolute left-3 right-3 h-0.5 bg-current rounded-sm transition-all duration-300"
-            style={{
-              top: "21px",
-              opacity: sheetOpen ? 0 : 1,
-            }}
-          />
-          <span
-            className="absolute left-3 right-3 h-0.5 bg-current rounded-sm transition-all duration-300"
-            style={{
-              top: sheetOpen ? "21px" : "27px",
-              transform: sheetOpen ? "rotate(-45deg)" : "none",
-            }}
-          />
-        </button>
-      </div>
-
-      {/* ── 3. Desktop Floating Pill Navbar (Increased Length & Grand Appearance) ─ */}
+      {/* ── Unified Top Bar: Logo & Navbar on the EXACT Same Horizontal Row ── */}
       <header
         ref={wrapRef}
-        className="hidden md:flex fixed top-0 left-0 right-0 z-[10000] justify-center pointer-events-none"
+        className="fixed top-0 left-0 right-0 z-[10000] pointer-events-none px-4 sm:px-6 md:px-8 lg:px-12"
         style={{
-          paddingTop: "calc(env(safe-area-inset-top, 0px) + 12px)",
-          paddingInline: "16px",
+          paddingTop: "calc(env(safe-area-inset-top, 0px) + 14px)",
           transition: isHidden
             ? "transform .55s cubic-bezier(.65,0,.35,1), opacity .35s .1s, filter .45s"
             : "transform .7s cubic-bezier(.34,1.5,.64,1), opacity .4s, filter .5s",
@@ -276,189 +200,245 @@ const Header = () => {
           filter: isHidden ? "blur(10px)" : "none",
         }}
       >
-        <nav
-          className="pointer-events-auto relative flex items-center justify-between gap-2 md:gap-3 lg:gap-4 max-w-[94vw] md:min-w-[660px] lg:min-w-[800px] xl:min-w-[900px] 2xl:min-w-[980px]"
-          style={{
-            width: "fit-content",
-            padding: isScrolled
-              ? "6px 14px 6px 18px"
-              : "8px 16px 8px 22px",
-            borderRadius: "999px",
-            background:
-              "linear-gradient(135deg,rgba(255,255,255,.14),rgba(255,255,255,.03) 50%,rgba(255,255,255,.14)),rgba(12,16,24,.8)",
-            border: "1px solid rgba(255,255,255,.2)",
-            backdropFilter: "blur(30px) saturate(120%) brightness(1.04)",
-            WebkitBackdropFilter: "blur(30px) saturate(120%) brightness(1.04)",
-            boxShadow:
-              "0 16px 48px -14px rgba(0,0,0,.65), inset 0 1px 0 rgba(255,255,255,.35), inset 0 -1px 0 rgba(255,255,255,.08), inset 0 0 22px rgba(255,255,255,.05)",
-            transition: "padding .3s, min-width .3s",
-          }}
-        >
-          {/* Animated conic cyan hairline */}
-          <span
-            aria-hidden
-            style={{
-              position: "absolute",
-              inset: "-1px",
-              borderRadius: "inherit",
-              pointerEvents: "none",
-              background:
-                "conic-gradient(from var(--quest-a,0deg), transparent 0 70%, #22d3ee 85%, transparent 100%)",
-              WebkitMask:
-                "linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0)",
-              WebkitMaskComposite: "xor",
-              maskComposite: "exclude",
-              padding: "1px",
-              opacity: 0.75,
-              animation: "questNavSpin 6s linear infinite",
-            }}
-          />
-
-          {/* Inner top-gloss sheen */}
-          <span
-            aria-hidden
-            style={{
-              position: "absolute",
-              inset: 0,
-              borderRadius: "inherit",
-              pointerEvents: "none",
-              background:
-                "linear-gradient(180deg,rgba(255,255,255,.18),transparent 45%)",
-              opacity: 0.55,
-            }}
-          />
-
-          {/* Desktop links + sliding indicator */}
-          <ul
-            ref={listRef}
-            className="relative flex items-center list-none p-0 gap-1 md:gap-1.5 lg:gap-2.5 flex-1 justify-center"
-            onMouseLeave={() => {
-              const activeEl = listRef.current?.querySelector("a.quest-active");
-              moveTo(activeEl || null);
-            }}
-          >
-            {/* Sliding pill indicator */}
-            <span
-              ref={indRef}
-              style={{
-                position: "absolute",
-                zIndex: 0,
-                top: 0,
-                left: 0,
-                height: "100%",
-                borderRadius: "999px",
-                background: "rgba(34,211,238,.12)",
-                border: "1px solid rgba(34,211,238,.25)",
-                opacity: 0,
-                pointerEvents: "none",
-                transition:
-                  "transform .35s cubic-bezier(.2,.9,.3,1.1), width .35s cubic-bezier(.2,.9,.3,1.1), opacity .2s",
-              }}
-            />
-
-            {desktopLinks.map((item, i) => {
-              const active = isItemActive(item);
-              const hasDropdown = Boolean(item.dropdown);
-
-              return (
-                <li key={i} className="relative group">
-                  {hasDropdown ? (
-                    <>
-                      <button
-                        className={`relative z-10 flex items-center gap-1.5 px-4 md:px-5 lg:px-6 py-2 md:py-2.5 rounded-full text-sm lg:text-[0.94rem] font-medium transition-colors whitespace-nowrap ${
-                          active
-                            ? "text-white font-semibold"
-                            : "text-[#9aa6b5] hover:text-white"
-                        }`}
-                        onMouseEnter={(e) => moveTo(e.currentTarget)}
-                        onFocus={(e) => moveTo(e.currentTarget)}
-                      >
-                        {item.name}
-                        <ChevronDown className="w-3.5 h-3.5 transition-transform duration-300 group-hover:rotate-180" />
-                        {active && (
-                          <span className="absolute left-1/2 bottom-[3px] w-1.5 h-1.5 -ml-[3px] rounded-full bg-cyan-400 shadow-[0_0_8px_#22d3ee]" />
-                        )}
-                      </button>
-                      <ul className="absolute left-0 top-full pt-2 w-48 hidden group-hover:block z-50">
-                        <div className="bg-black/90 border border-neutral-800 rounded-xl overflow-hidden shadow-xl backdrop-blur-xl">
-                          {item.dropdown.map((sub, si) => (
-                            <li
-                              key={si}
-                              className="border-b border-neutral-800 last:border-none"
-                            >
-                              <Link
-                                href={sub.path}
-                                className="block px-4 py-3 text-sm text-gray-300 hover:text-cyan-400 hover:bg-white/5 transition-colors"
-                              >
-                                {sub.name}
-                              </Link>
-                            </li>
-                          ))}
-                        </div>
-                      </ul>
-                    </>
-                  ) : (
-                    <Link
-                      href={item.path}
-                      target={item.external ? "_blank" : undefined}
-                      rel={item.external ? "noopener noreferrer" : undefined}
-                      className={`${
-                        active ? "quest-active " : ""
-                      }relative z-10 flex items-center gap-1.5 px-4 md:px-5 lg:px-6 py-2 md:py-2.5 rounded-full text-sm lg:text-[0.94rem] font-medium transition-colors whitespace-nowrap ${
-                        active
-                          ? "text-white font-semibold"
-                          : "text-[#9aa6b5] hover:text-white"
-                      }`}
-                      onMouseEnter={(e) => moveTo(e.currentTarget)}
-                      onFocus={(e) => moveTo(e.currentTarget)}
-                      onClick={(e) => {
-                        spawnSparks(e, e.currentTarget);
-                        moveTo(e.currentTarget);
-                      }}
-                    >
-                      {item.name}
-                      {active && (
-                        <span className="absolute left-1/2 bottom-[3px] w-1.5 h-1.5 -ml-[3px] rounded-full bg-cyan-400 shadow-[0_0_8px_#22d3ee]" />
-                      )}
-                      {item.external && (
-                        <ExternalLink className="w-3 h-3 opacity-50" />
-                      )}
-                    </Link>
-                  )}
-                </li>
-              );
-            })}
-          </ul>
-
-          {/* CTA "Contact Us" button */}
-          {ctaItem && (
+        <div className="relative w-full flex items-center justify-between min-h-[50px] md:min-h-[54px]">
+          {/* 1. Left Corner: Quest IT Logo */}
+          <div className="flex items-center flex-shrink-0 z-20">
             <Link
-              href={ctaItem.path}
-              className={`relative inline-flex items-center gap-2 px-5 lg:px-6 py-2 md:py-2.5 rounded-full text-sm lg:text-[0.94rem] font-semibold whitespace-nowrap ml-2 transition-all duration-200 overflow-hidden ${
-                isItemActive(ctaItem)
-                  ? "bg-cyan-400/10 text-white border border-cyan-400/25 shadow-none"
-                  : "bg-cyan-400 text-[#021018] shadow-[0_4px_14px_-6px_rgba(34,211,238,.4)] hover:-translate-y-px hover:shadow-[0_6px_18px_-6px_rgba(34,211,238,.5)] active:scale-[.94]"
-              }`}
-              onClick={(e) => spawnSparks(e, e.currentTarget)}
+              href="/"
+              aria-label="Quest IT Home"
+              className="pointer-events-auto block transition-transform duration-200 hover:scale-[1.03] active:scale-95"
             >
-              Contact Us
-              <svg
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                className="w-3.5 h-3.5 transition-transform duration-200 group-hover:translate-x-0.5"
-              >
-                <path d="M5 12h14M13 6l6 6-6 6" />
-              </svg>
+              <Image
+                priority
+                src="/images/logo-navbar.webp"
+                alt="Quest IT Logo"
+                width={398}
+                height={138}
+                unoptimized
+                className="h-10 sm:h-11 md:h-11 lg:h-12 w-auto object-contain filter drop-shadow-[0_2px_14px_rgba(0,0,0,0.85)]"
+              />
             </Link>
-          )}
-        </nav>
+          </div>
+
+          {/* 2. Center: Desktop Floating Pill Navbar (Perfect horizontal centerline alignment) */}
+          <div className="hidden md:flex absolute inset-x-0 justify-center items-center pointer-events-none z-10">
+            <nav
+              className="pointer-events-auto relative flex items-center justify-between gap-2 md:gap-3 lg:gap-4 max-w-[94vw] md:min-w-[660px] lg:min-w-[800px] xl:min-w-[900px] 2xl:min-w-[980px]"
+              style={{
+                width: "fit-content",
+                padding: isScrolled
+                  ? "6px 14px 6px 18px"
+                  : "8px 16px 8px 22px",
+                borderRadius: "999px",
+                background:
+                  "linear-gradient(135deg,rgba(255,255,255,.14),rgba(255,255,255,.03) 50%,rgba(255,255,255,.14)),rgba(12,16,24,.8)",
+                border: "1px solid rgba(255,255,255,.2)",
+                backdropFilter: "blur(30px) saturate(120%) brightness(1.04)",
+                WebkitBackdropFilter: "blur(30px) saturate(120%) brightness(1.04)",
+                boxShadow:
+                  "0 16px 48px -14px rgba(0,0,0,.65), inset 0 1px 0 rgba(255,255,255,.35), inset 0 -1px 0 rgba(255,255,255,.08), inset 0 0 22px rgba(255,255,255,.05)",
+                transition: "padding .3s, min-width .3s",
+              }}
+            >
+              {/* Animated conic cyan hairline */}
+              <span
+                aria-hidden
+                style={{
+                  position: "absolute",
+                  inset: "-1px",
+                  borderRadius: "inherit",
+                  pointerEvents: "none",
+                  background:
+                    "conic-gradient(from var(--quest-a,0deg), transparent 0 70%, #22d3ee 85%, transparent 100%)",
+                  WebkitMask:
+                    "linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0)",
+                  WebkitMaskComposite: "xor",
+                  maskComposite: "exclude",
+                  padding: "1px",
+                  opacity: 0.75,
+                  animation: "questNavSpin 6s linear infinite",
+                }}
+              />
+
+              {/* Inner top-gloss sheen */}
+              <span
+                aria-hidden
+                style={{
+                  position: "absolute",
+                  inset: 0,
+                  borderRadius: "inherit",
+                  pointerEvents: "none",
+                  background:
+                    "linear-gradient(180deg,rgba(255,255,255,.18),transparent 45%)",
+                  opacity: 0.55,
+                }}
+              />
+
+              {/* Desktop links + sliding indicator */}
+              <ul
+                ref={listRef}
+                className="relative flex items-center list-none p-0 gap-1 md:gap-1.5 lg:gap-2.5 flex-1 justify-center"
+                onMouseLeave={() => {
+                  const activeEl = listRef.current?.querySelector("a.quest-active");
+                  moveTo(activeEl || null);
+                }}
+              >
+                {/* Sliding pill indicator */}
+                <span
+                  ref={indRef}
+                  style={{
+                    position: "absolute",
+                    zIndex: 0,
+                    top: 0,
+                    left: 0,
+                    height: "100%",
+                    borderRadius: "999px",
+                    background: "rgba(34,211,238,.12)",
+                    border: "1px solid rgba(34,211,238,.25)",
+                    opacity: 0,
+                    pointerEvents: "none",
+                    transition:
+                      "transform .35s cubic-bezier(.2,.9,.3,1.1), width .35s cubic-bezier(.2,.9,.3,1.1), opacity .2s",
+                  }}
+                />
+
+                {desktopLinks.map((item, i) => {
+                  const active = isItemActive(item);
+                  const hasDropdown = Boolean(item.dropdown);
+
+                  return (
+                    <li key={i} className="relative group">
+                      {hasDropdown ? (
+                        <>
+                          <button
+                            className={`relative z-10 flex items-center gap-1.5 px-4 md:px-5 lg:px-6 py-2 md:py-2.5 rounded-full text-sm lg:text-[0.94rem] font-medium transition-colors whitespace-nowrap ${
+                              active
+                                ? "text-white font-semibold"
+                                : "text-[#9aa6b5] hover:text-white"
+                            }`}
+                            onMouseEnter={(e) => moveTo(e.currentTarget)}
+                            onFocus={(e) => moveTo(e.currentTarget)}
+                          >
+                            {item.name}
+                            <ChevronDown className="w-3.5 h-3.5 transition-transform duration-300 group-hover:rotate-180" />
+                            {active && (
+                              <span className="absolute left-1/2 bottom-[3px] w-1.5 h-1.5 -ml-[3px] rounded-full bg-cyan-400 shadow-[0_0_8px_#22d3ee]" />
+                            )}
+                          </button>
+                          <ul className="absolute left-0 top-full pt-2 w-48 hidden group-hover:block z-50">
+                            <div className="bg-black/90 border border-neutral-800 rounded-xl overflow-hidden shadow-xl backdrop-blur-xl">
+                              {item.dropdown.map((sub, si) => (
+                                <li
+                                  key={si}
+                                  className="border-b border-neutral-800 last:border-none"
+                                >
+                                  <Link
+                                    href={sub.path}
+                                    className="block px-4 py-3 text-sm text-gray-300 hover:text-cyan-400 hover:bg-white/5 transition-colors"
+                                  >
+                                    {sub.name}
+                                  </Link>
+                                </li>
+                              ))}
+                            </div>
+                          </ul>
+                        </>
+                      ) : (
+                        <Link
+                          href={item.path}
+                          target={item.external ? "_blank" : undefined}
+                          rel={item.external ? "noopener noreferrer" : undefined}
+                          className={`${
+                            active ? "quest-active " : ""
+                          }relative z-10 flex items-center gap-1.5 px-4 md:px-5 lg:px-6 py-2 md:py-2.5 rounded-full text-sm lg:text-[0.94rem] font-medium transition-colors whitespace-nowrap ${
+                            active
+                              ? "text-white font-semibold"
+                              : "text-[#9aa6b5] hover:text-white"
+                          }`}
+                          onMouseEnter={(e) => moveTo(e.currentTarget)}
+                          onFocus={(e) => moveTo(e.currentTarget)}
+                          onClick={(e) => {
+                            spawnSparks(e, e.currentTarget);
+                            moveTo(e.currentTarget);
+                          }}
+                        >
+                          {item.name}
+                          {active && (
+                            <span className="absolute left-1/2 bottom-[3px] w-1.5 h-1.5 -ml-[3px] rounded-full bg-cyan-400 shadow-[0_0_8px_#22d3ee]" />
+                          )}
+                          {item.external && (
+                            <ExternalLink className="w-3 h-3 opacity-50" />
+                          )}
+                        </Link>
+                      )}
+                    </li>
+                  );
+                })}
+              </ul>
+
+              {/* CTA "Contact Us" button */}
+              {ctaItem && (
+                <Link
+                  href={ctaItem.path}
+                  className={`relative inline-flex items-center gap-2 px-5 lg:px-6 py-2 md:py-2.5 rounded-full text-sm lg:text-[0.94rem] font-semibold whitespace-nowrap ml-2 transition-all duration-200 overflow-hidden ${
+                    isItemActive(ctaItem)
+                      ? "bg-cyan-400/10 text-white border border-cyan-400/25 shadow-none"
+                      : "bg-cyan-400 text-[#021018] shadow-[0_4px_14px_-6px_rgba(34,211,238,.4)] hover:-translate-y-px hover:shadow-[0_6px_18px_-6px_rgba(34,211,238,.5)] active:scale-[.94]"
+                  }`}
+                  onClick={(e) => spawnSparks(e, e.currentTarget)}
+                >
+                  Contact Us
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    className="w-3.5 h-3.5 transition-transform duration-200 group-hover:translate-x-0.5"
+                  >
+                    <path d="M5 12h14M13 6l6 6-6 6" />
+                  </svg>
+                </Link>
+              )}
+            </nav>
+          </div>
+
+          {/* 3. Right Corner: Mobile Menu Button (Horizontally aligned with logo on mobile) */}
+          <div className="md:hidden flex items-center flex-shrink-0 z-20">
+            <button
+              className="pointer-events-auto relative w-11 h-11 rounded-full border border-white/20 bg-black/75 backdrop-blur-xl cursor-pointer text-white flex items-center justify-center shadow-[0_8px_24px_rgba(0,0,0,0.7)] transition-all active:scale-90 hover:border-cyan-400/50"
+              aria-label="Menu"
+              aria-expanded={sheetOpen}
+              onClick={() => setSheetOpen((o) => !o)}
+            >
+              <span
+                className="absolute left-3 right-3 h-0.5 bg-current rounded-sm transition-all duration-300"
+                style={{
+                  top: sheetOpen ? "21px" : "15px",
+                  transform: sheetOpen ? "rotate(45deg)" : "none",
+                }}
+              />
+              <span
+                className="absolute left-3 right-3 h-0.5 bg-current rounded-sm transition-all duration-300"
+                style={{
+                  top: "21px",
+                  opacity: sheetOpen ? 0 : 1,
+                }}
+              />
+              <span
+                className="absolute left-3 right-3 h-0.5 bg-current rounded-sm transition-all duration-300"
+                style={{
+                  top: sheetOpen ? "21px" : "27px",
+                  transform: sheetOpen ? "rotate(-45deg)" : "none",
+                }}
+              />
+            </button>
+          </div>
+        </div>
       </header>
 
-      {/* ── 4. Mobile Full-Screen Sheet (No Duplicate Logo) ──────────────── */}
+      {/* ── 4. Mobile Full-Screen Sheet ──────────────────────────────────── */}
       <div
         className="fixed inset-0 z-[9999] md:hidden flex flex-col justify-center items-center gap-3 px-6"
         style={{
