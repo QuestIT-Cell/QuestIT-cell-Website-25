@@ -140,7 +140,6 @@ const Header = () => {
       document.fonts.ready.then(update);
     }
 
-    // Small delay to allow layout painting
     const t = setTimeout(update, 50);
 
     return () => {
@@ -172,7 +171,7 @@ const Header = () => {
   }, [sheetOpen]);
 
   const desktopLinks = menu.filter((m) => m.name !== "Contact");
-  const ctaItem = menu.find((m => m.name === "Contact"));
+  const ctaItem = menu.find((m) => m.name === "Contact");
   const sheetLinks = menu;
 
   return (
@@ -187,12 +186,12 @@ const Header = () => {
         @property --quest-a{syntax:'<angle>';inherits:false;initial-value:0deg}
       `}</style>
 
-      {/* ── 1. Top-Left Corner: Quest IT Logo (Prominent & Visible) ──────── */}
+      {/* ── 1. Top-Left Corner: Quest IT Logo & Text (Pushed to the corner) ── */}
       <div
         className="fixed top-0 left-0 z-[10001] pointer-events-none"
         style={{
-          paddingTop: "calc(env(safe-area-inset-top, 0px) + 14px)",
-          paddingLeft: "clamp(16px, 3vw, 40px)",
+          paddingTop: "calc(env(safe-area-inset-top, 0px) + 8px)",
+          paddingLeft: "clamp(10px, 1.5vw, 24px)",
           transition: isHidden
             ? "transform .55s cubic-bezier(.65,0,.35,1), opacity .35s .1s, filter .45s"
             : "transform .7s cubic-bezier(.34,1.5,.64,1), opacity .4s, filter .5s",
@@ -213,17 +212,17 @@ const Header = () => {
             width={240}
             height={126}
             unoptimized
-            className="w-[160px] sm:w-[190px] md:w-[220px] lg:w-[240px] h-auto object-contain filter drop-shadow-[0_2px_14px_rgba(0,0,0,0.85)]"
+            className="w-[150px] sm:w-[175px] md:w-[200px] lg:w-[230px] h-auto object-contain filter drop-shadow-[0_2px_14px_rgba(0,0,0,0.85)]"
           />
         </Link>
       </div>
 
-      {/* ── 2. Top-Right Corner: Mobile Menu Button ──────────────────────── */}
+      {/* ── 2. Top-Right Corner: Mobile Menu Button (Pushed to the corner) ── */}
       <div
         className="md:hidden fixed top-0 right-0 z-[10001] pointer-events-none"
         style={{
-          paddingTop: "calc(env(safe-area-inset-top, 0px) + 14px)",
-          paddingRight: "16px",
+          paddingTop: "calc(env(safe-area-inset-top, 0px) + 8px)",
+          paddingRight: "clamp(10px, 1.5vw, 20px)",
           transition: isHidden
             ? "transform .55s cubic-bezier(.65,0,.35,1), opacity .35s .1s, filter .45s"
             : "transform .7s cubic-bezier(.34,1.5,.64,1), opacity .4s, filter .5s",
@@ -262,12 +261,12 @@ const Header = () => {
         </button>
       </div>
 
-      {/* ── 3. Desktop Floating Pill Navigation Bar (Centered) ───────────── */}
+      {/* ── 3. Desktop Floating Pill Navbar (Increased Length & Grand Appearance) ─ */}
       <header
         ref={wrapRef}
         className="hidden md:flex fixed top-0 left-0 right-0 z-[10000] justify-center pointer-events-none"
         style={{
-          paddingTop: "calc(env(safe-area-inset-top, 0px) + 16px)",
+          paddingTop: "calc(env(safe-area-inset-top, 0px) + 12px)",
           paddingInline: "16px",
           transition: isHidden
             ? "transform .55s cubic-bezier(.65,0,.35,1), opacity .35s .1s, filter .45s"
@@ -278,10 +277,12 @@ const Header = () => {
         }}
       >
         <nav
-          className="pointer-events-auto relative flex items-center justify-center gap-1.5 max-w-full"
+          className="pointer-events-auto relative flex items-center justify-between gap-2 md:gap-3 lg:gap-4 max-w-[94vw] md:min-w-[660px] lg:min-w-[800px] xl:min-w-[900px] 2xl:min-w-[980px]"
           style={{
             width: "fit-content",
-            padding: isScrolled ? "6px 10px" : "8px 14px",
+            padding: isScrolled
+              ? "6px 14px 6px 18px"
+              : "8px 16px 8px 22px",
             borderRadius: "999px",
             background:
               "linear-gradient(135deg,rgba(255,255,255,.14),rgba(255,255,255,.03) 50%,rgba(255,255,255,.14)),rgba(12,16,24,.8)",
@@ -290,7 +291,7 @@ const Header = () => {
             WebkitBackdropFilter: "blur(30px) saturate(120%) brightness(1.04)",
             boxShadow:
               "0 16px 48px -14px rgba(0,0,0,.65), inset 0 1px 0 rgba(255,255,255,.35), inset 0 -1px 0 rgba(255,255,255,.08), inset 0 0 22px rgba(255,255,255,.05)",
-            transition: "padding .3s",
+            transition: "padding .3s, min-width .3s",
           }}
         >
           {/* Animated conic cyan hairline */}
@@ -330,7 +331,7 @@ const Header = () => {
           {/* Desktop links + sliding indicator */}
           <ul
             ref={listRef}
-            className="relative flex items-center list-none p-0 gap-0.5"
+            className="relative flex items-center list-none p-0 gap-1 md:gap-1.5 lg:gap-2.5 flex-1 justify-center"
             onMouseLeave={() => {
               const activeEl = listRef.current?.querySelector("a.quest-active");
               moveTo(activeEl || null);
@@ -364,9 +365,9 @@ const Header = () => {
                   {hasDropdown ? (
                     <>
                       <button
-                        className={`relative z-10 flex items-center gap-1 px-4 py-2 rounded-full text-sm font-medium transition-colors whitespace-nowrap ${
+                        className={`relative z-10 flex items-center gap-1.5 px-4 md:px-5 lg:px-6 py-2 md:py-2.5 rounded-full text-sm lg:text-[0.94rem] font-medium transition-colors whitespace-nowrap ${
                           active
-                            ? "text-white"
+                            ? "text-white font-semibold"
                             : "text-[#9aa6b5] hover:text-white"
                         }`}
                         onMouseEnter={(e) => moveTo(e.currentTarget)}
@@ -375,7 +376,7 @@ const Header = () => {
                         {item.name}
                         <ChevronDown className="w-3.5 h-3.5 transition-transform duration-300 group-hover:rotate-180" />
                         {active && (
-                          <span className="absolute left-1/2 bottom-[3px] w-1 h-1 -ml-0.5 rounded-full bg-cyan-400" />
+                          <span className="absolute left-1/2 bottom-[3px] w-1.5 h-1.5 -ml-[3px] rounded-full bg-cyan-400 shadow-[0_0_8px_#22d3ee]" />
                         )}
                       </button>
                       <ul className="absolute left-0 top-full pt-2 w-48 hidden group-hover:block z-50">
@@ -403,9 +404,9 @@ const Header = () => {
                       rel={item.external ? "noopener noreferrer" : undefined}
                       className={`${
                         active ? "quest-active " : ""
-                      }relative z-10 flex items-center gap-1 px-4 py-2 rounded-full text-sm font-medium transition-colors whitespace-nowrap ${
+                      }relative z-10 flex items-center gap-1.5 px-4 md:px-5 lg:px-6 py-2 md:py-2.5 rounded-full text-sm lg:text-[0.94rem] font-medium transition-colors whitespace-nowrap ${
                         active
-                          ? "text-white"
+                          ? "text-white font-semibold"
                           : "text-[#9aa6b5] hover:text-white"
                       }`}
                       onMouseEnter={(e) => moveTo(e.currentTarget)}
@@ -417,7 +418,7 @@ const Header = () => {
                     >
                       {item.name}
                       {active && (
-                        <span className="absolute left-1/2 bottom-[3px] w-1 h-1 -ml-0.5 rounded-full bg-cyan-400" />
+                        <span className="absolute left-1/2 bottom-[3px] w-1.5 h-1.5 -ml-[3px] rounded-full bg-cyan-400 shadow-[0_0_8px_#22d3ee]" />
                       )}
                       {item.external && (
                         <ExternalLink className="w-3 h-3 opacity-50" />
@@ -433,7 +434,7 @@ const Header = () => {
           {ctaItem && (
             <Link
               href={ctaItem.path}
-              className={`relative inline-flex items-center gap-2 px-5 py-2 rounded-full text-sm font-semibold whitespace-nowrap ml-1 transition-all duration-200 overflow-hidden ${
+              className={`relative inline-flex items-center gap-2 px-5 lg:px-6 py-2 md:py-2.5 rounded-full text-sm lg:text-[0.94rem] font-semibold whitespace-nowrap ml-2 transition-all duration-200 overflow-hidden ${
                 isItemActive(ctaItem)
                   ? "bg-cyan-400/10 text-white border border-cyan-400/25 shadow-none"
                   : "bg-cyan-400 text-[#021018] shadow-[0_4px_14px_-6px_rgba(34,211,238,.4)] hover:-translate-y-px hover:shadow-[0_6px_18px_-6px_rgba(34,211,238,.5)] active:scale-[.94]"
@@ -457,36 +458,22 @@ const Header = () => {
         </nav>
       </header>
 
-      {/* ── 4. Mobile Full-Screen Sheet ──────────────────────────────────── */}
+      {/* ── 4. Mobile Full-Screen Sheet (No Duplicate Logo) ──────────────── */}
       <div
-        className="fixed inset-0 z-[9999] md:hidden flex flex-col justify-center items-center gap-2 px-6"
+        className="fixed inset-0 z-[9999] md:hidden flex flex-col justify-center items-center gap-3 px-6"
         style={{
           background: "rgba(10,14,22,.96)",
           backdropFilter: "blur(28px)",
           WebkitBackdropFilter: "blur(28px)",
           clipPath: sheetOpen
-            ? "circle(150% at calc(100% - 40px) 40px)"
-            : "circle(0 at calc(100% - 40px) 40px)",
+            ? "circle(150% at calc(100% - 35px) 35px)"
+            : "circle(0 at calc(100% - 35px) 35px)",
           visibility: sheetOpen ? "visible" : "hidden",
           transition: sheetOpen
             ? "clip-path .8s cubic-bezier(.77,0,.18,1), visibility 0s"
             : "clip-path .75s cubic-bezier(.77,0,.18,1), visibility 0s .75s",
         }}
       >
-        {/* Logo at top of sheet */}
-        <div className="absolute top-6 left-6">
-          <Link href="/" onClick={() => setSheetOpen(false)}>
-            <Image
-              src="/images/logo-460.webp"
-              width={180}
-              height={94}
-              alt="Quest IT"
-              unoptimized
-              className="w-[150px] h-auto object-contain"
-            />
-          </Link>
-        </div>
-
         {sheetLinks.map((item, i) => {
           const active = isItemActive(item);
           return (
