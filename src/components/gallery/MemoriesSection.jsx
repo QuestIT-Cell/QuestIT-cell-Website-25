@@ -323,6 +323,7 @@ const MemoriesSection = () => {
   };
 
   // Click on non-active card: smoothly orbit to that card and spotlight it as active
+  // Uses the exact same smooth motion, velocity, and rotation as the active card moves
   const handleCardClick = (targetIndex) => {
     const currentActiveIndex =
       focalStepRef.current !== null
@@ -343,9 +344,12 @@ const MemoriesSection = () => {
 
     if (targetStep === focalStepRef.current) return;
 
-    // Responsive duration proportional to travel distance (scaled smoothly between 1.8s and 2.8s)
+    // Use ROTATION_DURATION so the motion and rotation match the active card's smooth glide
     const dist = Math.abs(targetStep - currentVal);
-    const customDuration = Math.min(1.8 + Math.max(dist - 1, 0) * 0.3, 2.8);
+    const customDuration =
+      dist <= 1
+        ? ROTATION_DURATION
+        : ROTATION_DURATION * Math.min(1 + (dist - 1) * 0.35, 1.8);
 
     rotateToStep(targetStep, customDuration);
   };
@@ -453,12 +457,12 @@ const MemoriesSection = () => {
 
     if (mobile) {
       // MOBILE HORIZONTAL 3D ORBITAL (W < 768px)
-      // Native card dimensions sized directly to active spotlight box for 1:1 crisp rasterization
-      const cw = Math.min(Math.max(Math.round(W * 0.52), 195), 250);
-      const ch = Math.round(cw * 0.70);
+      // Sized comfortably to prevent clutter while keeping crisp native rendering
+      const cw = Math.min(Math.max(Math.round(W * 0.44), 155), 195);
+      const ch = Math.round(cw * 0.68);
 
       // Symmetrical horizontal spread so side cards peek cleanly without horizontal overflow
-      const rx = Math.max(Math.round(W * 0.38), 130);
+      const rx = Math.max(Math.round(W * 0.38), 125);
       // Subtle vertical swoop along the orbital arc
       const ry = Math.round(rx * 0.18);
       // Deep 3D Z-depth for perspective curvature
@@ -470,7 +474,7 @@ const MemoriesSection = () => {
       const maxD = 1.35;
       const fZone = 0.35;
 
-      const lift = -16;
+      const lift = -12;
       const scale = 1.0; // 1:1 scale: eliminates GPU bilinear upscaling blur
 
       return {
@@ -492,26 +496,26 @@ const MemoriesSection = () => {
       const tablet = W < 1024;
       const slots = tablet ? 6 : 8;
 
-      // Base card dimensions match the full active focal spotlight size for native 1:1 crisp rasterization
+      // Decreased size for a spacious, uncluttered, elegant presentation
       const rawCw = tablet
-        ? Math.min(W * 0.35, H * 0.38)
-        : Math.min(W * 0.28, H * 0.44);
+        ? Math.min(W * 0.28, H * 0.30)
+        : Math.min(W * 0.22, H * 0.35);
 
       const cw = tablet
-        ? Math.min(Math.max(Math.round(rawCw), 290), 380)
-        : Math.min(Math.max(Math.round(rawCw), 380), 480);
+        ? Math.min(Math.max(Math.round(rawCw), 230), 290)
+        : Math.min(Math.max(Math.round(rawCw), 280), 360);
 
-      const ch = Math.round(cw * 0.74);
+      const ch = Math.round(cw * 0.72);
 
-      // Curvy, deep 3D elliptical radii in X, Y, and Z
-      const rawRx = (W * 0.84 - cw * 0.55) / 2;
-      const rx = Math.max(Math.round(rawRx), 90);
+      // Curvy, deep 3D elliptical radii in X, Y, and Z with spacious clearance
+      const rawRx = (W * 0.86 - cw * 0.45) / 2;
+      const rx = Math.max(Math.round(rawRx), 100);
       // Sweeping vertical swoop along orbital arc
-      const ry = Math.round(rx * 0.34);
+      const ry = Math.round(rx * 0.32);
       // Deep Z depth for prominent 3D front-to-back perspective curve
-      const rz = Math.round(rx * 0.46);
+      const rz = Math.round(rx * 0.44);
 
-      const lift = tablet ? -100 : -130;
+      const lift = tablet ? -85 : -110;
       const scale = 1.0; // 1:1 scale: eliminates GPU bilinear upscaling blur
 
       return {
@@ -575,21 +579,15 @@ const MemoriesSection = () => {
         z = Math.round(Rz * cosT * 10) / 10;
 
         depthFactor = (cosT + 1) / 2;
-        // Non-focal cards scale down to ~0.72x; active focal card is 1.0x native
-        baseScale = isFocal ? 1.0 : 0.62 + depthFactor * 0.16;
+        // Continuous smooth scaling: 0.64 at sides to 1.0 at front center
+        baseScale = 0.64 + depthFactor * 0.36;
         brightness = Math.round((0.88 + depthFactor * 0.12) * 100) / 100;
         blur = 0;
 
-        // Active focal card sits square (0 tilt) to screen for pin-sharp pixels
-        if (isFocal) {
-          rotateX = 0;
-          rotateY = 0;
-          rotateZ = 0;
-        } else {
-          rotateX = Math.round(cosT * 8 * 10) / 10;
-          rotateY = Math.round(-sinT * 42 * 10) / 10;
-          rotateZ = Math.round(sinT * 4 * 10) / 10;
-        }
+        // Continuous banking along orbit that straightens smoothly to 0 at focal center
+        rotateX = Math.round((1 - Math.max(0, cosT)) * 6 * 10) / 10;
+        rotateY = Math.round(-sinT * 36 * 10) / 10;
+        rotateZ = Math.round(sinT * 3 * 10) / 10;
       } else {
         // DESKTOP / TABLET HORIZONTAL 3D ORBIT
         x = Math.round(Rx * sinT * 10) / 10;
@@ -597,21 +595,15 @@ const MemoriesSection = () => {
         z = Math.round(Rz * cosT * 10) / 10;
 
         depthFactor = (cosT + 1) / 2;
-        // Non-focal cards scale down to ~0.65x; active focal card is 1.0x native
-        baseScale = isFocal ? 1.0 : 0.56 + depthFactor * 0.20;
+        // Continuous smooth scaling: 0.58 in rear to 1.0 at front center
+        baseScale = 0.58 + depthFactor * 0.42;
         brightness = Math.round((0.85 + depthFactor * 0.15) * 100) / 100;
         blur = 0;
 
-        // Active focal card sits square (0 tilt) to screen for pin-sharp pixels
-        if (isFocal) {
-          rotateX = 0;
-          rotateY = 0;
-          rotateZ = 0;
-        } else {
-          rotateX = Math.round(cosT * 12 * 10) / 10;
-          rotateY = Math.round(-sinT * 50 * 10) / 10;
-          rotateZ = Math.round(sinT * 5 * 10) / 10;
-        }
+        // Continuous banking along orbit that straightens smoothly to 0 at focal center
+        rotateX = Math.round((1 - Math.max(0, cosT)) * 8 * 10) / 10;
+        rotateY = Math.round(-sinT * 44 * 10) / 10;
+        rotateZ = Math.round(sinT * 3.5 * 10) / 10;
       }
 
       // Opacity multiplied by the smooth fade window

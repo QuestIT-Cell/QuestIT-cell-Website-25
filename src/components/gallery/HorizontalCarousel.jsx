@@ -593,15 +593,6 @@ const HorizontalCarousel = () => {
         </div>
       </div>
       )}
-      <div
-        className="absolute bottom-8 right-8 md:right-12 z-20 hidden md:flex flex-col items-end gap-1 font-mono-tech select-none"
-        style={{ opacity: introComplete || chromeVisible ? 1 : 0, transition: 'opacity 0.4s ease-out' }}
-      >
-        {["ART", "CULTURE", "TECHNOLOGY"].map((l) => (
-          <span key={l} className="text-[8.5px] tracking-[0.3em] text-[#e8f0ff]/50 uppercase">{l}</span>
-        ))}
-        <div className="w-5 h-[1.5px] bg-[#4cff8a] mt-0.5 opacity-80" />
-      </div>
 
       {/* ── Intro chrome wrapper: title + corner labels fade in at stage 5 ── */}
       {!introComplete && introStage > 0 && introStage < 5 && (
