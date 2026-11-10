@@ -5,7 +5,6 @@ import Image from "next/image";
 import {
   motion,
   useMotionValue,
-  useSpring,
   useTransform,
   animate,
   useInView,
@@ -31,28 +30,25 @@ const ORBITAL_IMAGES = [
 
 const INITIAL_OFFSET_INDEX = 2;
 const TOTAL_CARDS = ORBITAL_IMAGES.length;
+// Exactly 3 seconds active resting window per photo
 const PAUSE_MS = 3000;
-const ROTATION_DURATION = 2.4;
-const INITIAL_ARRIVAL_PAUSE_MS = 3500;
-// Cinematic ease: smooth float-in, whisper-soft landing
+const INITIAL_ARRIVAL_PAUSE_MS = 3000;
+// Swift, fluid 1.6s sweep with smooth in-flight card flipping
+const ROTATION_DURATION = 1.6;
+// Smooth cinematic bezier curve
 const ORBIT_EASE = [0.16, 1, 0.3, 1];
-
-// Spring config for the card flip — physical momentum
-const FLIP_SPRING = { stiffness: 48, damping: 20, mass: 1.3 };
-// Spring for lift
-const LIFT_SPRING = { stiffness: 55, damping: 24, mass: 1 };
 
 const mod = (n, m) => ((n % m) + m) % m;
 
 // ─── MemoryCard ───────────────────────────────────────────────────────────────
-// Receives progressMV (MotionValue) and derives its own geometry via
-// useTransform — NO React re-renders during the orbit animation.
+// Derives its 3D orbital trajectory, smooth flip (0 -> 180deg), lift, scale,
+// border glow, and shadow continuously from progressMV via useTransform.
+// Zero React re-renders during motion.
 const MemoryCard = ({
   cardIndex,
   progressMV,
   cardWidth,
   cardHeight,
-  isFocal,
   liftY,
   isMobile,
   Rx, Ry, Rz,
@@ -62,16 +58,33 @@ const MemoryCard = ({
   onCardClick,
   onActivePhotoClick,
 }) => {
-  // Spring-driven flip: rotates smoothly with physical momentum into focal state
-  const flipY = useSpring(0, FLIP_SPRING);
-  const liftMV = useSpring(0, LIFT_SPRING);
+  const src = ORBITAL_IMAGES[cardIndex % TOTAL_CARDS];
 
-  useEffect(() => {
-    flipY.set(isFocal ? 180 : 0);
-    liftMV.set(isFocal ? liftY : 0);
-  }, [isFocal, liftY, flipY, liftMV]);
+  // ─── Continuous Flip Angle & Lift Elevation ────────────────────────────────
+  // As card sweeps into center (|diff|: 0.55 -> 0.0), it smoothly flips 0 -> 180deg.
+  // When resting at center (|diff| = 0), it is fully flipped at 180deg facing forward.
+  // As it drifts away (|diff|: 0.0 -> 0.55), it smoothly flips 180 -> 0deg back into ring.
+  const flipAngle = useTransform(progressMV, (p) => {
+    const diff = getDiff(cardIndex, p);
+    const absDiff = Math.abs(diff);
+    const flipZone = 0.55;
+    if (absDiff >= flipZone) return 0;
+    const progress = (flipZone - absDiff) / flipZone;
+    const smoothT = (1 - Math.cos(progress * Math.PI)) / 2;
+    return smoothT * 180;
+  });
 
-  // ── Derive all geometry directly from progressMV (no React state) ──────────
+  const liftVal = useTransform(progressMV, (p) => {
+    const diff = getDiff(cardIndex, p);
+    const absDiff = Math.abs(diff);
+    const flipZone = 0.55;
+    if (absDiff >= flipZone) return 0;
+    const progress = (flipZone - absDiff) / flipZone;
+    const smoothT = (1 - Math.cos(progress * Math.PI)) / 2;
+    return smoothT * liftY;
+  });
+
+  // ─── 3D Orbital Trajectory ────────────────────────────────────────────────
   const transformX = useTransform(progressMV, (p) => {
     const diff = getDiff(cardIndex, p);
     const theta = diff * angularSpacing;
@@ -103,6 +116,7 @@ const MemoryCard = ({
     const theta = diff * angularSpacing;
     return Math.sin(theta) * (isMobile ? 2.5 : 3);
   });
+
   const scaleVal = useTransform(progressMV, (p) => {
     const diff = getDiff(cardIndex, p);
     const theta = diff * angularSpacing;
@@ -121,22 +135,45 @@ const MemoryCard = ({
     const minOp = isMobile ? 0.72 : 0.65;
     return (minOp + depthFactor * (1 - minOp)) * fade;
   });
-  const brightnessVal = useTransform(progressMV, (p) => {
+  const filterVal = useTransform(progressMV, (p) => {
     const diff = getDiff(cardIndex, p);
+    const absDiff = Math.abs(diff);
+    if (absDiff < 0.35) return "none";
     const theta = diff * angularSpacing;
     const cosT = Math.cos(theta);
     const depthFactor = (cosT + 1) / 2;
-    return isMobile ? 0.88 + depthFactor * 0.12 : 0.85 + depthFactor * 0.15;
+    const b = isMobile ? 0.88 + depthFactor * 0.12 : 0.85 + depthFactor * 0.15;
+    return `brightness(${b})`;
   });
   const zIndexVal = useTransform(progressMV, (p) => {
-    if (isFocal) return 150;
     const diff = getDiff(cardIndex, p);
+    const absDiff = Math.abs(diff);
+    if (absDiff < 0.5) return 150;
     const theta = diff * angularSpacing;
     const cosT = Math.cos(theta);
     const depthFactor = (cosT + 1) / 2;
     return Math.round(depthFactor * 100) + 1;
   });
-  // Build the 3D transform string
+
+  // Glowing borders & shadows that smoothly intensify as card centers
+  const borderStyle = useTransform(progressMV, (p) => {
+    const diff = getDiff(cardIndex, p);
+    const absDiff = Math.abs(diff);
+    if (absDiff >= 0.5) return "1px solid rgba(0, 212, 255, 0.18)";
+    const t = (0.5 - absDiff) / 0.5;
+    const op = 0.18 + t * 0.77;
+    return `2px solid rgba(0, 212, 255, ${op})`;
+  });
+
+  const shadowVal = useTransform(progressMV, (p) => {
+    const diff = getDiff(cardIndex, p);
+    const absDiff = Math.abs(diff);
+    if (absDiff >= 0.5) return "0 8px 24px rgba(0, 0, 0, 0.7)";
+    const t = (0.5 - absDiff) / 0.5;
+    const glow = Math.round(t * 50);
+    return `0 0 ${glow}px rgba(0, 212, 255, ${t * 0.65}), 0 28px 56px rgba(0, 0, 0, 0.95)`;
+  });
+
   const posTransform = useTransform(
     [transformX, transformY, transformZ, rotX, rotY, rotZ],
     ([x, y, z, rx, ry, rz]) =>
@@ -146,38 +183,30 @@ const MemoryCard = ({
     scaleVal,
     (s) => `scale(${s}) translateZ(0)`
   );
-  const filterVal = useTransform(
-    brightnessVal,
-    (b) => (isFocal ? "none" : `brightness(${b})`)
-  );
 
-  const src = ORBITAL_IMAGES[cardIndex % TOTAL_CARDS];
+  const handleClick = useCallback(() => {
+    const currentVal = progressMV.get();
+    const curDiff = Math.abs(getDiff(cardIndex, currentVal));
+    if (curDiff < 0.35) {
+      if (onActivePhotoClick) onActivePhotoClick(src, cardIndex);
+    } else {
+      if (onCardClick) onCardClick(cardIndex);
+    }
+  }, [cardIndex, progressMV, onCardClick, onActivePhotoClick, src]);
 
   return (
     <motion.div
-      onClick={() => {
-        if (!isFocal && onCardClick) {
-          onCardClick(cardIndex);
-        } else if (isFocal && onActivePhotoClick) {
-          onActivePhotoClick(src, cardIndex);
-        }
-      }}
+      onClick={handleClick}
       role="button"
       tabIndex={0}
       onKeyDown={(e) => {
         if (e.key === "Enter" || e.key === " ") {
           e.preventDefault();
-          if (!isFocal && onCardClick) onCardClick(cardIndex);
-          else if (isFocal && onActivePhotoClick) onActivePhotoClick(src, cardIndex);
+          handleClick();
         }
       }}
-      aria-label={
-        isFocal
-          ? `Active Quest-IT Memory ${cardIndex + 1} - Click to maximize`
-          : `Select Quest-IT Memory ${cardIndex + 1}`
-      }
-      title={isFocal ? "Click to maximize photo" : `View Memory ${cardIndex + 1}`}
-      className={`group outline-none focus:outline-none select-none ${isFocal ? "cursor-zoom-in" : "cursor-pointer"}`}
+      aria-label={`Quest-IT Memory ${cardIndex + 1}`}
+      className="group outline-none focus:outline-none select-none cursor-pointer"
       style={{
         position: "absolute",
         left: "50%",
@@ -186,9 +215,8 @@ const MemoryCard = ({
         height: `${cardHeight}px`,
         marginLeft: `-${cardWidth / 2}px`,
         marginTop: `-${cardHeight / 2}px`,
-        // 3D positional transform — driven by MotionValue, zero React renders
         transform: posTransform,
-        zIndex: isFocal ? 150 : zIndexVal,
+        zIndex: zIndexVal,
         opacity: opacityVal,
         transformStyle: "preserve-3d",
         pointerEvents: "auto",
@@ -197,9 +225,7 @@ const MemoryCard = ({
         willChange: "transform, opacity",
       }}
     >
-      {/* Scale wrapper — intentionally flat (no transformStyle:preserve-3d)
-          so the GPU layer is rasterized at full native card size, then
-          the compositor downsamples → crisp at all scales. */}
+      {/* Scale wrapper — flat GPU layer rasterized at full cardWidth×cardHeight */}
       <motion.div
         style={{
           width: "100%",
@@ -210,31 +236,26 @@ const MemoryCard = ({
           willChange: "transform",
         }}
       >
-        {/* Spring-driven flip wrapper */}
+        {/* Dynamic Flip wrapper — rotates 0 -> 180deg during orbit transition */}
         <motion.div
           style={{
-            rotateY: flipY,
-            y: liftMV,
+            rotateY: flipAngle,
+            y: liftVal,
             transformStyle: "preserve-3d",
             width: "100%",
             height: "100%",
             position: "relative",
           }}
         >
-          {/* FRONT FACE — mirrored photo (shown when inactive) */}
-          <div
-            className={`absolute inset-0 w-full h-full rounded-2xl md:rounded-3xl overflow-hidden bg-neutral-950 ${
-              !isFocal ? "group-hover:scale-[1.03] transition-transform duration-500 ease-out" : ""
-            }`}
+          {/* FRONT FACE — mirrored photo (visible at rotateY: 0deg when in orbital ring) */}
+          <motion.div
+            className="absolute inset-0 w-full h-full rounded-2xl md:rounded-3xl overflow-hidden bg-neutral-950 group-hover:scale-[1.03] transition-transform duration-500 ease-out"
             style={{
               transform: "rotateY(0deg) translateZ(1px)",
               backfaceVisibility: "hidden",
               WebkitBackfaceVisibility: "hidden",
-              border: isFocal ? "2px solid rgba(0,212,255,0.95)" : "1px solid rgba(0,212,255,0.18)",
-              boxShadow: isFocal
-                ? "0 0 40px rgba(0,212,255,0.6), 0 20px 48px rgba(0,0,0,0.9)"
-                : "0 8px 24px rgba(0,0,0,0.7)",
-              transition: "border-color 0.8s ease, box-shadow 0.8s ease",
+              border: borderStyle,
+              boxShadow: shadowVal,
             }}
           >
             <div className="relative w-full h-full" style={{ transform: "scaleX(-1)" }}>
@@ -252,24 +273,20 @@ const MemoryCard = ({
             <div
               className="absolute inset-0 pointer-events-none"
               style={{
-                background: `linear-gradient(to top, rgba(0,0,0,${isFocal ? 0 : 0.28}), transparent 55%)`,
-                transition: "background 0.9s ease",
+                background: "linear-gradient(to top, rgba(0,0,0,0.28), transparent 55%)",
               }}
             />
-          </div>
+          </motion.div>
 
-          {/* BACK FACE — original photo (shown when focal / flipped) */}
-          <div
+          {/* BACK FACE — original photograph (visible at rotateY: 180deg in focal spotlight) */}
+          <motion.div
             className="absolute inset-0 w-full h-full rounded-2xl md:rounded-3xl overflow-hidden bg-neutral-950"
             style={{
               transform: "rotateY(180deg) translateZ(1px)",
               backfaceVisibility: "hidden",
               WebkitBackfaceVisibility: "hidden",
-              border: isFocal ? "2px solid rgba(0,212,255,0.95)" : "1px solid rgba(0,212,255,0.18)",
-              boxShadow: isFocal
-                ? "0 0 50px rgba(0,212,255,0.65), 0 28px 56px rgba(0,0,0,0.95)"
-                : "0 8px 24px rgba(0,0,0,0.7)",
-              transition: "border-color 0.8s ease, box-shadow 0.8s ease",
+              border: borderStyle,
+              boxShadow: shadowVal,
             }}
           >
             <Image
@@ -282,14 +299,14 @@ const MemoryCard = ({
               className="object-cover select-none pointer-events-none"
               priority={cardIndex < 6}
             />
-          </div>
+          </motion.div>
         </motion.div>
       </motion.div>
     </motion.div>
   );
 };
 
-// Pure helper: compute signed diff for card `i` given continuous progress `p`
+// Pure helper: compute signed angular difference for card `i` given progress `p`
 function getDiff(i, p) {
   const currentCenter = INITIAL_OFFSET_INDEX + p;
   let diff = (i - currentCenter) % TOTAL_CARDS;
@@ -309,24 +326,24 @@ const MemoriesSection = () => {
   });
 
   const [stageDimensions, setStageDimensions] = useState({ width: 1200, height: 700 });
-  const [step,      setStep]      = useState(0);
+  const [step, setStep] = useState(0);
   const stepRef = useRef(0);
-  const [focalStep, setFocalStep] = useState(0);
-  const focalStepRef = useRef(0);
 
-  // progressMV drives ALL card geometry — no React re-renders during orbit
+  // progressMV drives ALL orbital trajectories & flips continuously
   const progressMV = useMotionValue(0);
 
-  const [animDuration, setAnimDuration] = useState(ROTATION_DURATION);
-  const [modalPhoto,   setModalPhoto]   = useState(null);
+  const [modalPhoto, setModalPhoto] = useState(null);
 
-  const timeoutRef      = useRef(null);
+  const timeoutRef = useRef(null);
   const animControlsRef = useRef(null);
-  const isCancelledRef  = useRef(false);
+  const isCancelledRef = useRef(false);
   const scheduleNextRef = useRef(null);
 
   const handleActivePhotoClick = useCallback((src, index) => {
-    if (timeoutRef.current) { clearTimeout(timeoutRef.current); timeoutRef.current = null; }
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+      timeoutRef.current = null;
+    }
     if (animControlsRef.current) animControlsRef.current.stop();
     setModalPhoto({ src, title: `QUEST-IT Memory ${index + 1}` });
   }, []);
@@ -336,29 +353,29 @@ const MemoriesSection = () => {
     if (scheduleNextRef.current) scheduleNextRef.current();
   }, []);
 
-  // ─── Core orbital animator ─────────────────────────────────────────────────
+  // ─── Core Orbital Transition ───────────────────────────────────────────────
   const rotateToStep = useCallback((targetStep, customDuration = ROTATION_DURATION) => {
     if (isCancelledRef.current) return;
-    if (timeoutRef.current) { clearTimeout(timeoutRef.current); timeoutRef.current = null; }
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+      timeoutRef.current = null;
+    }
     if (animControlsRef.current) animControlsRef.current.stop();
 
     stepRef.current = targetStep;
-    focalStepRef.current = targetStep;
     setStep(targetStep);
-    setFocalStep(targetStep);
-    setAnimDuration(customDuration);
 
     animControlsRef.current = animate(progressMV, targetStep, {
       duration: customDuration,
       ease: ORBIT_EASE,
       onComplete: () => {
         if (isCancelledRef.current) return;
-        setAnimDuration(ROTATION_DURATION);
         if (scheduleNextRef.current) scheduleNextRef.current();
       },
     });
   }, [progressMV]);
 
+  // Schedule next auto-rotation: exactly 3 seconds active resting time per card
   scheduleNextRef.current = () => {
     if (timeoutRef.current) clearTimeout(timeoutRef.current);
     timeoutRef.current = setTimeout(() => {
@@ -368,25 +385,20 @@ const MemoriesSection = () => {
   };
 
   const handleCardClick = useCallback((targetIndex) => {
-    const curActive = focalStepRef.current !== null
-      ? mod(INITIAL_OFFSET_INDEX + focalStepRef.current, TOTAL_CARDS)
-      : INITIAL_OFFSET_INDEX;
-    if (targetIndex === curActive) return;
-
     const currentVal = progressMV.get();
     const baseK = Math.round((currentVal - (targetIndex - INITIAL_OFFSET_INDEX)) / TOTAL_CARDS);
     const targetStep = targetIndex - INITIAL_OFFSET_INDEX + baseK * TOTAL_CARDS;
-    if (targetStep === focalStepRef.current) return;
+    if (targetStep === stepRef.current) return;
 
     const dist = Math.abs(targetStep - currentVal);
     const customDuration = dist <= 1
       ? ROTATION_DURATION
-      : ROTATION_DURATION * Math.min(1 + (dist - 1) * 0.3, 1.7);
+      : ROTATION_DURATION * Math.min(1 + (dist - 1) * 0.3, 1.6);
 
     rotateToStep(targetStep, customDuration);
   }, [progressMV, rotateToStep]);
 
-  // Touch swipe
+  // Mobile Touch Swipe
   const touchStartX = useRef(0);
   const touchStartY = useRef(0);
   const handleTouchStart = (e) => {
@@ -401,26 +413,35 @@ const MemoriesSection = () => {
     }
   };
 
-  // ─── Viewport lifecycle ────────────────────────────────────────────────────
+  // ─── Viewport Lifecycle: Start only when in view, calm 3s arrival ─────────
   useEffect(() => {
     if (!isInView) {
       isCancelledRef.current = true;
-      if (timeoutRef.current) { clearTimeout(timeoutRef.current); timeoutRef.current = null; }
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+        timeoutRef.current = null;
+      }
       if (animControlsRef.current) animControlsRef.current.stop();
       return;
     }
+
     isCancelledRef.current = false;
+    // Exactly 3 seconds arrival resting window for the initial card
     timeoutRef.current = setTimeout(() => {
       if (!isCancelledRef.current) rotateToStep(stepRef.current + 1, ROTATION_DURATION);
     }, INITIAL_ARRIVAL_PAUSE_MS);
+
     return () => {
       isCancelledRef.current = true;
-      if (timeoutRef.current) { clearTimeout(timeoutRef.current); timeoutRef.current = null; }
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+        timeoutRef.current = null;
+      }
       if (animControlsRef.current) animControlsRef.current.stop();
     };
   }, [isInView, rotateToStep]);
 
-  // ResizeObserver
+  // ResizeObserver for Container Dimensions
   useEffect(() => {
     if (!stageRef.current) return;
     const observer = new ResizeObserver(([entry]) => {
@@ -435,7 +456,7 @@ const MemoriesSection = () => {
     return () => observer.disconnect();
   }, []);
 
-  // ─── Responsive geometry ───────────────────────────────────────────────────
+  // ─── Responsive Geometry ───────────────────────────────────────────────────
   const geo = useMemo(() => {
     const W = stageDimensions.width;
     const H = stageDimensions.height;
@@ -453,13 +474,13 @@ const MemoriesSection = () => {
       };
     }
     const tablet = W < 1024;
-    const slots  = tablet ? 6 : 8;
-    const rawCw  = tablet ? Math.min(W * 0.28, H * 0.30) : Math.min(W * 0.22, H * 0.35);
-    const cw     = tablet
+    const slots = tablet ? 6 : 8;
+    const rawCw = tablet ? Math.min(W * 0.28, H * 0.30) : Math.min(W * 0.22, H * 0.35);
+    const cw = tablet
       ? Math.min(Math.max(Math.round(rawCw), 230), 290)
       : Math.min(Math.max(Math.round(rawCw), 280), 360);
-    const ch  = Math.round(cw * 0.72);
-    const rx  = Math.max(Math.round((W * 0.86 - cw * 0.45) / 2), 100);
+    const ch = Math.round(cw * 0.72);
+    const rx = Math.max(Math.round((W * 0.86 - cw * 0.45) / 2), 100);
     return {
       isMobile: false,
       Rx: rx, Ry: Math.round(rx * 0.32), Rz: Math.round(rx * 0.44),
@@ -471,9 +492,6 @@ const MemoriesSection = () => {
 
   const { isMobile, Rx, Ry, Rz, cardWidth, cardHeight, angularSpacing, maxDiff, fadeZone, liftY } = geo;
 
-  // focalIndex: which card index is currently focal (for MemoryCard.isFocal prop)
-  const focalCardIndex = mod(INITIAL_OFFSET_INDEX + focalStep, TOTAL_CARDS);
-
   return (
     <section
       ref={sectionRef}
@@ -482,7 +500,7 @@ const MemoriesSection = () => {
       }`}
       style={isMobile ? undefined : { height: "min(95dvh, 800px)", minHeight: "560px" }}
     >
-      {/* Stage */}
+      {/* 3D Stage */}
       <div
         ref={stageRef}
         onTouchStart={handleTouchStart}
@@ -540,7 +558,7 @@ const MemoriesSection = () => {
             </div>
           </div>
 
-          {/* Orbital Cards — each derives its own geometry via useTransform */}
+          {/* Orbital Cards */}
           {ORBITAL_IMAGES.map((_, i) => (
             <MemoryCard
               key={i}
@@ -548,14 +566,12 @@ const MemoriesSection = () => {
               progressMV={progressMV}
               cardWidth={cardWidth}
               cardHeight={cardHeight}
-              isFocal={i === focalCardIndex}
               liftY={liftY}
               isMobile={isMobile}
               Rx={Rx} Ry={Ry} Rz={Rz}
               angularSpacing={angularSpacing}
               maxDiff={maxDiff}
               fadeZone={fadeZone}
-              animDuration={animDuration}
               onCardClick={handleCardClick}
               onActivePhotoClick={handleActivePhotoClick}
             />
@@ -574,7 +590,7 @@ const MemoriesSection = () => {
               <ChevronLeft className="w-4 h-4 sm:w-5 sm:h-5" />
             </button>
             <span className="font-mono text-xs sm:text-sm tracking-widest text-cyan-400/90 font-medium">
-              {String(mod(INITIAL_OFFSET_INDEX + (focalStep !== null ? focalStep : step), TOTAL_CARDS) + 1).padStart(2, "0")}{" "}
+              {String(mod(INITIAL_OFFSET_INDEX + step, TOTAL_CARDS) + 1).padStart(2, "0")}{" "}
               <span className="text-neutral-500">/</span> {String(TOTAL_CARDS).padStart(2, "0")}
             </span>
             <button
