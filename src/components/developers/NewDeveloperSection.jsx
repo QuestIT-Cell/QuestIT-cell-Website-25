@@ -28,6 +28,16 @@ const DEVELOPER_WORK_TITLES = {
   "Sankalp Mane": "Cross-Device Layout Optimization & Event Modules",
 };
 
+const getCardDesignation = (name) => {
+  if (name === "Atharva Lotankar" || name === "Shravanya Andhale") {
+    return "TECH HEAD";
+  }
+  if (name === "Jay Kerkar" || name === "Pranav Titambe") {
+    return "EX TECH MEMBER";
+  }
+  return "TECH MEMBER";
+};
+
 const UNIFORM_STATS = {
   "Atharva Lotankar": [
     { label: "CODE", value: 94 },
@@ -100,6 +110,7 @@ function CollectibleTeamCard({
   const [flipClass, setFlipClass] = useState("");
 
   const workTitle = DEVELOPER_WORK_TITLES[member.name] || member.role || "Developer";
+  const designation = getCardDesignation(member.name);
   const stats = UNIFORM_STATS[member.name] || [
     { label: "CODE", value: 90 },
     { label: "SYSTEMS", value: 88 },
@@ -184,7 +195,7 @@ function CollectibleTeamCard({
               <div className="card-frame">
                 {/* Header */}
                 <div className="card-header">
-                  <span>TEAM MEMBER</span>
+                  <span title={designation}>{designation}</span>
                   <b className="gem" />
                   <span>{year}</span>
                 </div>
@@ -522,16 +533,11 @@ export default function NewDeveloperSection() {
         <div className="showcase-sticky">
           {/* Background Typography Parallax */}
           <div className="showcase-heading" ref={headingRef}>
-            QUEST IT // ARCHITECTS
+            QUEST IT // DEVELOPERS
           </div>
 
           {/* Top Controls Bar */}
           <div className="showcase-nav-bar">
-            <div className="dev-hero-badge">
-              <Sparkles size={12} />
-              <span>COLLECTIBLE CORPS ✦ 2026 EDITION</span>
-            </div>
-
             <div className="dev-view-switch" role="tablist" aria-label="View switch">
               <button
                 className={`dev-view-btn ${viewMode === "showcase" ? "is-active" : ""}`}
@@ -605,12 +611,7 @@ export default function NewDeveloperSection() {
         /* ───────── Grid Mode ───────── */
         <div className="dev-grid-section">
           {/* Top Controls Bar for Grid View */}
-          <div className="flex justify-between items-center mb-8 px-4">
-            <div className="dev-hero-badge">
-              <Sparkles size={12} />
-              <span>COLLECTIBLE CORPS ✦ ALL 11 ARCHITECTS</span>
-            </div>
-
+          <div className="flex justify-end items-center mb-8 px-4">
             <div className="dev-view-switch" role="tablist">
               <button
                 className={`dev-view-btn ${viewMode === "showcase" ? "is-active" : ""}`}

@@ -11,9 +11,12 @@ import { InstallPromptButton } from "./utils";
 // App's External Imports
 import Link from "next/link";
 import Image from "next/image";
+import { usePathname } from "next/navigation";
 import { ChevronDown, Menu, X, ExternalLink } from "lucide-react";
 
 const Header = () => {
+  const pathname = usePathname();
+  const isDevelopersPage = pathname?.startsWith("/developers");
   const [is_sticky, set_is_sticky] = useState(false);
   const [is_hidden, set_is_hidden] = useState(false);
   const [is_sidebar_open, set_is_sidebar_open] = useState(false);
@@ -32,6 +35,17 @@ const Header = () => {
         set_is_sticky(false);
       }
 
+      // On developer section, don't show navbar when scrolling up to avoid breaking experience
+      if (isDevelopersPage) {
+        if (currentScrollY > 40) {
+          set_is_hidden(true);
+        } else {
+          set_is_hidden(false);
+        }
+        lastScrollY = currentScrollY;
+        return;
+      }
+
       // Hide/push back navbar when scrolling down, show when scrolling up
       if (currentScrollY > 70 && currentScrollY > lastScrollY + 4) {
         set_is_hidden(true);
@@ -47,7 +61,7 @@ const Header = () => {
     return () => {
       window.removeEventListener("scroll", handleScroll);
     };
-  }, []);
+  }, [isDevelopersPage]);
 
   // Prevent background scroll when mobile sidebar is open
   useEffect(() => {
