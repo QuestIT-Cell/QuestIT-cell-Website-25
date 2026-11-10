@@ -5,7 +5,8 @@ import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { ChevronDown, ExternalLink } from "lucide-react";
+import { ChevronDown, ExternalLink, Mail, ArrowRight } from "lucide-react";
+import { FaGithub, FaLinkedin, FaInstagram } from "react-icons/fa";
 import menu from "@/constants/menu";
 
 /* ─── Sliding-pill indicator helper for desktop ──────────────────────────── */
@@ -201,17 +202,18 @@ const Header = () => {
           transition: isHidden
             ? "transform .55s cubic-bezier(.65,0,.35,1), opacity .35s .1s, filter .45s"
             : "transform .7s cubic-bezier(.34,1.5,.64,1), opacity .4s, filter .5s",
-          transform: isHidden ? "translateY(-140%) scale(.9)" : "translateY(0) scale(1)",
-          opacity: isHidden ? 0 : 1,
-          filter: isHidden ? "blur(10px)" : "none",
+          transform: isHidden && !sheetOpen ? "translateY(-140%) scale(.9)" : "translateY(0) scale(1)",
+          opacity: isHidden && !sheetOpen ? 0 : 1,
+          filter: isHidden && !sheetOpen ? "blur(10px)" : "none",
         }}
       >
         <div className="relative w-full flex items-center justify-between min-h-[50px] md:min-h-[54px]">
-          {/* 1. Left Corner: Quest IT Logo */}
+          {/* 1. Left Corner: Quest IT Logo (Sole logo in both desktop & mobile) */}
           <div className="flex items-center flex-shrink-0 z-20">
             <Link
               href="/"
               aria-label="Quest IT Home"
+              onClick={() => setSheetOpen(false)}
               className="pointer-events-auto block transition-transform duration-200 hover:scale-[1.03] active:scale-95"
             >
               <Image
@@ -452,36 +454,20 @@ const Header = () => {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -8 }}
             transition={{ duration: 0.28, ease: [0.16, 1, 0.3, 1] }}
-            className="fixed inset-0 z-[10005] md:hidden flex flex-col justify-between bg-[#08090d]/98 backdrop-blur-2xl text-white select-none px-6 pt-[calc(env(safe-area-inset-top,0px)+18px)] pb-[calc(env(safe-area-inset-bottom,0px)+24px)]"
+            className="fixed inset-0 z-[10005] md:hidden flex flex-col justify-between bg-[#08090d]/98 backdrop-blur-2xl text-white select-none px-6 pt-[calc(env(safe-area-inset-top,0px)+82px)] pb-[calc(env(safe-area-inset-bottom,0px)+24px)]"
           >
-            {/* Top Bar inside sheet: Brand identity aligned with the outside button */}
-            <div className="flex items-center justify-between pb-6 border-b border-white/[0.08]">
-              <div className="flex items-center gap-3">
-                <Link
-                  href="/"
-                  onClick={() => setSheetOpen(false)}
-                  className="block"
-                >
-                  <Image
-                    src="/images/logo-navbar.webp"
-                    width={398}
-                    height={138}
-                    alt="Quest IT"
-                    unoptimized
-                    className="h-8 w-auto object-contain opacity-90"
-                  />
-                </Link>
-                <div className="h-4 w-px bg-white/20" />
-                <span className="text-[11px] font-mono tracking-wider text-neutral-400">
-                  VESIT IT CELL
-                </span>
-              </div>
-              {/* Spacer matching the width of the morphing button above it */}
-              <div className="w-11 h-11 pointer-events-none" />
+            {/* Top divider & section badge (No duplicate logo — outside logo sits on top) */}
+            <div className="flex items-center justify-between pb-3 border-b border-white/[0.08]">
+              <span className="text-[11px] font-mono tracking-widest uppercase text-neutral-400">
+                Navigation
+              </span>
+              <span className="text-[11px] font-mono tracking-wider text-cyan-400/80">
+                VESIT IT CELL
+              </span>
             </div>
 
             {/* Navigation links: Editorial typography with numbered markers */}
-            <nav className="my-auto py-8">
+            <nav className="my-auto py-4">
               <motion.ul
                 initial="hidden"
                 animate="visible"
@@ -490,7 +476,7 @@ const Header = () => {
                     transition: { staggerChildren: 0.04, delayChildren: 0.05 },
                   },
                 }}
-                className="space-y-4 max-w-sm"
+                className="space-y-3.5 max-w-sm"
               >
                 {menu.map((item, i) => {
                   const active = isItemActive(item);
@@ -540,55 +526,68 @@ const Header = () => {
                   );
                 })}
               </motion.ul>
-            </nav>
 
-            {/* Bottom editorial footer: human details, motto & clean text socials */}
-            <div className="pt-6 border-t border-white/[0.08] flex flex-col gap-4">
-              <div className="flex items-center justify-between text-xs text-neutral-400">
-                <span className="italic font-serif text-neutral-400">
-                  Curiosity. Code. Community.
-                </span>
+              {/* ── Prominent High-Visibility Contact Us CTA Button ── */}
+              <div className="pt-5">
                 <Link
                   href="/#contact"
                   onClick={() => setSheetOpen(false)}
-                  className="text-cyan-400 hover:text-cyan-300 font-mono transition-colors"
+                  className="group flex items-center justify-between w-full px-5 py-3.5 rounded-2xl bg-cyan-400 text-black font-semibold text-sm tracking-wide shadow-[0_4px_20px_rgba(34,211,238,0.25)] hover:bg-cyan-300 active:scale-[0.98] transition-all"
                 >
-                  Contact &rarr;
+                  <div className="flex items-center gap-2.5">
+                    <Mail className="w-4 h-4 text-black" />
+                    <span>Contact Us</span>
+                  </div>
+                  <ArrowRight className="w-4 h-4 text-black transition-transform duration-200 group-hover:translate-x-1" />
                 </Link>
               </div>
+            </nav>
 
-              <div className="flex items-center justify-between pt-1">
-                <div className="flex items-center gap-4 text-xs font-mono text-neutral-400">
+            {/* Bottom editorial footer: social icons & human details */}
+            <div className="pt-4 border-t border-white/[0.08] flex flex-col gap-3">
+              <div className="flex items-center justify-between">
+                {/* Social Media Icons */}
+                <div className="flex items-center gap-2.5">
                   <a
                     href="https://github.com/QuestIT-Cell"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="hover:text-white transition-colors"
+                    aria-label="GitHub"
+                    className="w-10 h-10 rounded-full border border-white/15 bg-white/5 flex items-center justify-center text-neutral-300 hover:text-white hover:border-cyan-400/60 hover:bg-white/10 active:scale-95 transition-all"
                   >
-                    GitHub
+                    <FaGithub className="w-4 h-4" />
                   </a>
-                  <span>/</span>
                   <a
                     href="https://www.linkedin.com/company/questit-vesit"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="hover:text-white transition-colors"
+                    aria-label="LinkedIn"
+                    className="w-10 h-10 rounded-full border border-white/15 bg-white/5 flex items-center justify-center text-neutral-300 hover:text-cyan-400 hover:border-cyan-400/60 hover:bg-white/10 active:scale-95 transition-all"
                   >
-                    LinkedIn
+                    <FaLinkedin className="w-4 h-4" />
                   </a>
-                  <span>/</span>
                   <a
                     href="https://www.instagram.com/questit_cell?igsh=MWgzNGdzYnUxanF5Yg=="
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="hover:text-white transition-colors"
+                    aria-label="Instagram"
+                    className="w-10 h-10 rounded-full border border-white/15 bg-white/5 flex items-center justify-center text-neutral-300 hover:text-pink-400 hover:border-pink-400/60 hover:bg-white/10 active:scale-95 transition-all"
                   >
-                    Instagram
+                    <FaInstagram className="w-4 h-4" />
                   </a>
                 </div>
 
-                <span className="text-[10px] font-mono text-neutral-500">
-                  © {new Date().getFullYear()}
+                <span className="text-[11px] font-mono text-neutral-500">
+                  © {new Date().getFullYear()} QUEST IT
+                </span>
+              </div>
+
+              <div className="flex items-center justify-between text-xs text-neutral-500">
+                <span className="italic font-serif text-neutral-400 text-xs">
+                  Curiosity. Code. Community.
+                </span>
+                <span className="font-mono text-[10px] tracking-wider text-neutral-500">
+                  DEPT OF IT
                 </span>
               </div>
             </div>

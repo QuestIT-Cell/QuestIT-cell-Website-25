@@ -14,13 +14,13 @@ import PhotoLightboxModal from "./PhotoLightboxModal";
 
 /* ─── Orbital Memories Exhibition Images ───────────────────────────────────── */
 const ORBITAL_IMAGES = [
+  "/images/gallery-images/Orbital/IMG_2522_1920x1080.webp",
   "/images/gallery-images/Orbital/diagonal_9.webp",
   "/images/gallery-images/Orbital/diagonal_12.webp",
   "/images/gallery-images/Orbital/Council_photos_genesis.webp",
   "/images/gallery-images/Orbital/download_1920x1080.webp",
   "/images/gallery-images/Orbital/firstmeet_1920x1080.webp",
   "/images/gallery-images/Orbital/Tech-Team.webp",
-  "/images/gallery-images/Orbital/IMG_2522_1920x1080.webp",
   "/images/gallery-images/Orbital/IMG_2829_1920x1080.webp",
   "/images/gallery-images/Orbital/IMG_3955_1920x1080.webp",
   "/images/gallery-images/Orbital/rshb-vwq_1920x1080.webp",
@@ -135,15 +135,16 @@ const MemoryCard = ({
     const minOp = isMobile ? 0.72 : 0.65;
     return (minOp + depthFactor * (1 - minOp)) * fade;
   });
-  const filterVal = useTransform(progressMV, (p) => {
+  // Dim overlay opacity for non-focal cards (Zero CSS filter -> preserves 100% crystal clear sharpness)
+  const dimOpacity = useTransform(progressMV, (p) => {
     const diff = getDiff(cardIndex, p);
     const absDiff = Math.abs(diff);
-    if (absDiff < 0.35) return "none";
+    if (absDiff < 0.35) return 0;
     const theta = diff * angularSpacing;
     const cosT = Math.cos(theta);
     const depthFactor = (cosT + 1) / 2;
     const b = isMobile ? 0.88 + depthFactor * 0.12 : 0.85 + depthFactor * 0.15;
-    return `brightness(${b})`;
+    return Math.max(0, Math.min(1, 1 - b));
   });
   const zIndexVal = useTransform(progressMV, (p) => {
     const diff = getDiff(cardIndex, p);
@@ -174,14 +175,11 @@ const MemoryCard = ({
     return `0 0 ${glow}px rgba(0, 212, 255, ${t * 0.65}), 0 28px 56px rgba(0, 0, 0, 0.95)`;
   });
 
+  // 3D Orbital Trajectory + Scale combined in one transform to prevent matrix rounding blur
   const posTransform = useTransform(
-    [transformX, transformY, transformZ, rotX, rotY, rotZ],
-    ([x, y, z, rx, ry, rz]) =>
-      `translate3d(${x}px,${y}px,${z}px) rotateX(${rx}deg) rotateY(${ry}deg) rotateZ(${rz}deg)`
-  );
-  const scaleTransform = useTransform(
-    scaleVal,
-    (s) => `scale(${s}) translateZ(0)`
+    [transformX, transformY, transformZ, rotX, rotY, rotZ, scaleVal],
+    ([x, y, z, rx, ry, rz, s]) =>
+      `translate3d(${x}px,${y}px,${z}px) rotateX(${rx}deg) rotateY(${ry}deg) rotateZ(${rz}deg) scale(${s})`
   );
 
   const handleClick = useCallback(() => {
@@ -222,84 +220,89 @@ const MemoryCard = ({
         pointerEvents: "auto",
         WebkitTapHighlightColor: "transparent",
         outline: "none",
-        willChange: "transform, opacity",
+        imageRendering: "-webkit-optimize-contrast",
+        WebkitFontSmoothing: "subpixel-antialiased",
       }}
     >
-      {/* Scale wrapper — flat GPU layer rasterized at full cardWidth×cardHeight */}
+      {/* Dynamic Flip wrapper — rotates 0 -> 180deg during orbit transition */}
       <motion.div
         style={{
+          rotateY: flipAngle,
+          y: liftVal,
+          transformStyle: "preserve-3d",
           width: "100%",
           height: "100%",
-          transform: scaleTransform,
-          filter: filterVal,
-          transformOrigin: "center center",
-          willChange: "transform",
+          position: "relative",
         }}
       >
-        {/* Dynamic Flip wrapper — rotates 0 -> 180deg during orbit transition */}
+        {/* FRONT FACE — mirrored photo (visible at rotateY: 0deg when in orbital ring) */}
         <motion.div
+          className="absolute inset-0 w-full h-full rounded-2xl md:rounded-3xl overflow-hidden bg-neutral-950 group-hover:scale-[1.03] transition-transform duration-500 ease-out"
           style={{
-            rotateY: flipAngle,
-            y: liftVal,
-            transformStyle: "preserve-3d",
-            width: "100%",
-            height: "100%",
-            position: "relative",
+            transform: "rotateY(0deg) translateZ(1px)",
+            backfaceVisibility: "hidden",
+            WebkitBackfaceVisibility: "hidden",
+            border: borderStyle,
+            boxShadow: shadowVal,
+            isolation: "isolate",
+            imageRendering: "-webkit-optimize-contrast",
           }}
         >
-          {/* FRONT FACE — mirrored photo (visible at rotateY: 0deg when in orbital ring) */}
-          <motion.div
-            className="absolute inset-0 w-full h-full rounded-2xl md:rounded-3xl overflow-hidden bg-neutral-950 group-hover:scale-[1.03] transition-transform duration-500 ease-out"
-            style={{
-              transform: "rotateY(0deg) translateZ(1px)",
-              backfaceVisibility: "hidden",
-              WebkitBackfaceVisibility: "hidden",
-              border: borderStyle,
-              boxShadow: shadowVal,
-            }}
-          >
-            <div className="relative w-full h-full" style={{ transform: "scaleX(-1)" }}>
-              <Image
-                src={src}
-                alt={`Quest-IT Memory ${cardIndex + 1} (Mirrored)`}
-                fill
-                quality={100}
-                unoptimized
-                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 70vw, 900px"
-                className="object-cover select-none pointer-events-none"
-                priority={cardIndex < 6}
-              />
-            </div>
-            <div
-              className="absolute inset-0 pointer-events-none"
-              style={{
-                background: "linear-gradient(to top, rgba(0,0,0,0.28), transparent 55%)",
-              }}
-            />
-          </motion.div>
-
-          {/* BACK FACE — original photograph (visible at rotateY: 180deg in focal spotlight) */}
-          <motion.div
-            className="absolute inset-0 w-full h-full rounded-2xl md:rounded-3xl overflow-hidden bg-neutral-950"
-            style={{
-              transform: "rotateY(180deg) translateZ(1px)",
-              backfaceVisibility: "hidden",
-              WebkitBackfaceVisibility: "hidden",
-              border: borderStyle,
-              boxShadow: shadowVal,
-            }}
-          >
+          <div className="relative w-full h-full" style={{ transform: "scaleX(-1)" }}>
             <Image
               src={src}
-              alt={`Quest-IT Memory ${cardIndex + 1}`}
+              alt={`Quest-IT Memory ${cardIndex + 1} (Mirrored)`}
               fill
               quality={100}
               unoptimized
-              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 70vw, 900px"
+              sizes="(max-width: 768px) 50vw, (max-width: 1200px) 40vw, 450px"
               className="object-cover select-none pointer-events-none"
+              style={{ imageRendering: "-webkit-optimize-contrast" }}
               priority={cardIndex < 6}
             />
-          </motion.div>
+          </div>
+          {/* Subtle dimming for orbit cards (no CSS filter blur) */}
+          <motion.div
+            className="absolute inset-0 bg-black pointer-events-none"
+            style={{ opacity: dimOpacity }}
+          />
+          <div
+            className="absolute inset-0 pointer-events-none"
+            style={{
+              background: "linear-gradient(to top, rgba(0,0,0,0.28), transparent 55%)",
+            }}
+          />
+        </motion.div>
+
+        {/* BACK FACE — original photograph (visible at rotateY: 180deg in focal spotlight) */}
+        <motion.div
+          className="absolute inset-0 w-full h-full rounded-2xl md:rounded-3xl overflow-hidden bg-neutral-950"
+          style={{
+            transform: "rotateY(180deg) translateZ(1px)",
+            backfaceVisibility: "hidden",
+            WebkitBackfaceVisibility: "hidden",
+            border: borderStyle,
+            boxShadow: shadowVal,
+            isolation: "isolate",
+            imageRendering: "-webkit-optimize-contrast",
+          }}
+        >
+          <Image
+            src={src}
+            alt={`Quest-IT Memory ${cardIndex + 1}`}
+            fill
+            quality={100}
+            unoptimized
+            sizes="(max-width: 768px) 50vw, (max-width: 1200px) 40vw, 450px"
+            className="object-cover select-none pointer-events-none"
+            style={{ imageRendering: "-webkit-optimize-contrast" }}
+            priority={cardIndex < 6}
+          />
+          {/* Subtle dimming for orbit cards (no CSS filter blur) */}
+          <motion.div
+            className="absolute inset-0 bg-black pointer-events-none"
+            style={{ opacity: dimOpacity }}
+          />
         </motion.div>
       </motion.div>
     </motion.div>
