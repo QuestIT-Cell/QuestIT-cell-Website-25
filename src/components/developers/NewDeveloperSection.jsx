@@ -419,13 +419,10 @@ export default function NewDeveloperSection() {
     let raf = 0;
     let running = false;
 
-    const NAVBAR_OFFSET = 80;
-
     const readTarget = () => {
       const rect = section.getBoundingClientRect();
-      const distance = section.offsetHeight - (window.innerHeight - NAVBAR_OFFSET);
-      const scrolled = NAVBAR_OFFSET - rect.top;
-      target = distance > 0 ? Math.min(1, Math.max(0, scrolled / distance)) : 0;
+      const distance = section.offsetHeight - window.innerHeight;
+      target = distance > 0 ? Math.min(1, Math.max(0, -rect.top / distance)) : 0;
     };
 
     const render = () => {
@@ -497,7 +494,7 @@ export default function NewDeveloperSection() {
     const measure = () => {
       // Calculate travel distance needed to translate all 11 cards cleanly
       maxTravel = Math.max(0, track.scrollWidth - window.innerWidth + 140);
-      section.style.height = `${window.innerHeight - NAVBAR_OFFSET + maxTravel}px`;
+      section.style.height = `${window.innerHeight + maxTravel}px`;
       centers = items.map((el) => el.offsetLeft + el.offsetWidth / 2);
       readTarget();
       current = target;

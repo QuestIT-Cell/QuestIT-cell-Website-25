@@ -66,15 +66,7 @@ const DevelopersPageWrapper = () => {
   };
 
   return (
-    <div
-      className="relative w-full min-h-screen bg-[#060814] pt-20"
-      style={{
-        backgroundImage: "url('/images/developer_bg.jpg')",
-        backgroundSize: "cover",
-        backgroundPosition: "center",
-        backgroundAttachment: "fixed",
-      }}
-    >
+    <div className="relative w-full min-h-screen bg-[#09070f]">
       {/* ── Prominent Floating Version Toggle Dock ── */}
       <div
         className="fixed bottom-6 left-1/2 -translate-x-1/2 z-[10002] flex items-center p-1.5 rounded-full bg-neutral-950/95 backdrop-blur-xl border border-neutral-700/80 shadow-[0_8px_32px_rgba(0,0,0,0.85)] select-none transition-all duration-300 hover:border-cyan-400/80 hover:shadow-[0_8px_32px_rgba(6,182,212,0.25)]"

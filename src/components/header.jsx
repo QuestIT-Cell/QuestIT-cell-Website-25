@@ -26,6 +26,13 @@ const Header = () => {
     let lastScrollY = window.scrollY;
 
     const handleScroll = () => {
+      // On developer section, header stays relative in normal flow at the top of the page
+      if (isDevelopersPage) {
+        set_is_sticky(false);
+        set_is_hidden(false);
+        return;
+      }
+
       const currentScrollY = window.scrollY;
 
       // Make sticky once scrolled past top threshold
@@ -33,17 +40,6 @@ const Header = () => {
         set_is_sticky(true);
       } else {
         set_is_sticky(false);
-      }
-
-      // On developer section, don't show navbar when scrolling up to avoid breaking experience
-      if (isDevelopersPage) {
-        if (currentScrollY > 40) {
-          set_is_hidden(true);
-        } else {
-          set_is_hidden(false);
-        }
-        lastScrollY = currentScrollY;
-        return;
       }
 
       // Hide/push back navbar when scrolling down, show when scrolling up
@@ -106,14 +102,16 @@ const Header = () => {
   return (
     <>
       <header
-        className={`flex left-0 top-0 w-full items-center z-[10000] transition-all duration-300 ease-in-out ${
-          is_hidden && !is_sidebar_open
+        className={`flex w-full items-center z-[10000] transition-all duration-300 ease-in-out ${
+          isDevelopersPage
+            ? "relative bg-black py-4 border-b border-white/10"
+            : is_sticky
+            ? "fixed left-0 top-0 w-full border-b border-white/10 py-2 backdrop-blur-[12px] bg-black/85 shadow-[0_4px_25px_rgba(0,0,0,0.8)]"
+            : "absolute left-0 top-0 bg-black py-4"
+        } ${
+          !isDevelopersPage && is_hidden && !is_sidebar_open
             ? "-translate-y-full opacity-0 pointer-events-none"
             : "translate-y-0 opacity-100"
-        } ${
-          is_sticky
-            ? "fixed w-full border-b border-white/10 py-2 backdrop-blur-[12px] bg-black/85 shadow-[0_4px_25px_rgba(0,0,0,0.8)]"
-            : "absolute bg-black py-4"
         }`}
       >
         <div className="w-full px-4 md:px-8 lg:px-12">
