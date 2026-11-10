@@ -107,7 +107,6 @@ function CollectibleTeamCard({
   const frameId = useRef(0);
   const [imgFailed, setImgFailed] = useState(false);
   const [isFlipped, setIsFlipped] = useState(false);
-  const [flipClass, setFlipClass] = useState("");
 
   const workTitle = DEVELOPER_WORK_TITLES[member.name] || member.role || "Developer";
   const designation = getCardDesignation(member.name);
@@ -131,8 +130,8 @@ function CollectibleTeamCard({
       el.style.setProperty("--my", `${(y * 100).toFixed(1)}%`);
       el.style.setProperty("--px", (x - 0.5).toFixed(3));
       el.style.setProperty("--py", (y - 0.5).toFixed(3));
-      el.style.setProperty("--ry", `${((x - 0.5) * 22).toFixed(2)}deg`);
-      el.style.setProperty("--rx", `${((0.5 - y) * 22).toFixed(2)}deg`);
+      el.style.setProperty("--ry", `${((x - 0.5) * 20).toFixed(2)}deg`);
+      el.style.setProperty("--rx", `${((0.5 - y) * 20).toFixed(2)}deg`);
     });
   };
 
@@ -155,20 +154,12 @@ function CollectibleTeamCard({
     if (e.target.closest("a") || e.target.closest("button.dossier-contact-btn")) {
       return;
     }
-
-    const nextFlipped = !isFlipped;
-    setFlipClass(nextFlipped ? "is-flipping-to-back" : "is-flipping-to-front");
-    setIsFlipped(nextFlipped);
-
-    // Clear active animation class after full 3D vault completes
-    setTimeout(() => {
-      setFlipClass("");
-    }, 850);
+    setIsFlipped((prev) => !prev);
   };
 
   return (
     <div
-      className={`team-card ${isCenter ? "is-center" : ""} ${flipClass}`}
+      className={`team-card ${isCenter ? "is-center" : ""}`}
       ref={cardRef}
       onPointerMove={handlePointerMove}
       onPointerEnter={handlePointerEnter}
@@ -186,13 +177,13 @@ function CollectibleTeamCard({
     >
       <div className="card-3d">
         <div className={`card-flipper ${isFlipped ? "is-flipped" : ""}`}>
-          {/* Specular flip shine overlay */}
-          <div className="card-flip-shine" />
-
           {/* ══════════ FRONT FACE ══════════ */}
           <div className="card-face card-face-front">
             <div className="card-body">
               <div className="card-frame">
+                {/* White shine sweep contained strictly in card frame */}
+                <div className="card-flip-shine" />
+
                 {/* Header */}
                 <div className="card-header">
                   <span title={designation}>{designation}</span>
@@ -275,6 +266,9 @@ function CollectibleTeamCard({
           <div className="card-face card-face-back">
             <div className="card-body">
               <div className="dossier-frame">
+                {/* White shine sweep contained strictly in dossier frame */}
+                <div className="card-flip-shine" />
+
                 {/* Dossier Header */}
                 <div className="card-header">
                   <span>DOSSIER</span>
@@ -425,10 +419,13 @@ export default function NewDeveloperSection() {
     let raf = 0;
     let running = false;
 
+    const NAVBAR_OFFSET = 80;
+
     const readTarget = () => {
       const rect = section.getBoundingClientRect();
-      const distance = section.offsetHeight - window.innerHeight;
-      target = distance > 0 ? Math.min(1, Math.max(0, -rect.top / distance)) : 0;
+      const distance = section.offsetHeight - (window.innerHeight - NAVBAR_OFFSET);
+      const scrolled = NAVBAR_OFFSET - rect.top;
+      target = distance > 0 ? Math.min(1, Math.max(0, scrolled / distance)) : 0;
     };
 
     const render = () => {
@@ -500,7 +497,7 @@ export default function NewDeveloperSection() {
     const measure = () => {
       // Calculate travel distance needed to translate all 11 cards cleanly
       maxTravel = Math.max(0, track.scrollWidth - window.innerWidth + 140);
-      section.style.height = `${window.innerHeight + maxTravel}px`;
+      section.style.height = `${window.innerHeight - NAVBAR_OFFSET + maxTravel}px`;
       centers = items.map((el) => el.offsetLeft + el.offsetWidth / 2);
       readTarget();
       current = target;

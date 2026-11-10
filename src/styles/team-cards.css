@@ -57,130 +57,73 @@
   transform: translateY(-8px) rotateX(var(--rx)) rotateY(var(--ry)) scale(1.03);
 }
 
-/* ───────── 3D Card Flipper & Elevation Arc ───────── */
+/* ───────── 3D Card Flipper & Smooth GPU Flip ───────── */
 .card-flipper {
   position: relative;
   width: 100%;
   height: 100%;
   transform-style: preserve-3d;
-  transition: transform 0.85s cubic-bezier(0.34, 1.25, 0.64, 1);
+  transition: transform 0.65s cubic-bezier(0.25, 1, 0.5, 1);
   transform: rotateY(0deg);
+  will-change: transform;
 }
 
 .card-flipper.is-flipped {
   transform: rotateY(180deg);
 }
 
-/* 3D dynamic vaulting flip animation */
-.team-card.is-flipping-to-back .card-flipper {
-  animation: card3DFlipToBack 0.85s cubic-bezier(0.34, 1.25, 0.64, 1) forwards;
-}
-
-.team-card.is-flipping-to-front .card-flipper {
-  animation: card3DFlipToFront 0.85s cubic-bezier(0.34, 1.25, 0.64, 1) forwards;
-}
-
-@keyframes card3DFlipToBack {
-  0% {
-    transform: rotateY(0deg) translateZ(0px) scale(1);
-  }
-  38% {
-    transform: rotateY(80deg) translateZ(105px) scale(1.12);
-  }
-  62% {
-    transform: rotateY(115deg) translateZ(95px) scale(1.08);
-  }
-  100% {
-    transform: rotateY(180deg) translateZ(0px) scale(1);
-  }
-}
-
-@keyframes card3DFlipToFront {
-  0% {
-    transform: rotateY(180deg) translateZ(0px) scale(1);
-  }
-  38% {
-    transform: rotateY(100deg) translateZ(105px) scale(1.12);
-  }
-  62% {
-    transform: rotateY(65deg) translateZ(95px) scale(1.08);
-  }
-  100% {
-    transform: rotateY(0deg) translateZ(0px) scale(1);
-  }
-}
-
-/* 3D Pop Shadow */
-.team-card.is-flipping-to-back .card-shadow,
-.team-card.is-flipping-to-front .card-shadow {
-  animation: cardShadow3DPop 0.85s cubic-bezier(0.34, 1.25, 0.64, 1) forwards;
-}
-
-@keyframes cardShadow3DPop {
-  0%, 100% {
-    transform: translate(calc(var(--px) * -20px), 0px) scale(1);
-    opacity: 0.55;
-    filter: blur(8px);
-  }
-  45% {
-    transform: translate(calc(var(--px) * -20px), 24px) scale(1.4);
-    opacity: 0.18;
-    filter: blur(22px);
-  }
-}
-
-/* Flip Specular Shine Sweep - strictly contained inside card */
+/* White Specular Shine Sweep strictly contained within card */
 .card-flip-shine {
   position: absolute;
   inset: 0;
-  border-radius: 20px;
+  border-radius: 14px;
   overflow: hidden;
   pointer-events: none;
-  opacity: 0;
-  z-index: 15;
+  z-index: 10;
 }
 
-.card-flip-shine::after {
+.card-flip-shine::before {
   content: "";
   position: absolute;
   top: -50%;
-  left: -50%;
-  width: 200%;
+  left: -100%;
+  width: 100px;
   height: 200%;
   background: linear-gradient(
-    108deg,
-    transparent 36%,
-    rgba(255, 240, 189, 0.35) 47%,
-    rgba(255, 255, 255, 0.6) 50%,
-    rgba(255, 240, 189, 0.35) 53%,
-    transparent 64%
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.4) 40%,
+    rgba(255, 255, 255, 0.95) 50%,
+    rgba(255, 255, 255, 0.4) 60%,
+    transparent 100%
   );
-  transform: translateX(-120%) rotate(22deg);
+  transform: rotate(25deg);
+  opacity: 0;
 }
 
-.team-card.is-flipping-to-back .card-flip-shine,
-.team-card.is-flipping-to-front .card-flip-shine {
-  opacity: 1;
+.card-flipper.is-flipped .card-face-back .card-flip-shine::before {
+  animation: cardWhiteShineSweep 0.65s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+  animation-delay: 0.1s;
 }
 
-.team-card.is-flipping-to-back .card-flip-shine::after,
-.team-card.is-flipping-to-front .card-flip-shine::after {
-  animation: flipShineSweep 0.85s ease-in-out forwards;
+.card-flipper:not(.is-flipped) .card-face-front .card-flip-shine::before {
+  animation: cardWhiteShineSweep 0.65s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+  animation-delay: 0.1s;
 }
 
-@keyframes flipShineSweep {
+@keyframes cardWhiteShineSweep {
   0% {
-    transform: translateX(-120%) rotate(22deg);
+    left: -100%;
     opacity: 0;
   }
-  25% {
+  30% {
     opacity: 1;
   }
-  65% {
+  70% {
     opacity: 0.85;
   }
   100% {
-    transform: translateX(120%) rotate(22deg);
+    left: 160%;
     opacity: 0;
   }
 }
@@ -792,7 +735,14 @@
 .dev-showcase-section {
   position: relative;
   width: 100%;
-  background: #08070d;
+  background: #060814;
+  background-image:
+    linear-gradient(180deg, rgba(6, 8, 20, 0.7) 0%, rgba(6, 8, 20, 0.4) 50%, rgba(6, 8, 20, 0.8) 100%),
+    url("/images/developer_bg.jpg");
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
   color: #f6e7c1;
   overflow: clip;
 }
@@ -800,15 +750,16 @@
 .showcase-sticky {
   position: -webkit-sticky;
   position: sticky;
-  top: 0;
+  top: 80px;
   left: 0;
   width: 100%;
-  height: 100vh;
-  height: 100svh;
+  height: calc(100vh - 80px);
+  height: calc(100svh - 80px);
   overflow: hidden;
   background:
-    radial-gradient(ellipse at 50% 30%, rgba(60, 28, 110, 0.4), transparent 60%),
-    linear-gradient(120deg, #09070f, #100b1b 50%, #05050a);
+    radial-gradient(ellipse at 50% 30%, rgba(40, 25, 80, 0.35), transparent 60%),
+    linear-gradient(180deg, rgba(6, 8, 20, 0.65) 0%, rgba(4, 6, 15, 0.85) 100%),
+    url("/images/developer_bg.jpg") center/cover no-repeat;
 }
 
 .showcase-sticky::before {
@@ -829,17 +780,17 @@
   pointer-events: none;
   background: linear-gradient(
     90deg,
-    #08070d 0%,
+    rgba(6, 8, 20, 0.95) 0%,
     transparent 14%,
     transparent 86%,
-    #08070d 100%
+    rgba(6, 8, 20, 0.95) 100%
   );
 }
 
 /* Background Drift Typography */
 .showcase-heading {
   position: absolute;
-  top: 4%;
+  top: 3%;
   left: 4%;
   width: max-content;
   font-size: clamp(60px, 11vw, 170px);
@@ -860,7 +811,7 @@
 .showcase-nav-bar {
   position: absolute;
   z-index: 12;
-  top: 24px;
+  top: 14px;
   right: 4%;
   display: flex;
   justify-content: flex-end;
@@ -1053,9 +1004,13 @@
 /* ───────── Grid View Mode ───────── */
 .dev-grid-section {
   position: relative;
-  padding: 100px 4% 90px;
+  padding: 40px 4% 90px;
   max-width: 1360px;
   margin: 0 auto;
+  background:
+    linear-gradient(180deg, rgba(6, 8, 20, 0.75) 0%, rgba(4, 6, 15, 0.85) 100%),
+    url("/images/developer_bg.jpg") center/cover no-repeat fixed;
+  border-radius: 24px;
 }
 
 .dev-grid-cards {
