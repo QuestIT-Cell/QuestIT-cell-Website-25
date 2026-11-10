@@ -18,6 +18,9 @@
   aspect-ratio: 0.61;
   perspective: 1400px;
   animation: card-float 6s ease-in-out infinite;
+  will-change: transform;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
   cursor: pointer;
   user-select: none;
   -webkit-user-select: none;
@@ -930,14 +933,15 @@
     rotateY(calc(var(--d) * -20deg))
     rotateZ(calc(var(--d) * -2.5deg))
     scale(calc(1.06 - var(--a) * 0.16));
-  filter: contrast(calc(1.12 - var(--a) * 0.15)) brightness(calc(1.01 - var(--a) * 0.28));
-  will-change: transform, filter;
-  transition: filter 0.25s ease;
+  opacity: calc(1.04 - var(--a) * 0.35);
+  will-change: transform, opacity;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
 }
 
 .showcase-item.is-center {
   z-index: 10;
-  filter: contrast(1.15) brightness(1.0);
+  opacity: 1;
 }
 
 .member-caption {

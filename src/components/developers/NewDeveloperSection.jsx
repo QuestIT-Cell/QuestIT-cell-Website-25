@@ -409,57 +409,70 @@ export default function NewDeveloperSection() {
     let activeIndex = -1;
     let raf = 0;
     let running = false;
+    let lastTime = 0;
+
+    // Cached layout metrics to eliminate forced synchronous reflows on scroll
+    let cachedSectionTop = 0;
+    let cachedDistance = 0;
+    let cachedVw = typeof window !== "undefined" ? window.innerWidth : 1200;
+    let cachedIsMobile = cachedVw < 768;
+    let focusWidth = cachedIsMobile ? cachedVw * 0.6 : cachedVw * 0.45;
 
     const readTarget = () => {
-      const rect = section.getBoundingClientRect();
-      const distance = section.offsetHeight - window.innerHeight;
-      target = distance > 0 ? Math.min(1, Math.max(0, -rect.top / distance)) : 0;
+      // Using window.scrollY with cached offsets avoids synchronous getBoundingClientRect layout flushes
+      const scrolled = window.scrollY - cachedSectionTop;
+      target = cachedDistance > 0 ? Math.min(1, Math.max(0, scrolled / cachedDistance)) : 0;
     };
 
-    const render = () => {
-      const isMobile = window.innerWidth < 768;
-      // High responsiveness on mobile for instant 1:1 finger tracking, zero lag
-      const EASE = isMobile ? 0.16 : 0.085;
-
+    const render = (now = performance.now()) => {
       if (reduced) {
         current = target;
       } else {
-        current += (target - current) * EASE;
-        if (Math.abs(target - current) < 0.0003) current = target;
+        // Frame-rate independent exponential smoothing (dt-based)
+        // Works with identical physical smoothness on 60Hz, 120Hz, and 144Hz displays
+        const dt = lastTime > 0 ? Math.min(0.05, (now - lastTime) / 1000) : 0.016;
+        lastTime = now;
+
+        // Critical damping decay: 12 on mobile for immediate finger response, 8.5 on desktop for buttery glide
+        const decay = cachedIsMobile ? 12 : 8.5;
+        const factor = 1 - Math.exp(-decay * dt);
+        current += (target - current) * factor;
+
+        if (Math.abs(target - current) < 0.00008) current = target;
       }
 
       const x = -current * maxTravel;
-      const vw = window.innerWidth;
 
-      track.style.transform = `translate3d(${x}px, 0, 0)`;
+      track.style.transform = `translate3d(${x.toFixed(2)}px, 0, 0)`;
 
       if (heading) {
-        heading.style.transform = `translate3d(${x * 0.16}px, 0, 0)`;
+        heading.style.transform = `translate3d(${(x * 0.16).toFixed(2)}px, 0, 0)`;
       }
 
       let nearest = 0;
       let nearestDist = Infinity;
-      const focusWidth = isMobile ? vw * 0.6 : vw * 0.45;
 
-      items.forEach((item, i) => {
+      for (let i = 0; i < items.length; i++) {
+        const item = items[i];
         // d is normalized distance from center of viewport (-1 ... 0 ... +1)
-        const d = (centers[i] + x - vw / 2) / focusWidth;
+        const d = (centers[i] + x - cachedVw / 2) / focusWidth;
         const clampedD = Math.max(-1.8, Math.min(1.8, d));
         const a = Math.min(1, Math.abs(clampedD));
 
-        item.style.setProperty("--d", clampedD.toFixed(4));
-        item.style.setProperty("--a", a.toFixed(4));
+        item.style.setProperty("--d", clampedD.toFixed(3));
+        item.style.setProperty("--a", a.toFixed(3));
 
-        if (Math.abs(d) < nearestDist) {
-          nearestDist = Math.abs(d);
+        const absDist = Math.abs(d);
+        if (absDist < nearestDist) {
+          nearestDist = absDist;
           nearest = i;
         }
-      });
+      }
 
       if (nearest !== activeIndex) {
-        items.forEach((item, i) =>
-          item.classList.toggle("is-center", i === nearest)
-        );
+        for (let i = 0; i < items.length; i++) {
+          items[i].classList.toggle("is-center", i === nearest);
+        }
         activeIndex = nearest;
         if (counter) counter.textContent = pad(nearest + 1);
       }
@@ -467,18 +480,20 @@ export default function NewDeveloperSection() {
       if (bar) bar.style.transform = `scaleX(${current.toFixed(4)})`;
     };
 
-    const tick = () => {
-      render();
-      if (Math.abs(current - target) > 0.0001) {
+    const tick = (now) => {
+      render(now);
+      if (Math.abs(current - target) > 0.00008) {
         raf = requestAnimationFrame(tick);
       } else {
         running = false;
+        lastTime = 0;
       }
     };
 
     const kick = () => {
       if (running) return;
       running = true;
+      lastTime = performance.now();
       raf = requestAnimationFrame(tick);
     };
 
@@ -488,19 +503,26 @@ export default function NewDeveloperSection() {
     };
 
     const measure = () => {
-      const isMobile = window.innerWidth < 768;
-      // Calculate travel distance needed to translate all cards from first center to last center
-      maxTravel = Math.max(0, track.scrollWidth - window.innerWidth);
+      cachedVw = window.innerWidth;
+      cachedIsMobile = cachedVw < 768;
+      focusWidth = cachedIsMobile ? cachedVw * 0.6 : cachedVw * 0.45;
+
+      // Cache document-relative section position once during resize/measure
+      const rect = section.getBoundingClientRect();
+      cachedSectionTop = rect.top + window.scrollY;
+
+      maxTravel = Math.max(0, track.scrollWidth - cachedVw);
 
       // Balanced scroll ratio: on mobile, 1 natural thumb flick moves exactly 1 card
-      const scrollMultiplier = isMobile ? 1.55 : 1.35;
+      const scrollMultiplier = cachedIsMobile ? 1.55 : 1.35;
       const scrollTrackDistance = maxTravel * scrollMultiplier;
       section.style.height = `${window.innerHeight + scrollTrackDistance}px`;
+      cachedDistance = section.offsetHeight - window.innerHeight;
 
       centers = items.map((el) => el.offsetLeft + el.offsetWidth / 2);
       readTarget();
       current = target;
-      render();
+      render(performance.now());
     };
 
     measure();
