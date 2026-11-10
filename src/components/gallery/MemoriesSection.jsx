@@ -94,13 +94,14 @@ const MemoryCard = ({
         transform: `translate3d(${card.x}px, ${card.y}px, ${card.z}px) rotateX(${card.rotateX || 0}deg) rotateY(${card.rotateY || 0}deg) rotateZ(${card.rotateZ || 0}deg) scale(${card.baseScale})`,
         zIndex: isFocal ? 150 : card.zIndex,
         opacity: card.opacity,
-        filter: `brightness(${card.brightness})`,
-        willChange: "transform, opacity",
+        filter: isFocal ? "none" : `brightness(${card.brightness})`,
+        willChange: isFocal ? "auto" : "transform, opacity",
         transformStyle: "preserve-3d",
         backfaceVisibility: "hidden",
         pointerEvents: card.isVisible ? "auto" : "none",
         outline: "none",
         WebkitTapHighlightColor: "transparent",
+        imageRendering: "-webkit-optimize-contrast",
       }}
     >
       <motion.div
@@ -108,7 +109,7 @@ const MemoryCard = ({
         animate={{
           rotateY: isFocal ? 180 : 0,
           y: isFocal ? liftY : 0,
-          scale: isFocal ? activeScale : 1,
+          scale: 1,
         }}
         transition={{
           duration: animDuration || ROTATION_DURATION,
@@ -118,6 +119,7 @@ const MemoryCard = ({
         style={{
           transformStyle: "preserve-3d",
           outline: "none",
+          imageRendering: "-webkit-optimize-contrast",
         }}
       >
         {/* FRONT FACE: Mirrored photograph (visible when inactive in orbit at rotateY: 0) */}
@@ -138,11 +140,12 @@ const MemoryCard = ({
               ? "0 0 35px rgba(0, 212, 255, 0.65), 0 25px 50px rgba(0, 0, 0, 0.95)"
               : "0 10px 28px rgba(0, 0, 0, 0.75)",
             outline: "none",
+            imageRendering: "-webkit-optimize-contrast",
           }}
         >
           <div
             className="relative w-full h-full"
-            style={{ transform: "scaleX(-1)" }}
+            style={{ transform: "scaleX(-1)", imageRendering: "-webkit-optimize-contrast" }}
           >
             <Image
               src={card.src}
@@ -150,9 +153,12 @@ const MemoryCard = ({
               fill
               quality={100}
               unoptimized
-              sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 70vw, 900px"
               className="object-cover select-none pointer-events-none"
               priority={card.index < 6}
+              style={{
+                imageRendering: "-webkit-optimize-contrast",
+              }}
             />
           </div>
           <div
@@ -179,6 +185,7 @@ const MemoryCard = ({
               ? "0 0 45px rgba(0, 212, 255, 0.7), 0 30px 60px rgba(0, 0, 0, 0.95)"
               : "0 10px 28px rgba(0, 0, 0, 0.75)",
             outline: "none",
+            imageRendering: "-webkit-optimize-contrast",
           }}
         >
           <Image
@@ -187,9 +194,12 @@ const MemoryCard = ({
             fill
             quality={100}
             unoptimized
-            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 70vw, 900px"
             className="object-cover select-none pointer-events-none"
             priority={card.index < 6}
+            style={{
+              imageRendering: "-webkit-optimize-contrast",
+            }}
           />
           <div
             className="absolute inset-0 pointer-events-none"
@@ -443,16 +453,16 @@ const MemoriesSection = () => {
 
     if (mobile) {
       // MOBILE HORIZONTAL 3D ORBITAL (W < 768px)
-      // Exactly 3 cards visible at a time: 1 middle active + 2 side non-active
-      const cw = Math.min(Math.max(Math.round(W * 0.44), 145), 195);
-      const ch = Math.round(cw * 0.68);
+      // Native card dimensions sized directly to active spotlight box for 1:1 crisp rasterization
+      const cw = Math.min(Math.max(Math.round(W * 0.52), 195), 250);
+      const ch = Math.round(cw * 0.70);
 
       // Symmetrical horizontal spread so side cards peek cleanly without horizontal overflow
-      const rx = Math.max(Math.round(W * 0.36), 125);
+      const rx = Math.max(Math.round(W * 0.38), 130);
       // Subtle vertical swoop along the orbital arc
-      const ry = Math.round(rx * 0.22);
+      const ry = Math.round(rx * 0.18);
       // Deep 3D Z-depth for perspective curvature
-      const rz = Math.round(rx * 0.50);
+      const rz = Math.round(rx * 0.44);
 
       // Angular spacing (~47 degrees / 0.82 rad)
       const spacing = 0.82;
@@ -461,7 +471,7 @@ const MemoriesSection = () => {
       const fZone = 0.35;
 
       const lift = -16;
-      const scale = 1.25;
+      const scale = 1.0; // 1:1 scale: eliminates GPU bilinear upscaling blur
 
       return {
         isMobile: true,
@@ -482,26 +492,27 @@ const MemoriesSection = () => {
       const tablet = W < 1024;
       const slots = tablet ? 6 : 8;
 
+      // Base card dimensions match the full active focal spotlight size for native 1:1 crisp rasterization
       const rawCw = tablet
-        ? Math.min(W * 0.28, H * 0.24)
-        : Math.min(W * 0.21, H * 0.29);
+        ? Math.min(W * 0.35, H * 0.38)
+        : Math.min(W * 0.28, H * 0.44);
 
       const cw = tablet
-        ? Math.min(Math.max(Math.round(rawCw), 190), 250)
-        : Math.min(Math.max(Math.round(rawCw), 240), 340);
+        ? Math.min(Math.max(Math.round(rawCw), 290), 380)
+        : Math.min(Math.max(Math.round(rawCw), 380), 480);
 
-      const ch = Math.round(cw * 0.76);
+      const ch = Math.round(cw * 0.74);
 
       // Curvy, deep 3D elliptical radii in X, Y, and Z
-      const rawRx = (W * 0.82 - cw * 0.65) / 2;
-      const rx = Math.max(Math.round(rawRx), 85);
-      // Significantly increased Ry (0.38x instead of 0.22x) for a rich, sweeping vertical swoop
-      const ry = Math.round(rx * 0.38);
-      // Deep Z depth (0.52x instead of 0.28x) for prominent 3D front-to-back perspective curve
-      const rz = Math.round(rx * 0.52);
+      const rawRx = (W * 0.84 - cw * 0.55) / 2;
+      const rx = Math.max(Math.round(rawRx), 90);
+      // Sweeping vertical swoop along orbital arc
+      const ry = Math.round(rx * 0.34);
+      // Deep Z depth for prominent 3D front-to-back perspective curve
+      const rz = Math.round(rx * 0.46);
 
-      const lift = tablet ? -120 : -150;
-      const scale = tablet ? 1.52 : 1.58;
+      const lift = tablet ? -100 : -130;
+      const scale = 1.0; // 1:1 scale: eliminates GPU bilinear upscaling blur
 
       return {
         isMobile: false,
@@ -534,6 +545,9 @@ const MemoriesSection = () => {
         : -1;
 
     return Array.from({ length: TOTAL_CARDS }).map((_, i) => {
+      // Focal state strictly tied to active step
+      const isFocal = i === activeFocalIndex;
+
       // Signed angular distance from current focal position, wrapped modulo TOTAL_CARDS
       let diff = (i - currentCenter) % TOTAL_CARDS;
       while (diff > TOTAL_CARDS / 2) diff -= TOTAL_CARDS;
@@ -560,34 +574,45 @@ const MemoriesSection = () => {
         y = Math.round(Ry * cosT * 10) / 10;
         z = Math.round(Rz * cosT * 10) / 10;
 
-        // Elegant 3D perspective banking along the horizontal curve
-        rotateX = Math.round(cosT * 8 * 10) / 10;
-        rotateY = Math.round(-sinT * 42 * 10) / 10;
-        rotateZ = Math.round(sinT * 4 * 10) / 10;
-
         depthFactor = (cosT + 1) / 2;
-        baseScale = 0.74 + depthFactor * 0.20;
+        // Non-focal cards scale down to ~0.72x; active focal card is 1.0x native
+        baseScale = isFocal ? 1.0 : 0.62 + depthFactor * 0.16;
         brightness = Math.round((0.88 + depthFactor * 0.12) * 100) / 100;
         blur = 0;
+
+        // Active focal card sits square (0 tilt) to screen for pin-sharp pixels
+        if (isFocal) {
+          rotateX = 0;
+          rotateY = 0;
+          rotateZ = 0;
+        } else {
+          rotateX = Math.round(cosT * 8 * 10) / 10;
+          rotateY = Math.round(-sinT * 42 * 10) / 10;
+          rotateZ = Math.round(sinT * 4 * 10) / 10;
+        }
       } else {
         // DESKTOP / TABLET HORIZONTAL 3D ORBIT
         x = Math.round(Rx * sinT * 10) / 10;
         y = Math.round(Ry * cosT * 10) / 10;
         z = Math.round(Rz * cosT * 10) / 10;
 
-        // Inward tangent banking along the deep 3D curve
-        rotateX = Math.round(cosT * 12 * 10) / 10;
-        rotateY = Math.round(-sinT * 50 * 10) / 10;
-        rotateZ = Math.round(sinT * 5 * 10) / 10;
-
         depthFactor = (cosT + 1) / 2;
-        baseScale = 0.70 + depthFactor * 0.26;
+        // Non-focal cards scale down to ~0.65x; active focal card is 1.0x native
+        baseScale = isFocal ? 1.0 : 0.56 + depthFactor * 0.20;
         brightness = Math.round((0.85 + depthFactor * 0.15) * 100) / 100;
         blur = 0;
-      }
 
-      // Focal state strictly tied to active step
-      const isFocal = i === activeFocalIndex;
+        // Active focal card sits square (0 tilt) to screen for pin-sharp pixels
+        if (isFocal) {
+          rotateX = 0;
+          rotateY = 0;
+          rotateZ = 0;
+        } else {
+          rotateX = Math.round(cosT * 12 * 10) / 10;
+          rotateY = Math.round(-sinT * 50 * 10) / 10;
+          rotateZ = Math.round(sinT * 5 * 10) / 10;
+        }
+      }
 
       // Opacity multiplied by the smooth fade window
       const minOpacity = isMobile ? 0.75 : 0.68;
