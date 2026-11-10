@@ -5,38 +5,8 @@ import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import {
-  ChevronDown,
-  ChevronRight,
-  ExternalLink,
-  X,
-  Sparkles,
-  ArrowUpRight,
-  Home,
-  HelpCircle,
-  Calendar,
-  Images,
-  Users,
-  Mail,
-  Laptop,
-} from "lucide-react";
-import {
-  FaGithub as Github,
-  FaLinkedin as Linkedin,
-  FaInstagram as Instagram,
-} from "react-icons/fa";
+import { ChevronDown, ExternalLink } from "lucide-react";
 import menu from "@/constants/menu";
-
-/* ─── Map menu names to dedicated sleek icons ────────────────────────────── */
-const MENU_ICONS = {
-  Home: Home,
-  About: HelpCircle,
-  Events: Calendar,
-  Gallery: Images,
-  Team: Users,
-  Developers: Laptop,
-  Contact: Mail,
-};
 
 /* ─── Sliding-pill indicator helper for desktop ──────────────────────────── */
 function useIndicator() {
@@ -59,7 +29,7 @@ function useIndicator() {
   return { indRef, moveTo };
 }
 
-/* ─── Spark burst on click ───────────────────────────────────────────────── */
+/* ─── Spark burst on click (desktop only) ────────────────────────────────── */
 function spawnSparks(e, container) {
   if (!container) return;
   const r = container.getBoundingClientRect();
@@ -225,7 +195,7 @@ const Header = () => {
       {/* ── Fixed Top Bar: Logo & Floating Navbar in Perfect Horizontal Row ── */}
       <header
         ref={wrapRef}
-        className="fixed top-0 left-0 right-0 z-[10000] pointer-events-none px-4 sm:px-6 md:px-8 lg:px-12"
+        className="fixed top-0 left-0 right-0 z-[10010] pointer-events-none px-4 sm:px-6 md:px-8 lg:px-12"
         style={{
           paddingTop: "calc(env(safe-area-inset-top, 0px) + 14px)",
           transition: isHidden
@@ -276,7 +246,7 @@ const Header = () => {
                 transition: "padding .3s, min-width .3s",
               }}
             >
-              {/* Conic glowing accent border */}
+              {/* Conic subtle hairline border */}
               <span
                 aria-hidden
                 style={{
@@ -440,150 +410,100 @@ const Header = () => {
             </nav>
           </div>
 
-          {/* ── 3. Right Corner: High-Tech Frosted Glass Hamburger Button ── */}
-          <div className="md:hidden flex items-center flex-shrink-0 z-20">
+          {/* ── 3. Right Corner: Human-Made Minimal 2-Line Morphing Button ───── */}
+          {/* It stays in place as the ONE AND ONLY button (morphs cleanly into an 'X') */}
+          <div className="md:hidden flex items-center flex-shrink-0 z-30">
             <button
-              className="pointer-events-auto group relative w-12 h-12 rounded-full border border-cyan-400/30 bg-black/75 backdrop-blur-2xl cursor-pointer text-white flex items-center justify-center shadow-[0_4px_24px_rgba(0,0,0,0.8),inset_0_1px_0_rgba(255,255,255,0.2)] hover:border-cyan-400 hover:shadow-[0_0_20px_rgba(34,211,238,0.35)] transition-all duration-300 active:scale-90"
-              aria-label={sheetOpen ? "Close menu" : "Open menu"}
+              className="pointer-events-auto relative w-11 h-11 rounded-full border border-white/15 bg-[#0a0c12]/90 backdrop-blur-xl cursor-pointer text-white flex items-center justify-center transition-all duration-200 hover:border-white/30 active:scale-95"
+              aria-label={sheetOpen ? "Close navigation menu" : "Open navigation menu"}
               aria-expanded={sheetOpen}
               onClick={() => setSheetOpen((o) => !o)}
             >
-              {/* Outer subtle glow ring */}
-              <span className="absolute inset-0 rounded-full bg-cyan-400/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
-
-              {/* 3 Morphing lines */}
-              <span
-                className="absolute left-3.5 right-3.5 h-[2px] bg-white group-hover:bg-cyan-300 rounded-full transition-all duration-300"
-                style={{
-                  top: sheetOpen ? "23px" : "16px",
-                  transform: sheetOpen ? "rotate(45deg)" : "none",
-                }}
-              />
-              <span
-                className="absolute left-3.5 right-3.5 h-[2px] bg-cyan-400 rounded-full transition-all duration-300"
-                style={{
-                  top: "23px",
-                  opacity: sheetOpen ? 0 : 1,
-                  transform: sheetOpen ? "scaleX(0.2)" : "scaleX(1)",
-                }}
-              />
-              <span
-                className="absolute left-3.5 right-3.5 h-[2px] bg-white group-hover:bg-cyan-300 rounded-full transition-all duration-300"
-                style={{
-                  top: sheetOpen ? "23px" : "30px",
-                  transform: sheetOpen ? "rotate(-45deg)" : "none",
-                }}
-              />
+              <div className="relative w-5 h-5 flex items-center justify-center">
+                {/* Line 1 */}
+                <span
+                  className="absolute w-[18px] h-[1.5px] bg-white rounded-full transition-transform duration-300 ease-out origin-center"
+                  style={{
+                    transform: sheetOpen
+                      ? "rotate(45deg) translateY(0)"
+                      : "translateY(-3.5px)",
+                  }}
+                />
+                {/* Line 2 */}
+                <span
+                  className="absolute w-[18px] h-[1.5px] bg-white rounded-full transition-transform duration-300 ease-out origin-center"
+                  style={{
+                    transform: sheetOpen
+                      ? "rotate(-45deg) translateY(0)"
+                      : "translateY(3.5px)",
+                  }}
+                />
+              </div>
             </button>
           </div>
         </div>
       </header>
 
-      {/* ── 4. Next-Gen Full-Screen Cyber-Glass Mobile Navigation Menu ──────── */}
+      {/* ── 4. Editorial Human-Crafted Mobile Navigation Menu ────────────── */}
       <AnimatePresence>
         {sheetOpen && (
           <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.35, ease: "easeInOut" }}
-            className="fixed inset-0 z-[10005] md:hidden flex flex-col justify-between overflow-hidden bg-[#040711]/95 backdrop-blur-3xl text-white select-none"
+            initial={{ opacity: 0, y: -8 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -8 }}
+            transition={{ duration: 0.28, ease: [0.16, 1, 0.3, 1] }}
+            className="fixed inset-0 z-[10005] md:hidden flex flex-col justify-between bg-[#08090d]/98 backdrop-blur-2xl text-white select-none px-6 pt-[calc(env(safe-area-inset-top,0px)+18px)] pb-[calc(env(safe-area-inset-bottom,0px)+24px)]"
           >
-            {/* Ambient background glows */}
-            <div
-              aria-hidden="true"
-              className="absolute -top-32 -right-32 w-96 h-96 rounded-full pointer-events-none"
-              style={{
-                background:
-                  "radial-gradient(circle, rgba(34,211,238,0.20) 0%, rgba(14,165,233,0.06) 50%, transparent 70%)",
-                filter: "blur(60px)",
-              }}
-            />
-            <div
-              aria-hidden="true"
-              className="absolute -bottom-32 -left-32 w-96 h-96 rounded-full pointer-events-none"
-              style={{
-                background:
-                  "radial-gradient(circle, rgba(34,211,238,0.14) 0%, rgba(6,182,212,0.04) 50%, transparent 70%)",
-                filter: "blur(70px)",
-              }}
-            />
-
-            {/* Subtle background tech grid */}
-            <div
-              aria-hidden="true"
-              className="absolute inset-0 pointer-events-none opacity-[0.03]"
-              style={{
-                backgroundImage:
-                  "linear-gradient(rgba(255,255,255,0.4) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.4) 1px, transparent 1px)",
-                backgroundSize: "32px 32px",
-              }}
-            />
-
-            {/* ── Menu Header Bar ─────────────────────────────────────────── */}
-            <div className="relative z-10 flex items-center justify-between px-6 pt-[calc(env(safe-area-inset-top,0px)+16px)] pb-4 border-b border-white/10">
-              <Link
-                href="/"
-                onClick={() => setSheetOpen(false)}
-                className="flex items-center gap-3 group"
-              >
-                <Image
-                  src="/images/logo-navbar.webp"
-                  width={398}
-                  height={138}
-                  alt="Quest IT"
-                  unoptimized
-                  className="h-9 w-auto object-contain filter drop-shadow-[0_0_12px_rgba(34,211,238,0.4)]"
-                />
-              </Link>
-
+            {/* Top Bar inside sheet: Brand identity aligned with the outside button */}
+            <div className="flex items-center justify-between pb-6 border-b border-white/[0.08]">
               <div className="flex items-center gap-3">
-                {/* Live cell status pill */}
-                <div className="hidden sm:flex items-center gap-1.5 px-3 py-1 rounded-full border border-cyan-400/20 bg-cyan-400/5 text-cyan-300 font-mono text-[11px] tracking-wider">
-                  <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse" />
-                  QUEST-IT // 2026
-                </div>
-
-                {/* Close Button */}
-                <button
+                <Link
+                  href="/"
                   onClick={() => setSheetOpen(false)}
-                  className="p-2.5 rounded-full border border-white/15 bg-white/5 hover:border-cyan-400 hover:text-cyan-400 text-white transition-all active:scale-90"
-                  aria-label="Close menu"
+                  className="block"
                 >
-                  <X className="w-5 h-5" />
-                </button>
+                  <Image
+                    src="/images/logo-navbar.webp"
+                    width={398}
+                    height={138}
+                    alt="Quest IT"
+                    unoptimized
+                    className="h-8 w-auto object-contain opacity-90"
+                  />
+                </Link>
+                <div className="h-4 w-px bg-white/20" />
+                <span className="text-[11px] font-mono tracking-wider text-neutral-400">
+                  VESIT IT CELL
+                </span>
               </div>
+              {/* Spacer matching the width of the morphing button above it */}
+              <div className="w-11 h-11 pointer-events-none" />
             </div>
 
-            {/* ── Main Navigation List with Staggered Slide-In ─────────────── */}
-            <nav className="relative z-10 flex-1 overflow-y-auto px-6 py-6 flex flex-col justify-center">
+            {/* Navigation links: Editorial typography with numbered markers */}
+            <nav className="my-auto py-8">
               <motion.ul
                 initial="hidden"
                 animate="visible"
                 variants={{
                   visible: {
-                    transition: { staggerChildren: 0.045, delayChildren: 0.1 },
+                    transition: { staggerChildren: 0.04, delayChildren: 0.05 },
                   },
                 }}
-                className="space-y-1.5 max-w-lg mx-auto w-full"
+                className="space-y-4 max-w-sm"
               >
                 {menu.map((item, i) => {
                   const active = isItemActive(item);
-                  const Icon = MENU_ICONS[item.name] || Sparkles;
 
                   return (
                     <motion.li
                       key={item.name}
                       variants={{
-                        hidden: { opacity: 0, x: -30, filter: "blur(8px)" },
+                        hidden: { opacity: 0, y: 14 },
                         visible: {
                           opacity: 1,
-                          x: 0,
-                          filter: "blur(0px)",
-                          transition: {
-                            duration: 0.45,
-                            ease: [0.16, 1, 0.3, 1],
-                          },
+                          y: 0,
+                          transition: { duration: 0.35, ease: [0.16, 1, 0.3, 1] },
                         },
                       }}
                     >
@@ -592,50 +512,29 @@ const Header = () => {
                         onClick={() => setSheetOpen(false)}
                         target={item.external ? "_blank" : undefined}
                         rel={item.external ? "noopener noreferrer" : undefined}
-                        className={`group relative flex items-center justify-between px-4 py-3 rounded-2xl transition-all duration-300 ${
-                          active
-                            ? "bg-cyan-500/15 border border-cyan-400/40 text-white shadow-[0_0_24px_rgba(34,211,238,0.2)]"
-                            : "hover:bg-white/[0.06] border border-transparent hover:border-white/10 text-neutral-300 hover:text-white"
-                        }`}
+                        className="group flex items-baseline justify-between py-1 transition-colors"
                       >
-                        <div className="flex items-center gap-3.5">
-                          {/* Number index */}
-                          <span className="font-mono text-xs text-cyan-400/70 font-semibold w-5">
+                        <div className="flex items-baseline gap-4">
+                          <span className="font-mono text-xs text-neutral-500 group-hover:text-cyan-400 transition-colors">
                             {String(i + 1).padStart(2, "0")}
                           </span>
-
-                          {/* Frosted icon square */}
-                          <div
-                            className={`p-2 rounded-xl transition-all duration-300 ${
+                          <span
+                            className={`text-3xl sm:text-4xl font-light tracking-tight transition-colors duration-200 ${
                               active
-                                ? "bg-cyan-400 text-black shadow-[0_0_12px_rgba(34,211,238,0.6)]"
-                                : "bg-white/5 text-neutral-400 group-hover:text-cyan-400 group-hover:bg-cyan-400/10 group-hover:border group-hover:border-cyan-400/30"
+                                ? "text-white font-normal"
+                                : "text-neutral-400 group-hover:text-white"
                             }`}
                           >
-                            <Icon className="w-4 h-4" />
-                          </div>
-
-                          {/* Item Name */}
-                          <span className="text-xl sm:text-2xl font-semibold tracking-tight">
                             {item.name}
                           </span>
+                          {active && (
+                            <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 inline-block mb-1" />
+                          )}
                         </div>
 
-                        {/* Right indicator */}
-                        <div className="flex items-center gap-2">
-                          {active && (
-                            <span className="px-2 py-0.5 rounded-full text-[10px] font-mono tracking-widest uppercase bg-cyan-400/20 text-cyan-300 border border-cyan-400/40">
-                              Active
-                            </span>
-                          )}
-                          <ChevronRight
-                            className={`w-5 h-5 transition-transform duration-300 group-hover:translate-x-1 ${
-                              active
-                                ? "text-cyan-400"
-                                : "text-neutral-500 group-hover:text-cyan-400"
-                            }`}
-                          />
-                        </div>
+                        <span className="text-xs font-mono text-neutral-500 group-hover:text-cyan-400 group-hover:translate-x-1 transition-all">
+                          &rarr;
+                        </span>
                       </Link>
                     </motion.li>
                   );
@@ -643,74 +542,56 @@ const Header = () => {
               </motion.ul>
             </nav>
 
-            {/* ── Menu Footer Section (CTA + Social Links) ────────────────── */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.35, duration: 0.5, ease: "easeOut" }}
-              className="relative z-10 px-6 pt-3 pb-[calc(env(safe-area-inset-bottom,0px)+16px)] border-t border-white/10 bg-black/40 backdrop-blur-xl"
-            >
-              <div className="max-w-lg mx-auto w-full flex flex-col gap-3">
-                {/* Contact CTA Card */}
+            {/* Bottom editorial footer: human details, motto & clean text socials */}
+            <div className="pt-6 border-t border-white/[0.08] flex flex-col gap-4">
+              <div className="flex items-center justify-between text-xs text-neutral-400">
+                <span className="italic font-serif text-neutral-400">
+                  Curiosity. Code. Community.
+                </span>
                 <Link
                   href="/#contact"
                   onClick={() => setSheetOpen(false)}
-                  className="flex items-center justify-between px-4 py-3 rounded-xl bg-gradient-to-r from-cyan-500/20 via-cyan-400/10 to-transparent border border-cyan-400/30 hover:border-cyan-400 transition-all group"
+                  className="text-cyan-400 hover:text-cyan-300 font-mono transition-colors"
                 >
-                  <div className="flex items-center gap-2.5">
-                    <div className="p-1.5 rounded-lg bg-cyan-400/20 text-cyan-300">
-                      <Sparkles className="w-4 h-4" />
-                    </div>
-                    <div>
-                      <div className="text-xs font-semibold text-white group-hover:text-cyan-300 transition-colors">
-                        Have a Question or Idea?
-                      </div>
-                      <div className="text-[11px] text-cyan-400/80">
-                        Get in touch with the QuestIT team &rarr;
-                      </div>
-                    </div>
-                  </div>
-                  <ArrowUpRight className="w-4 h-4 text-cyan-400 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+                  Contact &rarr;
                 </Link>
-
-                {/* Social icons row + footer branding */}
-                <div className="flex items-center justify-between pt-1">
-                  <div className="flex items-center gap-2">
-                    <a
-                      href="https://github.com/QuestIT-Cell"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      aria-label="GitHub"
-                      className="p-2.5 rounded-full border border-white/10 bg-white/5 hover:border-cyan-400/50 hover:bg-cyan-400/10 text-neutral-300 hover:text-cyan-400 transition-all"
-                    >
-                      <Github className="w-4 h-4" />
-                    </a>
-                    <a
-                      href="https://www.linkedin.com/company/questit-vesit"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      aria-label="LinkedIn"
-                      className="p-2.5 rounded-full border border-white/10 bg-white/5 hover:border-cyan-400/50 hover:bg-cyan-400/10 text-neutral-300 hover:text-cyan-400 transition-all"
-                    >
-                      <Linkedin className="w-4 h-4" />
-                    </a>
-                    <a
-                      href="https://www.instagram.com/questit_cell?igsh=MWgzNGdzYnUxanF5Yg=="
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      aria-label="Instagram"
-                      className="p-2.5 rounded-full border border-white/10 bg-white/5 hover:border-cyan-400/50 hover:bg-cyan-400/10 text-neutral-300 hover:text-cyan-400 transition-all"
-                    >
-                      <Instagram className="w-4 h-4" />
-                    </a>
-                  </div>
-
-                  <p className="font-mono text-[10px] text-neutral-500 tracking-wider">
-                    QUEST IT CELL © {new Date().getFullYear()}
-                  </p>
-                </div>
               </div>
-            </motion.div>
+
+              <div className="flex items-center justify-between pt-1">
+                <div className="flex items-center gap-4 text-xs font-mono text-neutral-400">
+                  <a
+                    href="https://github.com/QuestIT-Cell"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="hover:text-white transition-colors"
+                  >
+                    GitHub
+                  </a>
+                  <span>/</span>
+                  <a
+                    href="https://www.linkedin.com/company/questit-vesit"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="hover:text-white transition-colors"
+                  >
+                    LinkedIn
+                  </a>
+                  <span>/</span>
+                  <a
+                    href="https://www.instagram.com/questit_cell?igsh=MWgzNGdzYnUxanF5Yg=="
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="hover:text-white transition-colors"
+                  >
+                    Instagram
+                  </a>
+                </div>
+
+                <span className="text-[10px] font-mono text-neutral-500">
+                  © {new Date().getFullYear()}
+                </span>
+              </div>
+            </div>
           </motion.div>
         )}
       </AnimatePresence>
