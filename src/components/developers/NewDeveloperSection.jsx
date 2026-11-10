@@ -368,8 +368,6 @@ function CollectibleTeamCard({
 }
 
 export default function NewDeveloperSection() {
-  const [viewMode, setViewMode] = useState("showcase"); // "showcase" | "grid"
-
   const sectionRef = useRef(null);
   const trackRef = useRef(null);
   const headingRef = useRef(null);
@@ -394,8 +392,6 @@ export default function NewDeveloperSection() {
   }, []);
 
   useEffect(() => {
-    if (viewMode !== "showcase") return;
-
     const section = sectionRef.current;
     const track = trackRef.current;
     const heading = headingRef.current;
@@ -515,128 +511,60 @@ export default function NewDeveloperSection() {
   }, [viewMode]);
 
   return (
-    <section
-      className="dev-showcase-section"
-      ref={sectionRef}
-      style={{ minHeight: viewMode === "grid" ? "100vh" : undefined }}
-    >
-      {viewMode === "showcase" ? (
-        <div className="showcase-sticky">
-          {/* Background Typography Parallax */}
-          <div className="showcase-heading" ref={headingRef}>
-            QUEST IT // DEVELOPERS
-          </div>
-
-          {/* Top Controls Bar */}
-          <div className="showcase-nav-bar">
-            <div className="dev-view-switch" role="tablist" aria-label="View switch">
-              <button
-                className={`dev-view-btn ${viewMode === "showcase" ? "is-active" : ""}`}
-                onClick={() => setViewMode("showcase")}
-                role="tab"
-                aria-selected={viewMode === "showcase"}
-              >
-                <Layers size={13} className="inline mr-1" />
-                <span>Showcase</span>
-              </button>
-              <button
-                className={`dev-view-btn ${viewMode === "grid" ? "is-active" : ""}`}
-                onClick={() => setViewMode("grid")}
-                role="tab"
-                aria-selected={viewMode === "grid"}
-              >
-                <LayoutGrid size={13} className="inline mr-1" />
-                <span>Grid View</span>
-              </button>
-            </div>
-          </div>
-
-          {/* Timeline Points in Background */}
-          <div className="timeline">
-            {[10, 20, 30, 40, 50].map((num) => (
-              <div className="timeline-point" key={num}>
-                <span>{num}</span>
-                <div />
-              </div>
-            ))}
-          </div>
-
-          {/* Horizontal Scroll Track (Scroll-Driven on Web) */}
-          <div className="showcase-track" ref={trackRef}>
-            {developers.map((member, index) => {
-              const workTitle = DEVELOPER_WORK_TITLES[member.name] || member.role;
-
-              return (
-                <article
-                  className="showcase-item"
-                  key={member.name}
-                  style={{ "--i": index }}
-                >
-                  <CollectibleTeamCard
-                    member={member}
-                    number={index + 1}
-                    total={totalMembers}
-                  />
-                  <p className="member-caption">{workTitle}</p>
-                </article>
-              );
-            })}
-          </div>
-
-          {/* Bottom Scroll Progress Bar */}
-          <div className="showcase-footer">
-            <span>SCROLL DOWN TO EXPLORE</span>
-
-            <div className="progress">
-              <span ref={counterRef}>01</span>
-              <div className="progress-line">
-                <i ref={barRef} />
-              </div>
-              <span>{pad(totalMembers)}</span>
-            </div>
-
-            <span>CLICK CARD TO FLIP IN 3D</span>
-          </div>
+    <section className="dev-showcase-section" ref={sectionRef}>
+      <div className="showcase-sticky">
+        {/* Background Typography Parallax */}
+        <div className="showcase-heading" ref={headingRef}>
+          QUEST IT // DEVELOPERS
         </div>
-      ) : (
-        /* ───────── Grid Mode ───────── */
-        <div className="dev-grid-section">
-          {/* Top Controls Bar for Grid View */}
-          <div className="flex justify-end items-center mb-8 px-4">
-            <div className="dev-view-switch" role="tablist">
-              <button
-                className={`dev-view-btn ${viewMode === "showcase" ? "is-active" : ""}`}
-                onClick={() => setViewMode("showcase")}
-              >
-                <Layers size={13} className="inline mr-1" />
-                <span>Showcase</span>
-              </button>
-              <button
-                className={`dev-view-btn ${viewMode === "grid" ? "is-active" : ""}`}
-                onClick={() => setViewMode("grid")}
-              >
-                <LayoutGrid size={13} className="inline mr-1" />
-                <span>Grid View</span>
-              </button>
-            </div>
-          </div>
 
-          <div className="dev-grid-cards">
-            {developers.map((member, index) => (
-              <div key={member.name} className="flex flex-col items-center">
+        {/* Timeline Points in Background */}
+        <div className="timeline">
+          {[10, 20, 30, 40, 50].map((num) => (
+            <div className="timeline-point" key={num}>
+              <span>{num}</span>
+              <div />
+            </div>
+          ))}
+        </div>
+
+        {/* Horizontal Scroll Track (Scroll-Driven on Web) */}
+        <div className="showcase-track" ref={trackRef}>
+          {developers.map((member, index) => {
+            const workTitle = DEVELOPER_WORK_TITLES[member.name] || member.role;
+
+            return (
+              <article
+                className="showcase-item"
+                key={member.name}
+                style={{ "--i": index }}
+              >
                 <CollectibleTeamCard
                   member={member}
                   number={index + 1}
                   total={totalMembers}
                 />
-                <p className="member-caption mt-4">
-                  {DEVELOPER_WORK_TITLES[member.name] || member.role}
-                </p>
-              </div>
-            ))}
-          </div>
+                <p className="member-caption">{workTitle}</p>
+              </article>
+            );
+          })}
         </div>
-      )}
+
+        {/* Bottom Scroll Progress Bar */}
+        <div className="showcase-footer">
+          <span>SCROLL DOWN TO EXPLORE</span>
+
+          <div className="progress">
+            <span ref={counterRef}>01</span>
+            <div className="progress-line">
+              <i ref={barRef} />
+            </div>
+            <span>{pad(totalMembers)}</span>
+          </div>
+
+          <span>CLICK CARD TO FLIP IN 3D</span>
+        </div>
+      </div>
     </section>
   );
 }
