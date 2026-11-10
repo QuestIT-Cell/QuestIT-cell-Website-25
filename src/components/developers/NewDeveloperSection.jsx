@@ -16,6 +16,9 @@ const DEVELOPER_WORK_TITLES = {
   "Karthik Kotian": "Gallery & Developer Section Redesign",
   "Avani Killekar": "Council 2026–27 Team Section Architecture",
   "Chaitali Rane": "Council 2026–27 Media Standardisation",
+  "Manish Awari": "Event Campaign Integration & Metrics UI",
+  "Sarra Khadse": "Data Analytics Visualization & Responsive Splits UI",
+  "Sankalp Mane": "Cross-Device Layout Optimization & Event Modules",
 };
 
 const CATEGORIES = [
