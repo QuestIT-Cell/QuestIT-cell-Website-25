@@ -402,8 +402,6 @@ export default function NewDeveloperSection() {
     const items = Array.from(track.children);
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-    const EASE = 0.085; // smooth inertial follow for natural scroll
-
     let maxTravel = 0;
     let centers = [];
     let target = 0;
@@ -419,6 +417,9 @@ export default function NewDeveloperSection() {
     };
 
     const render = () => {
+      const isMobile = window.innerWidth < 768;
+      const EASE = isMobile ? 0.07 : 0.085;
+
       if (reduced) {
         current = target;
       } else {
@@ -437,10 +438,11 @@ export default function NewDeveloperSection() {
 
       let nearest = 0;
       let nearestDist = Infinity;
+      const focusWidth = isMobile ? vw * 0.75 : vw * 0.45;
 
       items.forEach((item, i) => {
         // d is normalized distance from center of viewport (-1 ... 0 ... +1)
-        const d = (centers[i] + x - vw / 2) / (vw * 0.45);
+        const d = (centers[i] + x - vw / 2) / focusWidth;
         const clampedD = Math.max(-1.8, Math.min(1.8, d));
         const a = Math.min(1, Math.abs(clampedD));
 
@@ -485,9 +487,17 @@ export default function NewDeveloperSection() {
     };
 
     const measure = () => {
-      // Calculate travel distance needed to translate all 11 cards cleanly
-      maxTravel = Math.max(0, track.scrollWidth - window.innerWidth + 140);
-      section.style.height = `${window.innerHeight + maxTravel}px`;
+      const isMobile = window.innerWidth < 768;
+      // Calculate travel distance needed to translate all cards from first center to last center
+      maxTravel = Math.max(0, track.scrollWidth - window.innerWidth);
+
+      // Slow down motion on mobile so each person gets adequate visibility without skipping:
+      // A multiplier of 2.6 on mobile requires 2.6x more vertical scroll per card transition,
+      // giving each person a smooth, dedicated viewing window.
+      const scrollMultiplier = isMobile ? 2.6 : 1.35;
+      const scrollTrackDistance = maxTravel * scrollMultiplier;
+      section.style.height = `${window.innerHeight + scrollTrackDistance}px`;
+
       centers = items.map((el) => el.offsetLeft + el.offsetWidth / 2);
       readTarget();
       current = target;

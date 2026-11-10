@@ -4,7 +4,7 @@ import NewDeveloperSection from "./NewDeveloperSection";
 
 const DevelopersPageWrapper = () => {
   return (
-    <div className="relative w-full min-h-screen bg-[#09070f]">
+    <div className="relative w-full min-h-screen bg-[#040711]">
       <NewDeveloperSection />
     </div>
   );
