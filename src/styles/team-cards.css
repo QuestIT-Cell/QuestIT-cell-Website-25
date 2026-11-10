@@ -259,25 +259,13 @@
   border-radius: 110px 110px 12px 12px;
   overflow: hidden;
   border: 2px solid var(--gold-2);
-  background: #090b16;
+  background:
+    radial-gradient(ellipse at 50% 100%, #6d4ccf 0%, #2b1f5c 45%, #120e26 100%);
   box-shadow:
     inset 0 0 20px #000000aa,
     0 0 0 1px #00000099,
     0 0 14px #e2b24f44;
   z-index: 1;
-}
-
-.portrait-window::before {
-  content: "";
-  position: absolute;
-  inset: -6%;
-  background:
-    radial-gradient(circle at 50% 35%, transparent 35%, rgba(6, 8, 20, 0.45) 100%),
-    url("/images/dev_card_bg.webp") center/cover no-repeat;
-  transform: translate(calc(var(--px) * 8px), calc(var(--py) * 8px));
-  z-index: 0;
-  transition: transform 0.1s linear;
-  pointer-events: none;
 }
 
 .rays {
@@ -289,14 +277,11 @@
     transparent 5deg 12deg
   );
   transform: translate(calc(var(--px) * 10px), calc(var(--py) * 10px));
-  opacity: 0.2;
-  z-index: 1;
 }
 
 .portrait {
   position: absolute;
   inset: 0;
-  z-index: 2;
   transform:
     translate(calc(var(--px) * -14px), calc(var(--py) * -10px))
     scale(1.08);
@@ -612,7 +597,6 @@
   border-radius: 50%;
   object-fit: cover;
   object-position: center top;
-  background: #090b16 url("/images/dev_card_bg.webp") center/cover no-repeat;
 }
 
 .dossier-name {
@@ -1030,6 +1014,12 @@
 
 /* ───────── Responsive ───────── */
 @media (max-width: 768px) {
+  /* Disable shiny rainbow and glare on mobile to avoid blurry cards */
+  .card-holo,
+  .card-glare {
+    display: none !important;
+  }
+
   .showcase-heading {
     top: 10%;
     font-size: 15vw;

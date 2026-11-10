@@ -298,10 +298,7 @@ function CollectibleTeamCard({
 
                 {/* In-Card Description */}
                 <div className="dossier-body">
-                  <div
-                    className="dossier-desc-container"
-                    onClick={(e) => e.stopPropagation()}
-                  >
+                  <div className="dossier-desc-container">
                     <p className="dossier-desc-text">{member.description}</p>
                   </div>
                 </div>
