@@ -30,8 +30,8 @@ const ORBITAL_IMAGES = [
 
 const INITIAL_OFFSET_INDEX = 2;
 const TOTAL_CARDS = ORBITAL_IMAGES.length;
-const PAUSE_MS = 5500;
-const ROTATION_DURATION = 2.6;
+const PAUSE_MS = 3000;
+const ROTATION_DURATION = 2.2;
 const INITIAL_ARRIVAL_PAUSE_MS = 3500;
 // Cinematic ease: fast start, effortless float, whisper-soft landing
 const ORBIT_EASE = [0.12, 0.95, 0.25, 1];
@@ -105,18 +105,33 @@ const MemoryCard = ({
         height: `${cardHeight}px`,
         marginLeft: `-${cardWidth / 2}px`,
         marginTop: `-${cardHeight / 2}px`,
-        transform: `translate3d(${card.x}px, ${card.y}px, ${card.z}px) rotateX(${card.rotateX}deg) rotateY(${card.rotateY}deg) rotateZ(${card.rotateZ}deg) scale(${card.baseScale})`,
+        // 3D positional transforms only — NO scale here.
+        // Scale lives in the inner wrapper below so the browser rasterizes
+        // the GPU texture at full cardWidth×cardHeight, then composites it
+        // scaled — preventing the upscaling blur that happens when scale()
+        // is baked into the same 3D transform as the perspective stack.
+        transform: `translate3d(${card.x}px, ${card.y}px, ${card.z}px) rotateX(${card.rotateX}deg) rotateY(${card.rotateY}deg) rotateZ(${card.rotateZ}deg)`,
         zIndex: isFocal ? 150 : card.zIndex,
         opacity: card.opacity,
-        filter: isFocal ? "none" : `brightness(${card.brightness})`,
-        willChange: "transform",
         transformStyle: "preserve-3d",
-        backfaceVisibility: "hidden",
         pointerEvents: card.isVisible ? "auto" : "none",
         outline: "none",
         WebkitTapHighlightColor: "transparent",
       }}
     >
+      {/* Scale wrapper — intentionally NOT 3D so the browser rasterizes the GPU
+           layer at full native cardWidth×cardHeight, then downsamples in the
+           compositor (crisp). translateZ(0) forces its own compositing layer. */}
+      <div
+        style={{
+          width: "100%",
+          height: "100%",
+          transform: `scale(${card.baseScale}) translateZ(0)`,
+          filter: isFocal ? "none" : `brightness(${card.brightness})`,
+          transformOrigin: "center center",
+          willChange: "transform",
+        }}
+      >
       {/* Spring-driven flip wrapper — rotates the card face with natural momentum */}
       <motion.div
         style={{
@@ -164,6 +179,7 @@ const MemoryCard = ({
               sizes="(max-width: 768px) 100vw, (max-width: 1200px) 70vw, 900px"
               className="object-cover select-none pointer-events-none"
               priority={card.index < 6}
+              style={{ imageRendering: "high-quality" }}
             />
           </div>
           {/* Subtle bottom vignette that dissolves when card is focal */}
@@ -202,9 +218,11 @@ const MemoryCard = ({
             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 70vw, 900px"
             className="object-cover select-none pointer-events-none"
             priority={card.index < 6}
+            style={{ imageRendering: "high-quality" }}
           />
         </div>
       </motion.div>
+      </div>
     </div>
   );
 };
