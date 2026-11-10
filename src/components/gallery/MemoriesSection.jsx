@@ -30,8 +30,10 @@ const ORBITAL_IMAGES = [
 
 const INITIAL_OFFSET_INDEX = 2;
 const TOTAL_CARDS = ORBITAL_IMAGES.length;
-const PAUSE_MS = 1800;
-const ROTATION_DURATION = 0.95;
+const PAUSE_MS = 3800;
+const ROTATION_DURATION = 2.0;
+const INITIAL_ARRIVAL_PAUSE_MS = 2500;
+const ORBIT_EASE = [0.16, 1, 0.3, 1];
 
 const mod = (n, m) => ((n % m) + m) % m;
 
@@ -102,11 +104,7 @@ const MemoryCard = ({
       }}
     >
       <motion.div
-        initial={{
-          rotateY: 0,
-          y: 0,
-          scale: 1,
-        }}
+        initial={false}
         animate={{
           rotateY: isFocal ? 180 : 0,
           y: isFocal ? liftY : 0,
@@ -114,7 +112,7 @@ const MemoryCard = ({
         }}
         transition={{
           duration: animDuration || ROTATION_DURATION,
-          ease: [0.25, 1, 0.5, 1],
+          ease: ORBIT_EASE,
         }}
         className="relative w-full h-full outline-none"
         style={{
@@ -213,7 +211,11 @@ const MemoriesSection = () => {
   const orbitCanvasRef = useRef(null);
 
   // Detect when Memories section is in view to run auto-rotation
-  const isInView = useInView(sectionRef, { amount: 0.25 });
+  // Uses margin and 0.35 threshold so rotation starts ONLY when user actually scrolls to this section
+  const isInView = useInView(sectionRef, {
+    amount: 0.35,
+    margin: "-80px 0px -80px 0px",
+  });
 
   // Dynamic responsive dimensions derived directly from container measurements
   const [stageDimensions, setStageDimensions] = useState({
@@ -224,9 +226,9 @@ const MemoriesSection = () => {
   // Step counter for carousel position
   const [step, setStep] = useState(0);
   const stepRef = useRef(0);
-  // Separate focal step tracking so flip & elevation trigger right when card lands in center
-  const [focalStep, setFocalStep] = useState(null);
-  const focalStepRef = useRef(null);
+  // Separate focal step tracking: starts at 0 so initial card rests peacefully in focal spotlight
+  const [focalStep, setFocalStep] = useState(0);
+  const focalStepRef = useRef(0);
 
   // Synchronized animation duration so 3D flip/elevation matches orbit progress travel time
   const [animDuration, setAnimDuration] = useState(ROTATION_DURATION);
@@ -252,6 +254,9 @@ const MemoriesSection = () => {
       clearTimeout(timeoutRef.current);
       timeoutRef.current = null;
     }
+    if (animControlsRef.current) {
+      animControlsRef.current.stop();
+    }
     setModalPhoto({
       src,
       title: `QUEST-IT Memory ${index + 1}`,
@@ -261,7 +266,7 @@ const MemoriesSection = () => {
   // Minimizing modal resumes auto-rotation
   const handleCloseModal = () => {
     setModalPhoto(null);
-    if (scheduleNextRotationRef.current) {
+    if (isInView && scheduleNextRotationRef.current) {
       scheduleNextRotationRef.current();
     }
   };
@@ -287,7 +292,7 @@ const MemoriesSection = () => {
 
     animControlsRef.current = animate(progressMV, targetStep, {
       duration: customDuration,
-      ease: [0.25, 1, 0.5, 1],
+      ease: ORBIT_EASE,
       onComplete: () => {
         if (isCancelledRef.current) return;
         setAnimDuration(ROTATION_DURATION);
@@ -328,9 +333,9 @@ const MemoriesSection = () => {
 
     if (targetStep === focalStepRef.current) return;
 
-    // Responsive duration proportional to travel distance (capped between 0.75s and 1.35s)
+    // Responsive duration proportional to travel distance (scaled smoothly between 1.4s and 2.4s)
     const dist = Math.abs(targetStep - currentVal);
-    const customDuration = Math.min(0.75 + Math.max(dist - 1, 0) * 0.18, 1.35);
+    const customDuration = Math.min(1.4 + Math.max(dist - 1, 0) * 0.25, 2.4);
 
     rotateToStep(targetStep, customDuration);
   };
@@ -360,33 +365,39 @@ const MemoriesSection = () => {
     }
   };
 
-  // Automatic rotation lifecycle when section is in view
+  // Automatic rotation lifecycle: strictly runs ONLY when user scrolls to and views this section
   useEffect(() => {
     if (!isInView) {
       isCancelledRef.current = true;
-      if (timeoutRef.current) clearTimeout(timeoutRef.current);
-      if (animControlsRef.current) animControlsRef.current.stop();
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+        timeoutRef.current = null;
+      }
+      if (animControlsRef.current) {
+        animControlsRef.current.stop();
+      }
       return;
     }
 
     isCancelledRef.current = false;
 
-    // Initial spotlight trigger for the starting center card after 350ms
-    const initialTimer = setTimeout(() => {
+    // When the user enters the section, showcase the current memory calmly for an initial pause
+    // before the first automatic orbital transition begins
+    timeoutRef.current = setTimeout(() => {
       if (!isCancelledRef.current) {
-        focalStepRef.current = 0;
-        setFocalStep(0);
-        if (scheduleNextRotationRef.current) {
-          scheduleNextRotationRef.current();
-        }
+        rotateToStep(stepRef.current + 1, ROTATION_DURATION);
       }
-    }, 350);
+    }, INITIAL_ARRIVAL_PAUSE_MS);
 
     return () => {
       isCancelledRef.current = true;
-      clearTimeout(initialTimer);
-      if (timeoutRef.current) clearTimeout(timeoutRef.current);
-      if (animControlsRef.current) animControlsRef.current.stop();
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+        timeoutRef.current = null;
+      }
+      if (animControlsRef.current) {
+        animControlsRef.current.stop();
+      }
     };
   }, [isInView]);
 
