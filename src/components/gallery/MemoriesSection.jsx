@@ -1,11 +1,11 @@
 "use client";
 
-import { useEffect, useRef, useState, useMemo } from "react";
+import { useEffect, useRef, useState, useMemo, useCallback } from "react";
 import Image from "next/image";
 import {
   motion,
   useMotionValue,
-  useMotionValueEvent,
+  useSpring,
   animate,
   useInView,
 } from "framer-motion";
@@ -31,24 +31,38 @@ const ORBITAL_IMAGES = [
 const INITIAL_OFFSET_INDEX = 2;
 const TOTAL_CARDS = ORBITAL_IMAGES.length;
 const PAUSE_MS = 5500;
-const ROTATION_DURATION = 2.4;
+const ROTATION_DURATION = 2.6;
 const INITIAL_ARRIVAL_PAUSE_MS = 3500;
-const ORBIT_EASE = [0.16, 1, 0.3, 1];
+// Cinematic ease: fast start, effortless float, whisper-soft landing
+const ORBIT_EASE = [0.12, 0.95, 0.25, 1];
+
+// Spring config for the card flip — physical momentum, no abrupt snapping
+const FLIP_SPRING = { stiffness: 55, damping: 18, mass: 1.2 };
+// Spring config for lift elevation
+const LIFT_SPRING = { stiffness: 60, damping: 22, mass: 1 };
 
 const mod = (n, m) => ((n % m) + m) % m;
 
-// Sub-component for each 3D Memory Card with single flip, elevation, and size transitions
+// ─── MemoryCard: each card manages its own spring-driven flip & lift ─────────
 const MemoryCard = ({
   card,
   cardWidth,
   cardHeight,
   isFocal,
   liftY,
-  activeScale,
   animDuration,
   onCardClick,
   onActivePhotoClick,
 }) => {
+  // Spring-driven flip: rotates smoothly with physical momentum into focal state
+  const flipY = useSpring(0, FLIP_SPRING);
+  const liftMV = useSpring(0, LIFT_SPRING);
+
+  useEffect(() => {
+    flipY.set(isFocal ? 180 : 0);
+    liftMV.set(isFocal ? liftY : 0);
+  }, [isFocal, liftY, flipY, liftMV]);
+
   return (
     <div
       onClick={() => {
@@ -91,42 +105,36 @@ const MemoryCard = ({
         height: `${cardHeight}px`,
         marginLeft: `-${cardWidth / 2}px`,
         marginTop: `-${cardHeight / 2}px`,
-        transform: `translate3d(${card.x}px, ${card.y}px, ${card.z}px) rotateX(${card.rotateX || 0}deg) rotateY(${card.rotateY || 0}deg) rotateZ(${card.rotateZ || 0}deg) scale(${card.baseScale})`,
+        transform: `translate3d(${card.x}px, ${card.y}px, ${card.z}px) rotateX(${card.rotateX}deg) rotateY(${card.rotateY}deg) rotateZ(${card.rotateZ}deg) scale(${card.baseScale})`,
         zIndex: isFocal ? 150 : card.zIndex,
         opacity: card.opacity,
         filter: isFocal ? "none" : `brightness(${card.brightness})`,
-        willChange: isFocal ? "auto" : "transform, opacity",
+        willChange: "transform",
         transformStyle: "preserve-3d",
         backfaceVisibility: "hidden",
         pointerEvents: card.isVisible ? "auto" : "none",
         outline: "none",
         WebkitTapHighlightColor: "transparent",
-        imageRendering: "-webkit-optimize-contrast",
       }}
     >
+      {/* Spring-driven flip wrapper — rotates the card face with natural momentum */}
       <motion.div
-        initial={false}
-        animate={{
-          rotateY: isFocal ? 180 : 0,
-          y: isFocal ? liftY : 0,
-          scale: 1,
-        }}
-        transition={{
-          duration: animDuration || ROTATION_DURATION,
-          ease: ORBIT_EASE,
-        }}
-        className="relative w-full h-full outline-none"
         style={{
+          rotateY: flipY,
+          y: liftMV,
           transformStyle: "preserve-3d",
+          width: "100%",
+          height: "100%",
+          position: "relative",
           outline: "none",
-          imageRendering: "-webkit-optimize-contrast",
         }}
+        className="outline-none"
       >
-        {/* FRONT FACE: Mirrored photograph (visible when inactive in orbit at rotateY: 0) */}
+        {/* FRONT FACE: Mirrored photograph (visible when inactive at rotateY ~0) */}
         <div
-          className={`absolute inset-0 w-full h-full rounded-2xl md:rounded-3xl overflow-hidden bg-neutral-950 transition-all duration-700 ease-out outline-none ${
+          className={`absolute inset-0 w-full h-full rounded-2xl md:rounded-3xl overflow-hidden bg-neutral-950 outline-none ${
             !isFocal
-              ? "group-hover:border-cyan-400/70 group-hover:shadow-[0_0_25px_rgba(0,212,255,0.45)] group-hover:scale-[1.03]"
+              ? "group-hover:scale-[1.03] transition-transform duration-500 ease-out"
               : ""
           }`}
           style={{
@@ -135,17 +143,17 @@ const MemoryCard = ({
             WebkitBackfaceVisibility: "hidden",
             border: isFocal
               ? "2px solid rgba(0, 212, 255, 0.95)"
-              : "1px solid rgba(0, 212, 255, 0.2)",
+              : "1px solid rgba(0, 212, 255, 0.18)",
             boxShadow: isFocal
-              ? "0 0 35px rgba(0, 212, 255, 0.65), 0 25px 50px rgba(0, 0, 0, 0.95)"
-              : "0 10px 28px rgba(0, 0, 0, 0.75)",
+              ? "0 0 40px rgba(0, 212, 255, 0.6), 0 20px 48px rgba(0, 0, 0, 0.9)"
+              : "0 8px 24px rgba(0, 0, 0, 0.7)",
             outline: "none",
-            imageRendering: "-webkit-optimize-contrast",
+            transition: "border-color 0.8s ease, box-shadow 0.8s ease",
           }}
         >
           <div
             className="relative w-full h-full"
-            style={{ transform: "scaleX(-1)", imageRendering: "-webkit-optimize-contrast" }}
+            style={{ transform: "scaleX(-1)" }}
           >
             <Image
               src={card.src}
@@ -156,36 +164,33 @@ const MemoryCard = ({
               sizes="(max-width: 768px) 100vw, (max-width: 1200px) 70vw, 900px"
               className="object-cover select-none pointer-events-none"
               priority={card.index < 6}
-              style={{
-                imageRendering: "-webkit-optimize-contrast",
-              }}
             />
           </div>
+          {/* Subtle bottom vignette that dissolves when card is focal */}
           <div
             className="absolute inset-0 pointer-events-none"
             style={{
-              background: `linear-gradient(to top, rgba(0, 0, 0, ${
-                0.35 * (1 - (isFocal ? 1 : 0))
-              }), transparent 55%)`,
+              background: `linear-gradient(to top, rgba(0,0,0,${isFocal ? 0 : 0.28}), transparent 55%)`,
+              transition: "background 0.9s ease",
             }}
           />
         </div>
 
-        {/* BACK FACE: Original photograph (visible when active in focal spotlight at rotateY: 180) */}
+        {/* BACK FACE: Original photograph (visible when active at rotateY ~180) */}
         <div
-          className="absolute inset-0 w-full h-full rounded-2xl md:rounded-3xl overflow-hidden bg-neutral-950 transition-all duration-700 ease-out outline-none"
+          className="absolute inset-0 w-full h-full rounded-2xl md:rounded-3xl overflow-hidden bg-neutral-950 outline-none"
           style={{
             transform: "rotateY(180deg) translateZ(1px)",
             backfaceVisibility: "hidden",
             WebkitBackfaceVisibility: "hidden",
             border: isFocal
               ? "2px solid rgba(0, 212, 255, 0.95)"
-              : "1px solid rgba(0, 212, 255, 0.2)",
+              : "1px solid rgba(0, 212, 255, 0.18)",
             boxShadow: isFocal
-              ? "0 0 45px rgba(0, 212, 255, 0.7), 0 30px 60px rgba(0, 0, 0, 0.95)"
-              : "0 10px 28px rgba(0, 0, 0, 0.75)",
+              ? "0 0 50px rgba(0, 212, 255, 0.65), 0 28px 56px rgba(0, 0, 0, 0.95)"
+              : "0 8px 24px rgba(0, 0, 0, 0.7)",
             outline: "none",
-            imageRendering: "-webkit-optimize-contrast",
+            transition: "border-color 0.8s ease, box-shadow 0.8s ease",
           }}
         >
           <Image
@@ -197,17 +202,6 @@ const MemoryCard = ({
             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 70vw, 900px"
             className="object-cover select-none pointer-events-none"
             priority={card.index < 6}
-            style={{
-              imageRendering: "-webkit-optimize-contrast",
-            }}
-          />
-          <div
-            className="absolute inset-0 pointer-events-none"
-            style={{
-              background: `linear-gradient(to top, rgba(0, 0, 0, ${
-                0.35 * (1 - (isFocal ? 1 : 0))
-              }), transparent 55%)`,
-            }}
           />
         </div>
       </motion.div>
@@ -215,19 +209,19 @@ const MemoryCard = ({
   );
 };
 
+// ─── MemoriesSection ─────────────────────────────────────────────────────────
 const MemoriesSection = () => {
   const sectionRef = useRef(null);
   const stageRef = useRef(null);
   const orbitCanvasRef = useRef(null);
 
-  // Detect when Memories section is in view to run auto-rotation
-  // Uses margin and 0.35 threshold so rotation starts ONLY when user actually scrolls to this section
+  // Detect when Memories section is in view — only then start rotation
   const isInView = useInView(sectionRef, {
     amount: 0.35,
     margin: "-80px 0px -80px 0px",
   });
 
-  // Dynamic responsive dimensions derived directly from container measurements
+  // Dynamic responsive dimensions derived from container measurements
   const [stageDimensions, setStageDimensions] = useState({
     width: 1200,
     height: 700,
@@ -236,17 +230,18 @@ const MemoriesSection = () => {
   // Step counter for carousel position
   const [step, setStep] = useState(0);
   const stepRef = useRef(0);
-  // Separate focal step tracking: starts at 0 so initial card rests peacefully in focal spotlight
+  // focalStep: starts at 0 so initial card rests in spotlight immediately
   const [focalStep, setFocalStep] = useState(0);
   const focalStepRef = useRef(0);
 
-  // Synchronized animation duration so 3D flip/elevation matches orbit progress travel time
-  const [animDuration, setAnimDuration] = useState(ROTATION_DURATION);
-
+  // progressMV drives ALL card orbital positions — only this value animates
   const progressMV = useMotionValue(0);
   const [currentProgress, setCurrentProgress] = useState(0);
 
-  // Active photo pop-up modal state for max view
+  // animDuration tracks the in-flight duration for aria/debugging only
+  const [animDuration, setAnimDuration] = useState(ROTATION_DURATION);
+
+  // Active photo pop-up modal state
   const [modalPhoto, setModalPhoto] = useState(null);
 
   const timeoutRef = useRef(null);
@@ -254,12 +249,14 @@ const MemoriesSection = () => {
   const isCancelledRef = useRef(false);
   const scheduleNextRotationRef = useRef(null);
 
-  useMotionValueEvent(progressMV, "change", (latest) => {
-    setCurrentProgress(latest);
-  });
+  // Subscribe to progressMV without causing React re-renders inside RAF
+  useEffect(() => {
+    const unsub = progressMV.on("change", (v) => setCurrentProgress(v));
+    return unsub;
+  }, [progressMV]);
 
-  // Clicking the active photo opens full window max view and pauses auto-rotation
-  const handleActivePhotoClick = (src, index) => {
+  // Clicking the focal card opens lightbox and pauses rotation
+  const handleActivePhotoClick = useCallback((src, index) => {
     if (timeoutRef.current) {
       clearTimeout(timeoutRef.current);
       timeoutRef.current = null;
@@ -267,29 +264,26 @@ const MemoriesSection = () => {
     if (animControlsRef.current) {
       animControlsRef.current.stop();
     }
-    setModalPhoto({
-      src,
-      title: `QUEST-IT Memory ${index + 1}`,
-    });
-  };
+    setModalPhoto({ src, title: `QUEST-IT Memory ${index + 1}` });
+  }, []);
 
-  // Minimizing modal resumes auto-rotation
-  const handleCloseModal = () => {
+  // Closing modal resumes rotation if section is in view
+  const handleCloseModal = useCallback(() => {
     setModalPhoto(null);
-    if (isInView && scheduleNextRotationRef.current) {
+    if (scheduleNextRotationRef.current) {
       scheduleNextRotationRef.current();
     }
-  };
+  }, []);
 
-  // Core rotation orchestrator: animates orbit to targetStep and synchronizes focal flip
-  const rotateToStep = (targetStep, customDuration = ROTATION_DURATION) => {
+  // ─── Core orbital animator ─────────────────────────────────────────────────
+  // Drives progressMV using Framer Motion's native animate (bypasses React render)
+  const rotateToStep = useCallback((targetStep, customDuration = ROTATION_DURATION) => {
     if (isCancelledRef.current) return;
 
     if (timeoutRef.current) {
       clearTimeout(timeoutRef.current);
       timeoutRef.current = null;
     }
-
     if (animControlsRef.current) {
       animControlsRef.current.stop();
     }
@@ -311,9 +305,9 @@ const MemoriesSection = () => {
         }
       },
     });
-  };
+  }, [progressMV]);
 
-  // Schedule auto-rotation to next card after showcase pause
+  // Schedule the next auto-rotation after PAUSE_MS
   scheduleNextRotationRef.current = () => {
     if (timeoutRef.current) clearTimeout(timeoutRef.current);
     timeoutRef.current = setTimeout(() => {
@@ -322,21 +316,16 @@ const MemoriesSection = () => {
     }, PAUSE_MS);
   };
 
-  // Click on non-active card: smoothly orbit to that card and spotlight it as active
-  // Uses the exact same smooth motion, velocity, and rotation as the active card moves
-  const handleCardClick = (targetIndex) => {
+  // Click on non-active card: orbit it into the spotlight with the same silky motion
+  const handleCardClick = useCallback((targetIndex) => {
     const currentActiveIndex =
       focalStepRef.current !== null
         ? mod(INITIAL_OFFSET_INDEX + focalStepRef.current, TOTAL_CARDS)
         : INITIAL_OFFSET_INDEX;
 
-    if (targetIndex === currentActiveIndex) {
-      return; // Already the active card
-    }
+    if (targetIndex === currentActiveIndex) return;
 
     const currentVal = progressMV.get();
-
-    // Determine the closest targetStep that positions targetIndex at the focal center
     const baseK = Math.round(
       (currentVal - (targetIndex - INITIAL_OFFSET_INDEX)) / TOTAL_CARDS
     );
@@ -344,17 +333,16 @@ const MemoriesSection = () => {
 
     if (targetStep === focalStepRef.current) return;
 
-    // Use ROTATION_DURATION so the motion and rotation match the active card's smooth glide
+    // Duration scales with distance but always uses same ease — same feel as auto-rotation
     const dist = Math.abs(targetStep - currentVal);
-    const customDuration =
-      dist <= 1
-        ? ROTATION_DURATION
-        : ROTATION_DURATION * Math.min(1 + (dist - 1) * 0.35, 1.8);
+    const customDuration = dist <= 1
+      ? ROTATION_DURATION
+      : ROTATION_DURATION * Math.min(1 + (dist - 1) * 0.3, 1.7);
 
     rotateToStep(targetStep, customDuration);
-  };
+  }, [progressMV, rotateToStep]);
 
-  // Touch swipe support for mobile horizontal navigation
+  // Touch swipe support for mobile
   const touchStartX = useRef(0);
   const touchStartY = useRef(0);
 
@@ -362,41 +350,26 @@ const MemoriesSection = () => {
     touchStartX.current = e.touches[0].clientX;
     touchStartY.current = e.touches[0].clientY;
   };
-
   const handleTouchEnd = (e) => {
     const deltaX = e.changedTouches[0].clientX - touchStartX.current;
     const deltaY = e.changedTouches[0].clientY - touchStartY.current;
-
-    // Check if horizontal swipe exceeds 35px and is predominantly horizontal
     if (Math.abs(deltaX) > 35 && Math.abs(deltaX) > Math.abs(deltaY)) {
-      if (deltaX < 0) {
-        // Swiped Left -> advance to next memory
-        rotateToStep(stepRef.current + 1);
-      } else {
-        // Swiped Right -> return to previous memory
-        rotateToStep(stepRef.current - 1);
-      }
+      rotateToStep(deltaX < 0 ? stepRef.current + 1 : stepRef.current - 1);
     }
   };
 
-  // Automatic rotation lifecycle: strictly runs ONLY when user scrolls to and views this section
+  // ─── Viewport lifecycle: start only when user arrives, stop when they leave ─
   useEffect(() => {
     if (!isInView) {
       isCancelledRef.current = true;
-      if (timeoutRef.current) {
-        clearTimeout(timeoutRef.current);
-        timeoutRef.current = null;
-      }
-      if (animControlsRef.current) {
-        animControlsRef.current.stop();
-      }
+      if (timeoutRef.current) { clearTimeout(timeoutRef.current); timeoutRef.current = null; }
+      if (animControlsRef.current) animControlsRef.current.stop();
       return;
     }
 
     isCancelledRef.current = false;
 
-    // When the user enters the section, showcase the current memory calmly for an initial pause
-    // before the first automatic orbital transition begins
+    // Calm arrival: show the first card for INITIAL_ARRIVAL_PAUSE_MS before moving
     timeoutRef.current = setTimeout(() => {
       if (!isCancelledRef.current) {
         rotateToStep(stepRef.current + 1, ROTATION_DURATION);
@@ -405,243 +378,155 @@ const MemoriesSection = () => {
 
     return () => {
       isCancelledRef.current = true;
-      if (timeoutRef.current) {
-        clearTimeout(timeoutRef.current);
-        timeoutRef.current = null;
-      }
-      if (animControlsRef.current) {
-        animControlsRef.current.stop();
-      }
+      if (timeoutRef.current) { clearTimeout(timeoutRef.current); timeoutRef.current = null; }
+      if (animControlsRef.current) animControlsRef.current.stop();
     };
-  }, [isInView]);
+  }, [isInView, rotateToStep]);
 
-  // Measure actual container dimensions dynamically via ResizeObserver
+  // Measure container dimensions via ResizeObserver
   useEffect(() => {
     if (!stageRef.current) return;
-
-    const updateMeasurements = (entry) => {
-      if (entry) {
+    const observer = new ResizeObserver(([entry]) => {
+      if (entry?.contentRect) {
         setStageDimensions({
           width: entry.contentRect.width || window.innerWidth,
           height: entry.contentRect.height || window.innerHeight,
         });
       }
-    };
-
-    const observer = new ResizeObserver(([entry]) => updateMeasurements(entry));
+    });
     observer.observe(stageRef.current);
-
-    return () => {
-      observer.disconnect();
-    };
+    return () => observer.disconnect();
   }, []);
 
-  // Compute responsive geometry derived from container width W & height H
+  // ─── Responsive geometry ───────────────────────────────────────────────────
   const {
     isMobile,
-    Rx,
-    Ry,
-    Rz,
-    cardWidth,
-    cardHeight,
-    visibleSlots,
-    angularSpacing,
-    maxDiff,
-    fadeZone,
-    liftY,
-    activeScale,
+    Rx, Ry, Rz,
+    cardWidth, cardHeight,
+    angularSpacing, maxDiff, fadeZone,
+    liftY, activeScale,
   } = useMemo(() => {
     const W = stageDimensions.width;
     const H = stageDimensions.height;
     const mobile = W < 768;
 
     if (mobile) {
-      // MOBILE HORIZONTAL 3D ORBITAL (W < 768px)
-      // Sized comfortably to prevent clutter while keeping crisp native rendering
       const cw = Math.min(Math.max(Math.round(W * 0.44), 155), 195);
       const ch = Math.round(cw * 0.68);
-
-      // Symmetrical horizontal spread so side cards peek cleanly without horizontal overflow
       const rx = Math.max(Math.round(W * 0.38), 125);
-      // Subtle vertical swoop along the orbital arc
       const ry = Math.round(rx * 0.18);
-      // Deep 3D Z-depth for perspective curvature
       const rz = Math.round(rx * 0.44);
-
-      // Angular spacing (~47 degrees / 0.82 rad)
-      const spacing = 0.82;
-      // Strict threshold so ONLY absDiff <= 1 is in view at rest (exactly 3 cards)
-      const maxD = 1.35;
-      const fZone = 0.35;
-
-      const lift = -12;
-      const scale = 1.0; // 1:1 scale: eliminates GPU bilinear upscaling blur
-
       return {
         isMobile: true,
-        Rx: rx,
-        Ry: ry,
-        Rz: rz,
-        cardWidth: cw,
-        cardHeight: ch,
-        visibleSlots: 3,
-        angularSpacing: spacing,
-        maxDiff: maxD,
-        fadeZone: fZone,
-        liftY: lift,
-        activeScale: scale,
+        Rx: rx, Ry: ry, Rz: rz,
+        cardWidth: cw, cardHeight: ch,
+        visibleSlots: 3, angularSpacing: 0.82,
+        maxDiff: 1.35, fadeZone: 0.35,
+        liftY: -12, activeScale: 1.0,
       };
     } else {
-      // DESKTOP & TABLET HORIZONTAL 3D ELLIPTICAL ORBITAL GALLERY (W >= 768px)
       const tablet = W < 1024;
       const slots = tablet ? 6 : 8;
-
-      // Decreased size for a spacious, uncluttered, elegant presentation
       const rawCw = tablet
         ? Math.min(W * 0.28, H * 0.30)
         : Math.min(W * 0.22, H * 0.35);
-
       const cw = tablet
         ? Math.min(Math.max(Math.round(rawCw), 230), 290)
         : Math.min(Math.max(Math.round(rawCw), 280), 360);
-
       const ch = Math.round(cw * 0.72);
-
-      // Curvy, deep 3D elliptical radii in X, Y, and Z with spacious clearance
       const rawRx = (W * 0.86 - cw * 0.45) / 2;
       const rx = Math.max(Math.round(rawRx), 100);
-      // Sweeping vertical swoop along orbital arc
       const ry = Math.round(rx * 0.32);
-      // Deep Z depth for prominent 3D front-to-back perspective curve
       const rz = Math.round(rx * 0.44);
-
-      const lift = tablet ? -85 : -110;
-      const scale = 1.0; // 1:1 scale: eliminates GPU bilinear upscaling blur
-
       return {
         isMobile: false,
-        Rx: rx,
-        Ry: ry,
-        Rz: rz,
-        cardWidth: cw,
-        cardHeight: ch,
+        Rx: rx, Ry: ry, Rz: rz,
+        cardWidth: cw, cardHeight: ch,
         visibleSlots: slots,
         angularSpacing: (2 * Math.PI) / slots,
-        maxDiff: slots / 2,
-        fadeZone: 0.75,
-        liftY: lift,
-        activeScale: scale,
+        maxDiff: slots / 2, fadeZone: 0.75,
+        liftY: tablet ? -85 : -110, activeScale: 1.0,
       };
     }
   }, [stageDimensions]);
 
-  // Calculate 3D orbital positioning and dynamic cycling of all 15 images
+  // ─── Per-frame card geometry ───────────────────────────────────────────────
+  // Computed from currentProgress (driven by progressMV subscribe above)
   const cards = useMemo(() => {
-    // Start with diagonal_3 (index 2) front and center initially
-    const INITIAL_OFFSET_INDEX = 2;
-    // Current center index advances continuously across all 15 images as carousel rotates
     const currentCenter = INITIAL_OFFSET_INDEX + currentProgress;
-
-    // Active focal index is only active when a card is in the showcase spotlight (not during ring rotation)
     const activeFocalIndex =
       focalStep !== null
         ? mod(INITIAL_OFFSET_INDEX + focalStep, TOTAL_CARDS)
         : -1;
 
     return Array.from({ length: TOTAL_CARDS }).map((_, i) => {
-      // Focal state strictly tied to active step
       const isFocal = i === activeFocalIndex;
 
-      // Signed angular distance from current focal position, wrapped modulo TOTAL_CARDS
       let diff = (i - currentCenter) % TOTAL_CARDS;
       while (diff > TOTAL_CARDS / 2) diff -= TOTAL_CARDS;
       while (diff < -TOTAL_CARDS / 2) diff += TOTAL_CARDS;
 
       const absDiff = Math.abs(diff);
 
-      // Smooth fade factor as cards enter and depart at the back of the ellipse
+      // Fade window: smooth cosine blend so edges dissolve softly
       let fade = 0;
       if (absDiff < maxDiff) {
-        fade = absDiff > maxDiff - fadeZone ? (maxDiff - absDiff) / fadeZone : 1.0;
+        fade = absDiff > maxDiff - fadeZone
+          ? (maxDiff - absDiff) / fadeZone
+          : 1.0;
       }
 
-      // Orbital angle on the 3D horizontal ellipse
       const theta = diff * angularSpacing;
       const cosT = Math.cos(theta);
       const sinT = Math.sin(theta);
+      const depthFactor = (cosT + 1) / 2;
 
-      let x, y, z, rotateX, rotateY, rotateZ, depthFactor, baseScale, brightness, blur;
+      let x, y, z, rotateX, rotateY, rotateZ, baseScale, brightness;
 
       if (isMobile) {
-        // MOBILE 3-CARD HORIZONTAL 3D ORBIT
-        x = Math.round(Rx * sinT * 10) / 10;
-        y = Math.round(Ry * cosT * 10) / 10;
-        z = Math.round(Rz * cosT * 10) / 10;
-
-        depthFactor = (cosT + 1) / 2;
-        // Continuous smooth scaling: 0.64 at sides to 1.0 at front center
-        baseScale = 0.64 + depthFactor * 0.36;
-        brightness = Math.round((0.88 + depthFactor * 0.12) * 100) / 100;
-        blur = 0;
-
-        // Continuous banking along orbit that straightens smoothly to 0 at focal center
-        rotateX = Math.round((1 - Math.max(0, cosT)) * 6 * 10) / 10;
-        rotateY = Math.round(-sinT * 36 * 10) / 10;
-        rotateZ = Math.round(sinT * 3 * 10) / 10;
+        x = Rx * sinT;
+        y = Ry * cosT;
+        z = Rz * cosT;
+        // Continuous scale: flows organically from 0.65 (rear) to 1.0 (front)
+        baseScale = 0.65 + depthFactor * 0.35;
+        brightness = 0.88 + depthFactor * 0.12;
+        // Banking: smoothly untilts as card drifts to center
+        rotateX = (1 - Math.max(0, cosT)) * 5;
+        rotateY = -sinT * 32;
+        rotateZ = sinT * 2.5;
       } else {
-        // DESKTOP / TABLET HORIZONTAL 3D ORBIT
-        x = Math.round(Rx * sinT * 10) / 10;
-        y = Math.round(Ry * cosT * 10) / 10;
-        z = Math.round(Rz * cosT * 10) / 10;
-
-        depthFactor = (cosT + 1) / 2;
-        // Continuous smooth scaling: 0.58 in rear to 1.0 at front center
-        baseScale = 0.58 + depthFactor * 0.42;
-        brightness = Math.round((0.85 + depthFactor * 0.15) * 100) / 100;
-        blur = 0;
-
-        // Continuous banking along orbit that straightens smoothly to 0 at focal center
-        rotateX = Math.round((1 - Math.max(0, cosT)) * 8 * 10) / 10;
-        rotateY = Math.round(-sinT * 44 * 10) / 10;
-        rotateZ = Math.round(sinT * 3.5 * 10) / 10;
+        x = Rx * sinT;
+        y = Ry * cosT;
+        z = Rz * cosT;
+        baseScale = 0.60 + depthFactor * 0.40;
+        brightness = 0.85 + depthFactor * 0.15;
+        // Banking: smoothly untilts as card drifts to center
+        rotateX = (1 - Math.max(0, cosT)) * 7;
+        rotateY = -sinT * 40;
+        rotateZ = sinT * 3;
       }
 
-      // Opacity multiplied by the smooth fade window
-      const minOpacity = isMobile ? 0.75 : 0.68;
-      const baseOpacity = minOpacity + depthFactor * (1 - minOpacity);
-      const finalOpacity = Math.round(baseOpacity * fade * 100) / 100;
-
-      // Strict dynamic z-index based on depth so front active card always occludes rear cards
+      const minOpacity = isMobile ? 0.72 : 0.65;
+      const finalOpacity = (minOpacity + depthFactor * (1 - minOpacity)) * fade;
       const zIndex = isFocal ? 150 : Math.round(depthFactor * 100) + 1;
 
       return {
         index: i,
         src: ORBITAL_IMAGES[i % TOTAL_CARDS],
-        x,
-        y,
-        z,
-        rotateX,
-        rotateY,
-        rotateZ,
-        baseScale: Math.round(baseScale * 1000) / 1000,
+        x, y, z,
+        rotateX, rotateY, rotateZ,
+        baseScale,
         brightness,
         opacity: finalOpacity,
-        blur,
         zIndex,
         isFocal,
         isVisible: fade > 0.01,
       };
     });
   }, [
-    isMobile,
-    Rx,
-    Ry,
-    Rz,
-    currentProgress,
-    focalStep,
-    angularSpacing,
-    maxDiff,
-    fadeZone,
+    isMobile, Rx, Ry, Rz,
+    currentProgress, focalStep,
+    angularSpacing, maxDiff, fadeZone,
   ]);
 
   return (
@@ -653,10 +538,7 @@ const MemoriesSection = () => {
       style={
         isMobile
           ? undefined
-          : {
-              height: "min(95dvh, 800px)",
-              minHeight: "560px",
-            }
+          : { height: "min(95dvh, 800px)", minHeight: "560px" }
       }
     >
       {/* Viewport Container */}
@@ -670,7 +552,7 @@ const MemoriesSection = () => {
             : "h-full justify-between"
         }`}
         style={{
-          perspective: isMobile ? "900px" : "1300px",
+          perspective: isMobile ? "900px" : "1400px",
           perspectiveOrigin: "50% 50%",
           paddingInline: isMobile ? "0" : "clamp(2rem, 4vw, 4rem)",
         }}
@@ -685,7 +567,7 @@ const MemoriesSection = () => {
           </p>
         </div>
 
-        {/* 3D Orbital Canvas Area */}
+        {/* 3D Orbital Canvas */}
         <div
           ref={orbitCanvasRef}
           className={`relative w-full flex items-center justify-center overflow-visible ${
@@ -693,30 +575,21 @@ const MemoriesSection = () => {
               ? "h-[190px] sm:h-[220px] my-2"
               : "flex-1 -translate-y-4 md:-translate-y-8 my-0"
           }`}
-          style={{
-            transformStyle: "preserve-3d",
-            marginInline: "auto",
-          }}
+          style={{ transformStyle: "preserve-3d", marginInline: "auto" }}
         >
-          {/* Central Background Quest Logo Watermark & Ambient Radial Cyan Glow */}
+          {/* Ambient Cyan Glow + Quest Logo Watermark */}
           <div
             aria-hidden="true"
             className="absolute left-1/2 top-1/2 pointer-events-none select-none flex items-center justify-center"
-            style={{
-              transform: "translate3d(-50%, -50%, -20px)",
-              zIndex: 0,
-            }}
+            style={{ transform: "translate3d(-50%, -50%, -20px)", zIndex: 0 }}
           >
-            {/* Ambient Cyan Backlight Glow */}
             <div
               className="absolute w-[220px] h-[220px] sm:w-[320px] sm:h-[320px] md:w-[480px] md:h-[380px] rounded-full blur-[45px] md:blur-[75px] pointer-events-none"
               style={{
                 background:
-                  "radial-gradient(circle, rgba(0, 212, 255, 0.22) 0%, rgba(34, 211, 238, 0.08) 50%, transparent 75%)",
+                  "radial-gradient(circle, rgba(0, 212, 255, 0.20) 0%, rgba(34, 211, 238, 0.07) 50%, transparent 75%)",
               }}
             />
-
-            {/* Glowing Quest Logo */}
             <div className="relative w-[180px] h-[75px] sm:w-[250px] sm:h-[105px] md:w-[400px] md:h-[160px] lg:w-[480px] lg:h-[190px] opacity-25 md:opacity-30">
               <Image
                 src="/images/logo.webp"
@@ -728,10 +601,9 @@ const MemoriesSection = () => {
             </div>
           </div>
 
-          {/* Active 3D Orbital Memory Photograph Cards */}
+          {/* Orbital Cards */}
           {cards.map((card) => {
             if (!card.isVisible) return null;
-
             return (
               <MemoryCard
                 key={card.index}
@@ -749,7 +621,7 @@ const MemoriesSection = () => {
           })}
         </div>
 
-        {/* Mobile Navigation Controls & Counter */}
+        {/* Mobile Navigation Controls */}
         {isMobile ? (
           <div className="flex items-center justify-center gap-4 sm:gap-5 z-30 pt-1 pb-1 select-none">
             <button
@@ -778,7 +650,7 @@ const MemoriesSection = () => {
         )}
       </div>
 
-      {/* Maximized Lightbox Modal for Active Photo with Cross Symbol Minimize */}
+      {/* Lightbox Modal */}
       <PhotoLightboxModal
         isOpen={Boolean(modalPhoto)}
         onClose={handleCloseModal}
