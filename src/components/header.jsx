@@ -4,10 +4,41 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
-import { ChevronDown, ExternalLink } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import {
+  ChevronDown,
+  ChevronRight,
+  ExternalLink,
+  X,
+  Sparkles,
+  ArrowUpRight,
+  Home,
+  HelpCircle,
+  Calendar,
+  Images,
+  Users,
+  Mail,
+  Laptop,
+} from "lucide-react";
+import {
+  FaGithub as Github,
+  FaLinkedin as Linkedin,
+  FaInstagram as Instagram,
+} from "react-icons/fa";
 import menu from "@/constants/menu";
 
-/* ─── Sliding-pill indicator helper ──────────────────────────────────────── */
+/* ─── Map menu names to dedicated sleek icons ────────────────────────────── */
+const MENU_ICONS = {
+  Home: Home,
+  About: HelpCircle,
+  Events: Calendar,
+  Gallery: Images,
+  Team: Users,
+  Developers: Laptop,
+  Contact: Mail,
+};
+
+/* ─── Sliding-pill indicator helper for desktop ──────────────────────────── */
 function useIndicator() {
   const indRef = useRef(null);
 
@@ -50,7 +81,7 @@ function spawnSparks(e, container) {
   }
 }
 
-/* ─── Header ─────────────────────────────────────────────────────────────── */
+/* ─── Header Component ───────────────────────────────────────────────────── */
 const Header = () => {
   const pathname = usePathname();
 
@@ -126,7 +157,7 @@ const Header = () => {
     moveTo(activeEl || null);
   }, [pathname, activeId, moveTo]);
 
-  /* ─── Recalculate on font ready or window resize ──────────────────────── */
+  /* ─── Recalculate indicator on font ready or window resize ───────────── */
   useEffect(() => {
     const update = () => {
       if (!listRef.current) return;
@@ -148,13 +179,19 @@ const Header = () => {
     };
   }, [pathname, moveTo]);
 
-  /* ─── Lock scroll when mobile sheet is open ───────────────────────────── */
+  /* ─── Lock scroll & listen for ESC key when mobile sheet is open ──────── */
   useEffect(() => {
     if (sheetOpen) {
       const y = window.scrollY;
       document.documentElement.style.overflow = "hidden";
       document.body.style.cssText = `overflow:hidden;position:fixed;top:-${y}px;width:100%;touch-action:none`;
       document.body.dataset.scrollY = String(y);
+
+      const handleKeyDown = (e) => {
+        if (e.key === "Escape") setSheetOpen(false);
+      };
+      window.addEventListener("keydown", handleKeyDown);
+      return () => window.removeEventListener("keydown", handleKeyDown);
     } else {
       const saved = document.body.dataset.scrollY;
       document.documentElement.style.overflow = "";
@@ -172,11 +209,10 @@ const Header = () => {
 
   const desktopLinks = menu.filter((m) => m.name !== "Contact");
   const ctaItem = menu.find((m) => m.name === "Contact");
-  const sheetLinks = menu;
 
   return (
     <>
-      {/* Keyframe animations */}
+      {/* Dynamic keyframe styles */}
       <style>{`
         @keyframes questSparkAnim{
           0%{transform:translate(0,0) scale(1);opacity:1}
@@ -186,7 +222,7 @@ const Header = () => {
         @property --quest-a{syntax:'<angle>';inherits:false;initial-value:0deg}
       `}</style>
 
-      {/* ── Unified Top Bar: Logo & Navbar on the EXACT Same Horizontal Row ── */}
+      {/* ── Fixed Top Bar: Logo & Floating Navbar in Perfect Horizontal Row ── */}
       <header
         ref={wrapRef}
         className="fixed top-0 left-0 right-0 z-[10000] pointer-events-none px-4 sm:px-6 md:px-8 lg:px-12"
@@ -220,7 +256,7 @@ const Header = () => {
             </Link>
           </div>
 
-          {/* 2. Center: Desktop Floating Pill Navbar (Perfect horizontal centerline alignment) */}
+          {/* 2. Center: Desktop Floating Pill Navbar (Perfect horizontal alignment) */}
           <div className="hidden md:flex absolute inset-x-0 justify-center items-center pointer-events-none z-10">
             <nav
               className="pointer-events-auto relative flex items-center justify-between gap-2 md:gap-3 lg:gap-4 max-w-[94vw] md:min-w-[660px] lg:min-w-[800px] xl:min-w-[900px] 2xl:min-w-[980px]"
@@ -240,7 +276,7 @@ const Header = () => {
                 transition: "padding .3s, min-width .3s",
               }}
             >
-              {/* Animated conic cyan hairline */}
+              {/* Conic glowing accent border */}
               <span
                 aria-hidden
                 style={{
@@ -260,7 +296,7 @@ const Header = () => {
                 }}
               />
 
-              {/* Inner top-gloss sheen */}
+              {/* Inner top sheen */}
               <span
                 aria-hidden
                 style={{
@@ -404,32 +440,37 @@ const Header = () => {
             </nav>
           </div>
 
-          {/* 3. Right Corner: Mobile Menu Button (Horizontally aligned with logo on mobile) */}
+          {/* ── 3. Right Corner: High-Tech Frosted Glass Hamburger Button ── */}
           <div className="md:hidden flex items-center flex-shrink-0 z-20">
             <button
-              className="pointer-events-auto relative w-11 h-11 rounded-full border border-white/20 bg-black/75 backdrop-blur-xl cursor-pointer text-white flex items-center justify-center shadow-[0_8px_24px_rgba(0,0,0,0.7)] transition-all active:scale-90 hover:border-cyan-400/50"
-              aria-label="Menu"
+              className="pointer-events-auto group relative w-12 h-12 rounded-full border border-cyan-400/30 bg-black/75 backdrop-blur-2xl cursor-pointer text-white flex items-center justify-center shadow-[0_4px_24px_rgba(0,0,0,0.8),inset_0_1px_0_rgba(255,255,255,0.2)] hover:border-cyan-400 hover:shadow-[0_0_20px_rgba(34,211,238,0.35)] transition-all duration-300 active:scale-90"
+              aria-label={sheetOpen ? "Close menu" : "Open menu"}
               aria-expanded={sheetOpen}
               onClick={() => setSheetOpen((o) => !o)}
             >
+              {/* Outer subtle glow ring */}
+              <span className="absolute inset-0 rounded-full bg-cyan-400/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
+
+              {/* 3 Morphing lines */}
               <span
-                className="absolute left-3 right-3 h-0.5 bg-current rounded-sm transition-all duration-300"
+                className="absolute left-3.5 right-3.5 h-[2px] bg-white group-hover:bg-cyan-300 rounded-full transition-all duration-300"
                 style={{
-                  top: sheetOpen ? "21px" : "15px",
+                  top: sheetOpen ? "23px" : "16px",
                   transform: sheetOpen ? "rotate(45deg)" : "none",
                 }}
               />
               <span
-                className="absolute left-3 right-3 h-0.5 bg-current rounded-sm transition-all duration-300"
+                className="absolute left-3.5 right-3.5 h-[2px] bg-cyan-400 rounded-full transition-all duration-300"
                 style={{
-                  top: "21px",
+                  top: "23px",
                   opacity: sheetOpen ? 0 : 1,
+                  transform: sheetOpen ? "scaleX(0.2)" : "scaleX(1)",
                 }}
               />
               <span
-                className="absolute left-3 right-3 h-0.5 bg-current rounded-sm transition-all duration-300"
+                className="absolute left-3.5 right-3.5 h-[2px] bg-white group-hover:bg-cyan-300 rounded-full transition-all duration-300"
                 style={{
-                  top: sheetOpen ? "21px" : "27px",
+                  top: sheetOpen ? "23px" : "30px",
                   transform: sheetOpen ? "rotate(-45deg)" : "none",
                 }}
               />
@@ -438,62 +479,241 @@ const Header = () => {
         </div>
       </header>
 
-      {/* ── 4. Mobile Full-Screen Sheet ──────────────────────────────────── */}
-      <div
-        className="fixed inset-0 z-[9999] md:hidden flex flex-col justify-center items-center gap-3 px-6"
-        style={{
-          background: "rgba(10,14,22,.96)",
-          backdropFilter: "blur(28px)",
-          WebkitBackdropFilter: "blur(28px)",
-          clipPath: sheetOpen
-            ? "circle(150% at calc(100% - 35px) 35px)"
-            : "circle(0 at calc(100% - 35px) 35px)",
-          visibility: sheetOpen ? "visible" : "hidden",
-          transition: sheetOpen
-            ? "clip-path .8s cubic-bezier(.77,0,.18,1), visibility 0s"
-            : "clip-path .75s cubic-bezier(.77,0,.18,1), visibility 0s .75s",
-        }}
-      >
-        {sheetLinks.map((item, i) => {
-          const active = isItemActive(item);
-          return (
-            <Link
-              key={i}
-              href={item.path}
-              onClick={() => setSheetOpen(false)}
-              target={item.external ? "_blank" : undefined}
-              rel={item.external ? "noopener noreferrer" : undefined}
-              className={`text-[1.8rem] font-semibold px-5 py-2 transition-colors flex items-center gap-3 ${
-                active ? "text-cyan-400" : "text-white hover:text-cyan-400"
-              }`}
+      {/* ── 4. Next-Gen Full-Screen Cyber-Glass Mobile Navigation Menu ──────── */}
+      <AnimatePresence>
+        {sheetOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.35, ease: "easeInOut" }}
+            className="fixed inset-0 z-[10005] md:hidden flex flex-col justify-between overflow-hidden bg-[#040711]/95 backdrop-blur-3xl text-white select-none"
+          >
+            {/* Ambient background glows */}
+            <div
+              aria-hidden="true"
+              className="absolute -top-32 -right-32 w-96 h-96 rounded-full pointer-events-none"
               style={{
-                transform: sheetOpen ? "none" : "translateY(36px) scale(.92)",
-                opacity: sheetOpen ? 1 : 0,
-                filter: sheetOpen ? "none" : "blur(6px)",
-                transition: sheetOpen
-                  ? `transform .7s cubic-bezier(.22,1,.36,1) ${
-                      0.25 + i * 0.05
-                    }s, opacity .5s ${0.25 + i * 0.05}s, filter .5s ${
-                      0.25 + i * 0.05
-                    }s, color .2s`
-                  : "transform .3s, opacity .25s, filter .25s, color .2s",
+                background:
+                  "radial-gradient(circle, rgba(34,211,238,0.20) 0%, rgba(14,165,233,0.06) 50%, transparent 70%)",
+                filter: "blur(60px)",
               }}
-            >
-              {item.name}
-              {active && (
-                <span className="w-2 h-2 rounded-full bg-cyan-400 shadow-[0_0_8px_#22d3ee]" />
-              )}
-              {item.external && (
-                <ExternalLink className="inline w-4 h-4 ml-1 opacity-50" />
-              )}
-            </Link>
-          );
-        })}
+            />
+            <div
+              aria-hidden="true"
+              className="absolute -bottom-32 -left-32 w-96 h-96 rounded-full pointer-events-none"
+              style={{
+                background:
+                  "radial-gradient(circle, rgba(34,211,238,0.14) 0%, rgba(6,182,212,0.04) 50%, transparent 70%)",
+                filter: "blur(70px)",
+              }}
+            />
 
-        <p className="absolute bottom-6 text-neutral-500 text-xs tracking-wider">
-          © {new Date().getFullYear()} QUEST IT
-        </p>
-      </div>
+            {/* Subtle background tech grid */}
+            <div
+              aria-hidden="true"
+              className="absolute inset-0 pointer-events-none opacity-[0.03]"
+              style={{
+                backgroundImage:
+                  "linear-gradient(rgba(255,255,255,0.4) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.4) 1px, transparent 1px)",
+                backgroundSize: "32px 32px",
+              }}
+            />
+
+            {/* ── Menu Header Bar ─────────────────────────────────────────── */}
+            <div className="relative z-10 flex items-center justify-between px-6 pt-[calc(env(safe-area-inset-top,0px)+16px)] pb-4 border-b border-white/10">
+              <Link
+                href="/"
+                onClick={() => setSheetOpen(false)}
+                className="flex items-center gap-3 group"
+              >
+                <Image
+                  src="/images/logo-navbar.webp"
+                  width={398}
+                  height={138}
+                  alt="Quest IT"
+                  unoptimized
+                  className="h-9 w-auto object-contain filter drop-shadow-[0_0_12px_rgba(34,211,238,0.4)]"
+                />
+              </Link>
+
+              <div className="flex items-center gap-3">
+                {/* Live cell status pill */}
+                <div className="hidden sm:flex items-center gap-1.5 px-3 py-1 rounded-full border border-cyan-400/20 bg-cyan-400/5 text-cyan-300 font-mono text-[11px] tracking-wider">
+                  <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse" />
+                  QUEST-IT // 2026
+                </div>
+
+                {/* Close Button */}
+                <button
+                  onClick={() => setSheetOpen(false)}
+                  className="p-2.5 rounded-full border border-white/15 bg-white/5 hover:border-cyan-400 hover:text-cyan-400 text-white transition-all active:scale-90"
+                  aria-label="Close menu"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+            </div>
+
+            {/* ── Main Navigation List with Staggered Slide-In ─────────────── */}
+            <nav className="relative z-10 flex-1 overflow-y-auto px-6 py-6 flex flex-col justify-center">
+              <motion.ul
+                initial="hidden"
+                animate="visible"
+                variants={{
+                  visible: {
+                    transition: { staggerChildren: 0.045, delayChildren: 0.1 },
+                  },
+                }}
+                className="space-y-1.5 max-w-lg mx-auto w-full"
+              >
+                {menu.map((item, i) => {
+                  const active = isItemActive(item);
+                  const Icon = MENU_ICONS[item.name] || Sparkles;
+
+                  return (
+                    <motion.li
+                      key={item.name}
+                      variants={{
+                        hidden: { opacity: 0, x: -30, filter: "blur(8px)" },
+                        visible: {
+                          opacity: 1,
+                          x: 0,
+                          filter: "blur(0px)",
+                          transition: {
+                            duration: 0.45,
+                            ease: [0.16, 1, 0.3, 1],
+                          },
+                        },
+                      }}
+                    >
+                      <Link
+                        href={item.path}
+                        onClick={() => setSheetOpen(false)}
+                        target={item.external ? "_blank" : undefined}
+                        rel={item.external ? "noopener noreferrer" : undefined}
+                        className={`group relative flex items-center justify-between px-4 py-3 rounded-2xl transition-all duration-300 ${
+                          active
+                            ? "bg-cyan-500/15 border border-cyan-400/40 text-white shadow-[0_0_24px_rgba(34,211,238,0.2)]"
+                            : "hover:bg-white/[0.06] border border-transparent hover:border-white/10 text-neutral-300 hover:text-white"
+                        }`}
+                      >
+                        <div className="flex items-center gap-3.5">
+                          {/* Number index */}
+                          <span className="font-mono text-xs text-cyan-400/70 font-semibold w-5">
+                            {String(i + 1).padStart(2, "0")}
+                          </span>
+
+                          {/* Frosted icon square */}
+                          <div
+                            className={`p-2 rounded-xl transition-all duration-300 ${
+                              active
+                                ? "bg-cyan-400 text-black shadow-[0_0_12px_rgba(34,211,238,0.6)]"
+                                : "bg-white/5 text-neutral-400 group-hover:text-cyan-400 group-hover:bg-cyan-400/10 group-hover:border group-hover:border-cyan-400/30"
+                            }`}
+                          >
+                            <Icon className="w-4 h-4" />
+                          </div>
+
+                          {/* Item Name */}
+                          <span className="text-xl sm:text-2xl font-semibold tracking-tight">
+                            {item.name}
+                          </span>
+                        </div>
+
+                        {/* Right indicator */}
+                        <div className="flex items-center gap-2">
+                          {active && (
+                            <span className="px-2 py-0.5 rounded-full text-[10px] font-mono tracking-widest uppercase bg-cyan-400/20 text-cyan-300 border border-cyan-400/40">
+                              Active
+                            </span>
+                          )}
+                          <ChevronRight
+                            className={`w-5 h-5 transition-transform duration-300 group-hover:translate-x-1 ${
+                              active
+                                ? "text-cyan-400"
+                                : "text-neutral-500 group-hover:text-cyan-400"
+                            }`}
+                          />
+                        </div>
+                      </Link>
+                    </motion.li>
+                  );
+                })}
+              </motion.ul>
+            </nav>
+
+            {/* ── Menu Footer Section (CTA + Social Links) ────────────────── */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.35, duration: 0.5, ease: "easeOut" }}
+              className="relative z-10 px-6 pt-3 pb-[calc(env(safe-area-inset-bottom,0px)+16px)] border-t border-white/10 bg-black/40 backdrop-blur-xl"
+            >
+              <div className="max-w-lg mx-auto w-full flex flex-col gap-3">
+                {/* Contact CTA Card */}
+                <Link
+                  href="/#contact"
+                  onClick={() => setSheetOpen(false)}
+                  className="flex items-center justify-between px-4 py-3 rounded-xl bg-gradient-to-r from-cyan-500/20 via-cyan-400/10 to-transparent border border-cyan-400/30 hover:border-cyan-400 transition-all group"
+                >
+                  <div className="flex items-center gap-2.5">
+                    <div className="p-1.5 rounded-lg bg-cyan-400/20 text-cyan-300">
+                      <Sparkles className="w-4 h-4" />
+                    </div>
+                    <div>
+                      <div className="text-xs font-semibold text-white group-hover:text-cyan-300 transition-colors">
+                        Have a Question or Idea?
+                      </div>
+                      <div className="text-[11px] text-cyan-400/80">
+                        Get in touch with the QuestIT team &rarr;
+                      </div>
+                    </div>
+                  </div>
+                  <ArrowUpRight className="w-4 h-4 text-cyan-400 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+                </Link>
+
+                {/* Social icons row + footer branding */}
+                <div className="flex items-center justify-between pt-1">
+                  <div className="flex items-center gap-2">
+                    <a
+                      href="https://github.com/QuestIT-Cell"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      aria-label="GitHub"
+                      className="p-2.5 rounded-full border border-white/10 bg-white/5 hover:border-cyan-400/50 hover:bg-cyan-400/10 text-neutral-300 hover:text-cyan-400 transition-all"
+                    >
+                      <Github className="w-4 h-4" />
+                    </a>
+                    <a
+                      href="https://www.linkedin.com/company/questit-vesit"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      aria-label="LinkedIn"
+                      className="p-2.5 rounded-full border border-white/10 bg-white/5 hover:border-cyan-400/50 hover:bg-cyan-400/10 text-neutral-300 hover:text-cyan-400 transition-all"
+                    >
+                      <Linkedin className="w-4 h-4" />
+                    </a>
+                    <a
+                      href="https://www.instagram.com/questit_cell?igsh=MWgzNGdzYnUxanF5Yg=="
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      aria-label="Instagram"
+                      className="p-2.5 rounded-full border border-white/10 bg-white/5 hover:border-cyan-400/50 hover:bg-cyan-400/10 text-neutral-300 hover:text-cyan-400 transition-all"
+                    >
+                      <Instagram className="w-4 h-4" />
+                    </a>
+                  </div>
+
+                  <p className="font-mono text-[10px] text-neutral-500 tracking-wider">
+                    QUEST IT CELL © {new Date().getFullYear()}
+                  </p>
+                </div>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </>
   );
 };
