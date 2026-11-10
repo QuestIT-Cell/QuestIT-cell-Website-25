@@ -18,7 +18,7 @@ const RootLayout = ({ children }) => {
       <head>
         <StructuredData />
       </head>
-      <body className={`antialiased ${poppins.className} overflow-x-hidden`}>
+      <body className={`antialiased ${poppins.className} overflow-x-clip`}>
         <ClientLayout>{children}</ClientLayout>
         {process.env.NODE_ENV !== "development" && (
           <DeferredAnalytics />

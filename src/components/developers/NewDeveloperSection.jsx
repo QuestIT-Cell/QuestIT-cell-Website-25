@@ -376,6 +376,21 @@ export default function NewDeveloperSection() {
 
   const totalMembers = developers.length;
 
+  // Ensure body and html never have overflow-x: hidden which disables position: sticky
+  useEffect(() => {
+    if (typeof document !== "undefined") {
+      document.documentElement.style.setProperty("overflow-x", "clip", "important");
+      document.body.style.setProperty("overflow-x", "clip", "important");
+    }
+
+    return () => {
+      if (typeof document !== "undefined") {
+        document.documentElement.style.removeProperty("overflow-x");
+        document.body.style.removeProperty("overflow-x");
+      }
+    };
+  }, []);
+
   useEffect(() => {
     if (viewMode !== "showcase") return;
 
