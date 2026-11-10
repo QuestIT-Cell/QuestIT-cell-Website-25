@@ -11,7 +11,7 @@ const DeveloperEditorialSection = dynamic(
   { ssr: false }
 );
 
-const STORAGE_KEY = "questit_developer_section_view";
+const STORAGE_KEY = "questit_dev_view_v3";
 
 const DevelopersPageWrapper = () => {
   const [viewMode, setViewMode] = useState("new");
@@ -19,8 +19,15 @@ const DevelopersPageWrapper = () => {
 
   useEffect(() => {
     setMounted(true);
-    // 1. Check URL param ?view=new or ?view=old
     if (typeof window !== "undefined") {
+      // 1. Remove stale key from earlier testing if present
+      try {
+        localStorage.removeItem("questit_developer_section_view");
+      } catch (e) {
+        // Ignore storage exceptions
+      }
+
+      // 2. Check URL param ?view=new or ?view=old
       const urlParams = new URLSearchParams(window.location.search);
       const viewParam = urlParams.get("view");
       if (viewParam === "old" || viewParam === "new") {
@@ -28,11 +35,19 @@ const DevelopersPageWrapper = () => {
         return;
       }
 
-      // 2. Fall back to localStorage if saved
-      const saved = localStorage.getItem(STORAGE_KEY);
-      if (saved === "old" || saved === "new") {
-        setViewMode(saved);
+      // 3. Fall back to current localStorage if saved
+      try {
+        const saved = localStorage.getItem(STORAGE_KEY);
+        if (saved === "old" || saved === "new") {
+          setViewMode(saved);
+          return;
+        }
+      } catch (e) {
+        // Ignore storage exceptions
       }
+
+      // 4. Default explicitly to new
+      setViewMode("new");
     }
   }, []);
 
@@ -41,7 +56,6 @@ const DevelopersPageWrapper = () => {
     if (typeof window !== "undefined") {
       try {
         localStorage.setItem(STORAGE_KEY, mode);
-        // Optional: update URL query param without full page reload
         const url = new URL(window.location.href);
         url.searchParams.set("view", mode);
         window.history.replaceState({}, "", url.toString());
@@ -53,37 +67,37 @@ const DevelopersPageWrapper = () => {
 
   return (
     <div className="relative w-full min-h-screen bg-black">
-      {/* ── Floating Version Toggle Switcher ── */}
+      {/* ── Prominent Floating Version Toggle Dock ── */}
       <div
-        className="fixed top-20 sm:top-24 right-3 sm:right-6 md:right-8 z-50 flex items-center p-1 rounded-full bg-neutral-950/85 backdrop-blur-md border border-neutral-800 shadow-[0_4px_24px_rgba(0,0,0,0.7)] select-none transition-all duration-300 hover:border-cyan-500/40"
+        className="fixed bottom-6 left-1/2 -translate-x-1/2 z-[10002] flex items-center p-1.5 rounded-full bg-neutral-950/95 backdrop-blur-xl border border-neutral-700/80 shadow-[0_8px_32px_rgba(0,0,0,0.85)] select-none transition-all duration-300 hover:border-cyan-400/80 hover:shadow-[0_8px_32px_rgba(6,182,212,0.25)]"
         role="region"
         aria-label="Developer section view switcher"
       >
         <button
           onClick={() => handleToggle("new")}
           aria-pressed={viewMode === "new"}
-          title="Switch to New Developer Section"
-          className={`flex items-center gap-1.5 px-3 sm:px-3.5 py-1.5 rounded-full text-[11px] sm:text-xs font-mono font-medium transition-all duration-300 cursor-pointer ${
+          title="Switch to New Collectible Developer Section"
+          className={`flex items-center gap-2 px-3.5 sm:px-4 py-2 rounded-full text-xs font-semibold tracking-wide transition-all duration-300 cursor-pointer ${
             viewMode === "new"
-              ? "bg-gradient-to-r from-cyan-500 to-blue-600 text-white shadow-[0_0_15px_rgba(0,212,255,0.45)] border border-cyan-300/40"
-              : "text-neutral-400 hover:text-neutral-200"
+              ? "bg-gradient-to-r from-cyan-500 to-blue-600 text-white shadow-[0_0_20px_rgba(0,212,255,0.5)] border border-cyan-300/50 scale-105"
+              : "text-neutral-400 hover:text-neutral-200 hover:bg-neutral-900/60"
           }`}
         >
-          <Sparkles size={13} className={viewMode === "new" ? "text-white" : "text-cyan-400"} />
+          <Sparkles size={14} className={viewMode === "new" ? "text-white" : "text-cyan-400"} />
           <span>New Dev Sec</span>
         </button>
 
         <button
           onClick={() => handleToggle("old")}
           aria-pressed={viewMode === "old"}
-          title="Switch to Old Classic Developer Section"
-          className={`flex items-center gap-1.5 px-3 sm:px-3.5 py-1.5 rounded-full text-[11px] sm:text-xs font-mono font-medium transition-all duration-300 cursor-pointer ${
+          title="Switch to Classic Editorial Developer Section"
+          className={`flex items-center gap-2 px-3.5 sm:px-4 py-2 rounded-full text-xs font-semibold tracking-wide transition-all duration-300 cursor-pointer ${
             viewMode === "old"
-              ? "bg-gradient-to-r from-purple-500 to-violet-600 text-white shadow-[0_0_15px_rgba(168,85,247,0.45)] border border-purple-300/40"
-              : "text-neutral-400 hover:text-neutral-200"
+              ? "bg-gradient-to-r from-purple-500 to-violet-600 text-white shadow-[0_0_20px_rgba(168,85,247,0.5)] border border-purple-300/50 scale-105"
+              : "text-neutral-400 hover:text-neutral-200 hover:bg-neutral-900/60"
           }`}
         >
-          <Layers size={13} className={viewMode === "old" ? "text-white" : "text-purple-400"} />
+          <Layers size={14} className={viewMode === "old" ? "text-white" : "text-purple-400"} />
           <span>Old Dev Sec</span>
         </button>
       </div>
@@ -99,4 +113,3 @@ const DevelopersPageWrapper = () => {
 };
 
 export default DevelopersPageWrapper;
-
