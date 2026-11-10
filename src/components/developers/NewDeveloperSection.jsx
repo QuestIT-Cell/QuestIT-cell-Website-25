@@ -508,7 +508,7 @@ export default function NewDeveloperSection() {
       window.removeEventListener("resize", measure);
       observer.disconnect();
     };
-  }, [viewMode]);
+  }, []);
 
   return (
     <section className="dev-showcase-section" ref={sectionRef}>
