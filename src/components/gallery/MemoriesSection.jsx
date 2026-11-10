@@ -28,7 +28,7 @@ const ORBITAL_IMAGES = [
   "/images/gallery-images/Orbital/table-2_1920x1080.webp",
 ];
 
-const INITIAL_OFFSET_INDEX = 2;
+const INITIAL_OFFSET_INDEX = 0;
 const TOTAL_CARDS = ORBITAL_IMAGES.length;
 // Exactly 3 seconds active resting window per photo
 const PAUSE_MS = 3000;
@@ -61,13 +61,13 @@ const MemoryCard = ({
   const src = ORBITAL_IMAGES[cardIndex % TOTAL_CARDS];
 
   // ─── Continuous Flip Angle & Lift Elevation ────────────────────────────────
-  // As card sweeps into center (|diff|: 0.55 -> 0.0), it smoothly flips 0 -> 180deg.
+  // As card sweeps into center (|diff|: 0.85 -> 0.0), it smoothly flips 0 -> 180deg.
   // When resting at center (|diff| = 0), it is fully flipped at 180deg facing forward.
-  // As it drifts away (|diff|: 0.0 -> 0.55), it smoothly flips 180 -> 0deg back into ring.
+  // As it drifts away (|diff|: 0.0 -> 0.85), it smoothly flips 180 -> 0deg back into ring.
   const flipAngle = useTransform(progressMV, (p) => {
     const diff = getDiff(cardIndex, p);
     const absDiff = Math.abs(diff);
-    const flipZone = 0.55;
+    const flipZone = 0.85;
     if (absDiff >= flipZone) return 0;
     const progress = (flipZone - absDiff) / flipZone;
     const smoothT = (1 - Math.cos(progress * Math.PI)) / 2;
@@ -77,7 +77,7 @@ const MemoryCard = ({
   const liftVal = useTransform(progressMV, (p) => {
     const diff = getDiff(cardIndex, p);
     const absDiff = Math.abs(diff);
-    const flipZone = 0.55;
+    const flipZone = 0.85;
     if (absDiff >= flipZone) return 0;
     const progress = (flipZone - absDiff) / flipZone;
     const smoothT = (1 - Math.cos(progress * Math.PI)) / 2;
@@ -324,8 +324,7 @@ const MemoriesSection = () => {
   const stageRef = useRef(null);
 
   const isInView = useInView(sectionRef, {
-    amount: 0.35,
-    margin: "-80px 0px -80px 0px",
+    amount: 0.15,
   });
 
   const [stageDimensions, setStageDimensions] = useState({ width: 1200, height: 700 });
@@ -430,9 +429,11 @@ const MemoriesSection = () => {
 
     isCancelledRef.current = false;
     // Exactly 3 seconds arrival resting window for the initial card
-    timeoutRef.current = setTimeout(() => {
-      if (!isCancelledRef.current) rotateToStep(stepRef.current + 1, ROTATION_DURATION);
-    }, INITIAL_ARRIVAL_PAUSE_MS);
+    if (!timeoutRef.current) {
+      timeoutRef.current = setTimeout(() => {
+        if (!isCancelledRef.current) rotateToStep(stepRef.current + 1, ROTATION_DURATION);
+      }, INITIAL_ARRIVAL_PAUSE_MS);
+    }
 
     return () => {
       isCancelledRef.current = true;

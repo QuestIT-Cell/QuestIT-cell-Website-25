@@ -456,17 +456,17 @@ const Header = () => {
             transition={{ duration: 0.28, ease: [0.16, 1, 0.3, 1] }}
             className="fixed inset-0 z-[10005] md:hidden flex flex-col justify-between bg-[#08090d]/98 backdrop-blur-2xl text-white select-none px-6 pt-[calc(env(safe-area-inset-top,0px)+82px)] pb-[calc(env(safe-area-inset-bottom,0px)+24px)]"
           >
-            {/* Top divider & section badge (No duplicate logo — outside logo sits on top) */}
+            {/* Top divider & section badge */}
             <div className="flex items-center justify-between pb-3 border-b border-white/[0.08]">
               <span className="text-[11px] font-mono tracking-widest uppercase text-neutral-400">
-                Navigation
+                Menu
               </span>
-              <span className="text-[11px] font-mono tracking-wider text-cyan-400/80">
-                VESIT IT CELL
+              <span className="text-[10px] font-mono tracking-wider text-neutral-500">
+                {menu.length} Options
               </span>
             </div>
 
-            {/* Navigation links: Editorial typography with numbered markers */}
+            {/* Navigation links: Large typography with numbered markers */}
             <nav className="my-auto py-4">
               <motion.ul
                 initial="hidden"
@@ -476,7 +476,7 @@ const Header = () => {
                     transition: { staggerChildren: 0.04, delayChildren: 0.05 },
                   },
                 }}
-                className="space-y-3.5 max-w-sm"
+                className="space-y-4 max-w-sm"
               >
                 {menu.map((item, i) => {
                   const active = isItemActive(item);
@@ -501,11 +501,11 @@ const Header = () => {
                         className="group flex items-baseline justify-between py-1 transition-colors"
                       >
                         <div className="flex items-baseline gap-4">
-                          <span className="font-mono text-xs text-neutral-500 group-hover:text-cyan-400 transition-colors">
+                          <span className="font-mono text-sm text-neutral-500 group-hover:text-cyan-400 transition-colors">
                             {String(i + 1).padStart(2, "0")}
                           </span>
                           <span
-                            className={`text-3xl sm:text-4xl font-light tracking-tight transition-colors duration-200 ${
+                            className={`text-4xl sm:text-5xl font-light tracking-tight transition-colors duration-200 ${
                               active
                                 ? "text-white font-normal"
                                 : "text-neutral-400 group-hover:text-white"
@@ -514,11 +514,11 @@ const Header = () => {
                             {item.name}
                           </span>
                           {active && (
-                            <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 inline-block mb-1" />
+                            <span className="w-2 h-2 rounded-full bg-cyan-400 inline-block mb-1.5" />
                           )}
                         </div>
 
-                        <span className="text-xs font-mono text-neutral-500 group-hover:text-cyan-400 group-hover:translate-x-1 transition-all">
+                        <span className="text-sm font-mono text-neutral-500 group-hover:text-cyan-400 group-hover:translate-x-1.5 transition-all">
                           &rarr;
                         </span>
                       </Link>
@@ -530,7 +530,7 @@ const Header = () => {
               {/* ── Prominent High-Visibility Contact Us CTA Button ── */}
               <div className="pt-5">
                 <Link
-                  href="/#contact"
+                  href="/contact"
                   onClick={() => setSheetOpen(false)}
                   className="group flex items-center justify-between w-full px-5 py-3.5 rounded-2xl bg-cyan-400 text-black font-semibold text-sm tracking-wide shadow-[0_4px_20px_rgba(34,211,238,0.25)] hover:bg-cyan-300 active:scale-[0.98] transition-all"
                 >
@@ -587,7 +587,7 @@ const Header = () => {
                   Curiosity. Code. Community.
                 </span>
                 <span className="font-mono text-[10px] tracking-wider text-neutral-500">
-                  DEPT OF IT
+                  QUEST IT CELL
                 </span>
               </div>
             </div>
