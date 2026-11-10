@@ -1,10 +1,10 @@
-import DeveloperEditorialSection from "@/components/developers/DeveloperEditorialSection";
+import DevelopersPageWrapper from "@/components/developers/DevelopersPageWrapper";
 import { developers as meta_data } from "@/constants/metadata";
 
 export const metadata = meta_data;
 
 const Developers = () => {
-  return <DeveloperEditorialSection />;
+  return <DevelopersPageWrapper />;
 };
 
 export default Developers;
