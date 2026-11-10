@@ -1,313 +1,531 @@
 "use client";
 
-// React's Hook Imports
-import { useState, useEffect } from "react";
-
-// App's Internal Imports
-import menu from "@/constants/menu";
-import { InstallPromptButton } from "./utils";
-
-// App's External Imports
-// App's External Imports
+import { useState, useEffect, useRef, useCallback } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
-import { ChevronDown, Menu, X, ExternalLink } from "lucide-react";
+import { ChevronDown, ExternalLink } from "lucide-react";
+import menu from "@/constants/menu";
 
+/* ─── Sliding-pill indicator helper ──────────────────────────────────────── */
+function useIndicator() {
+  const indRef = useRef(null);
+
+  const moveTo = useCallback((el) => {
+    const ind = indRef.current;
+    if (!ind) return;
+    if (!el) {
+      ind.style.opacity = "0";
+      return;
+    }
+    const parent = el.parentElement;
+    if (!parent) return;
+    ind.style.opacity = "1";
+    ind.style.width = el.offsetWidth + "px";
+    ind.style.transform = `translateX(${parent.offsetLeft}px)`;
+  }, []);
+
+  return { indRef, moveTo };
+}
+
+/* ─── Spark burst on click ───────────────────────────────────────────────── */
+function spawnSparks(e, container) {
+  if (!container) return;
+  const r = container.getBoundingClientRect();
+  const x = e.clientX ? e.clientX - r.left : r.width / 2;
+  const y = e.clientY ? e.clientY - r.top : r.height / 2;
+  for (let i = 0; i < 10; i++) {
+    const p = document.createElement("span");
+    const ang = (i / 10) * Math.PI * 2 + Math.random() * 0.5;
+    const dist = 28 + Math.random() * 24;
+    p.style.cssText = `
+      position:absolute;width:5px;height:5px;margin:-2.5px;border-radius:50%;
+      background:#22d3ee;box-shadow:0 0 6px #22d3ee;pointer-events:none;z-index:3;
+      left:${x}px;top:${y}px;
+      --dx:${Math.cos(ang) * dist}px;--dy:${Math.sin(ang) * dist}px;
+      animation:questSparkAnim .65s cubic-bezier(.2,.8,.3,1) forwards;
+    `;
+    container.appendChild(p);
+    setTimeout(() => p.remove(), 700);
+  }
+}
+
+/* ─── Header ─────────────────────────────────────────────────────────────── */
 const Header = () => {
   const pathname = usePathname();
-  const isDevelopersPage = pathname?.startsWith("/developers");
-  const [is_sticky, set_is_sticky] = useState(false);
-  const [is_hidden, set_is_hidden] = useState(false);
-  const [is_sidebar_open, set_is_sidebar_open] = useState(false);
-  const [open_dropdown, set_open_dropdown] = useState(null);
 
+  const [isScrolled, setIsScrolled] = useState(false);
+  const [isHidden, setIsHidden] = useState(false);
+  const [sheetOpen, setSheetOpen] = useState(false);
+  const [activeId, setActiveId] = useState("home");
+
+  const wrapRef = useRef(null);
+  const listRef = useRef(null);
+  const { indRef, moveTo } = useIndicator();
+
+  /* ─── Check which navigation item is active ───────────────────────────── */
+  const isItemActive = useCallback(
+    (item) => {
+      if (!pathname) return false;
+
+      // Standalone page routes (/events, /gallery, /team, /developers)
+      if (!item.path.includes("#")) {
+        if (item.path === "/") {
+          return pathname === "/";
+        }
+        return pathname === item.path || pathname.startsWith(item.path + "/");
+      }
+
+      // Hash links (/#home, /#about, /#contact) — only active when on the root page "/"
+      if (pathname === "/" || pathname === "") {
+        const hash = item.path.split("#")[1];
+        return activeId === hash;
+      }
+
+      return false;
+    },
+    [pathname, activeId]
+  );
+
+  /* ─── Scroll behaviour: hide on down, show on up, section spy ─────────── */
   useEffect(() => {
-    let lastScrollY = window.scrollY;
+    let last = 0;
+    const onScroll = () => {
+      const y = window.scrollY;
+      setIsScrolled(y > 40);
+      setIsHidden((prev) => {
+        if (sheetOpen) return false;
+        if (y > last + 4 && y > 200) return true;
+        if (y < last - 4 || y <= 30) return false;
+        return prev;
+      });
+      last = y;
 
-    const handleScroll = () => {
-      // On developer section, header stays relative in normal flow at the top of the page
-      if (isDevelopersPage) {
-        set_is_sticky(false);
-        set_is_hidden(false);
-        return;
+      // Section spy: only evaluate section headings when browsing the home page
+      if (pathname === "/" || pathname === "") {
+        const ids = ["home", "about", "contact"];
+        let cur = "home";
+        ids.forEach((id) => {
+          const el = document.getElementById(id);
+          if (el && el.getBoundingClientRect().top <= window.innerHeight * 0.4) {
+            cur = id;
+          }
+        });
+        setActiveId(cur);
       }
-
-      const currentScrollY = window.scrollY;
-
-      // Make sticky once scrolled past top threshold
-      if (currentScrollY >= 60) {
-        set_is_sticky(true);
-      } else {
-        set_is_sticky(false);
-      }
-
-      // Hide/push back navbar when scrolling down, show when scrolling up
-      if (currentScrollY > 70 && currentScrollY > lastScrollY + 4) {
-        set_is_hidden(true);
-      } else if (currentScrollY < lastScrollY - 4 || currentScrollY <= 30) {
-        set_is_hidden(false);
-      }
-
-      lastScrollY = currentScrollY;
     };
 
-    window.addEventListener("scroll", handleScroll, { passive: true });
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, [pathname, sheetOpen]);
 
-    return () => {
-      window.removeEventListener("scroll", handleScroll);
-    };
-  }, [isDevelopersPage]);
-
-  // Prevent background scroll when mobile sidebar is open
+  /* ─── Sync sliding indicator with the active link ─────────────────────── */
   useEffect(() => {
-    if (is_sidebar_open) {
-      const scrollY = window.scrollY;
-      document.body.dataset.scrollY = scrollY.toString();
-      document.documentElement.style.overflow = "hidden";
-      document.body.style.overflow = "hidden";
-      document.body.style.position = "fixed";
-      document.body.style.top = `-${scrollY}px`;
-      document.body.style.width = "100%";
-      document.body.style.touchAction = "none";
-    } else {
-      const savedScrollY = document.body.dataset.scrollY;
-      document.documentElement.style.overflow = "";
-      document.body.style.overflow = "";
-      document.body.style.position = "";
-      document.body.style.top = "";
-      document.body.style.width = "";
-      document.body.style.touchAction = "";
-      if (savedScrollY) {
-        window.scrollTo(0, parseInt(savedScrollY, 10));
-        delete document.body.dataset.scrollY;
-      }
-      set_open_dropdown(null); // Reset dropdown when closing sidebar
+    if (!listRef.current) return;
+    const activeEl = listRef.current.querySelector("a.quest-active");
+    moveTo(activeEl || null);
+  }, [pathname, activeId, moveTo]);
+
+  /* ─── Recalculate on font ready or window resize ──────────────────────── */
+  useEffect(() => {
+    const update = () => {
+      if (!listRef.current) return;
+      const activeEl = listRef.current.querySelector("a.quest-active");
+      moveTo(activeEl || null);
+    };
+
+    window.addEventListener("resize", update);
+
+    if (typeof document !== "undefined" && document.fonts) {
+      document.fonts.ready.then(update);
     }
 
+    // Small delay to allow layout painting
+    const t = setTimeout(update, 50);
+
+    return () => {
+      window.removeEventListener("resize", update);
+      clearTimeout(t);
+    };
+  }, [pathname, moveTo]);
+
+  /* ─── Lock scroll when mobile sheet is open ───────────────────────────── */
+  useEffect(() => {
+    if (sheetOpen) {
+      const y = window.scrollY;
+      document.documentElement.style.overflow = "hidden";
+      document.body.style.cssText = `overflow:hidden;position:fixed;top:-${y}px;width:100%;touch-action:none`;
+      document.body.dataset.scrollY = String(y);
+    } else {
+      const saved = document.body.dataset.scrollY;
+      document.documentElement.style.overflow = "";
+      document.body.style.cssText = "";
+      if (saved) {
+        window.scrollTo(0, +saved);
+        delete document.body.dataset.scrollY;
+      }
+    }
     return () => {
       document.documentElement.style.overflow = "";
-      document.body.style.overflow = "";
-      document.body.style.position = "";
-      document.body.style.top = "";
-      document.body.style.width = "";
-      document.body.style.touchAction = "";
+      document.body.style.cssText = "";
     };
-  }, [is_sidebar_open]);
+  }, [sheetOpen]);
 
-  const toggle_dropdown = (name) => {
-    set_open_dropdown(open_dropdown === name ? null : name);
-  };
+  const desktopLinks = menu.filter((m) => m.name !== "Contact");
+  const ctaItem = menu.find((m => m.name === "Contact"));
+  const sheetLinks = menu;
 
   return (
     <>
-      <header
-        className={`flex w-full items-center z-[10000] transition-all duration-300 ease-in-out ${
-          isDevelopersPage
-            ? "relative bg-black py-4 border-b border-white/10"
-            : is_sticky
-            ? "fixed left-0 top-0 w-full border-b border-white/10 py-2 backdrop-blur-[12px] bg-black/85 shadow-[0_4px_25px_rgba(0,0,0,0.8)]"
-            : "absolute left-0 top-0 bg-black py-4"
-        } ${
-          !isDevelopersPage && is_hidden && !is_sidebar_open
-            ? "-translate-y-full opacity-0 pointer-events-none"
-            : "translate-y-0 opacity-100"
-        }`}
-      >
-        <div className="w-full px-4 md:px-8 lg:px-12">
-          <div className="relative w-full flex items-center justify-between min-h-[60px]">
-            {/* Mobile Hamburger Button - Left */}
-            <div className="lg:hidden z-20">
-              <button
-                onClick={() => set_is_sidebar_open(true)}
-                className="p-2 text-white hover:text-cyan-400 transition-colors"
-                aria-label="Open Menu"
-              >
-                <Menu size={32} />
-              </button>
-            </div>
+      {/* Keyframe animations */}
+      <style>{`
+        @keyframes questSparkAnim{
+          0%{transform:translate(0,0) scale(1);opacity:1}
+          100%{transform:translate(var(--dx),var(--dy)) scale(0);opacity:0}
+        }
+        @keyframes questNavSpin{to{--quest-a:360deg}}
+        @property --quest-a{syntax:'<angle>';inherits:false;initial-value:0deg}
+      `}</style>
 
-            {/* Logo - Centered on mobile, Left on desktop */}
-            <div className="absolute left-1/2 -translate-x-1/2 lg:static lg:translate-x-0 w-[210px] md:w-[220px] lg:w-[240px] max-w-full z-10 flex-shrink-0">
-              <Link href="/" className="block w-full">
-                <Image
-                  priority
-                  width={240}
-                  height={126}
-                  unoptimized
-                  alt="Header Icon"
-                  className="w-full h-auto"
-                  src="/images/logo-460.webp"
-                />
-              </Link>
-            </div>
-
-            {/* Desktop Navigation */}
-            <div className="flex items-center justify-end flex-1 pr-4 lg:pr-0">
-              <nav className="invisible absolute right-5 top-[120%] z-30 rounded border-[0.5px] bg-white px-6 py-4 duration-300 lg:visible lg:static lg:w-auto lg:border-none lg:p-0 lg:opacity-100 lg:bg-transparent">
-                <ul className="block lg:flex lg:gap-x-4 xl:gap-x-8 items-center">
-                  {menu.map((item, index) => (
-                    <li key={index} className="relative group">
-                      {item.dropdown ? (
-                        <>
-                          <button className="relative overflow-hidden group/btn flex items-center py-2 text-base lg:text-base font-medium hover:text-cyan-300 lg:inline-flex lg:px-2 lg:py-6 text-white border-b-0 cursor-pointer">
-                            <span className="absolute inset-0 bg-cyan-500/20 -translate-x-full group-hover/btn:translate-x-0 transition-transform duration-300 ease-in-out"></span>
-                            <span className="relative z-10 flex items-center gap-1">
-                              {item.name}
-                              <ChevronDown className="w-4 h-4 transition-transform duration-300 group-hover:rotate-180" />
-                            </span>
-                          </button>
-                          <ul className="absolute left-0 top-full pt-2 w-48 hidden group-hover:block transition-all duration-300 ease-in-out z-50">
-                            <div className="bg-black border border-neutral-800 rounded-md overflow-hidden shadow-xl">
-                              {item.dropdown.map((subItem, subIndex) => (
-                                <li key={subIndex} className="border-b border-neutral-800 last:border-none">
-                                  <Link
-                                    href={subItem.path}
-                                    className="block px-4 py-3 text-sm text-gray-300 hover:text-cyan-300 hover:bg-neutral-900 transition-colors relative overflow-hidden group/link"
-                                  >
-                                    <span className="absolute inset-0 bg-cyan-500/10 -translate-x-full group-hover/link:translate-x-0 transition-transform duration-300 ease-in-out"></span>
-                                    <span className="relative z-10">{subItem.name}</span>
-                                  </Link>
-                                </li>
-                              ))}
-                            </div>
-                          </ul>
-                        </>
-                      ) : (
-                        <Link
-                          href={item.path}
-                          target={item.external ? "_blank" : undefined}
-                          rel={item.external ? "noopener noreferrer" : undefined}
-                          className={`relative overflow-hidden group/link flex py-2 text-base lg:text-base font-medium hover:text-cyan-300 lg:inline-flex items-center text-white border-b-0 ${item.special ? "lg:px-3 lg:py-1.5 bg-neutral-800 rounded-[1.5rem] border border-neutral-700 hover:border-cyan-500/50 ml-1" : "lg:px-1.5 lg:py-6"}`}
-                        >
-                          {!item.special && <span className="absolute inset-0 bg-cyan-500/20 -translate-x-full group-hover/link:translate-x-0 transition-transform duration-300 ease-in-out"></span>}
-                          <span className="relative z-10 flex items-center gap-1.5">
-                            {item.special && <span className="text-cyan-500 group-hover/link:text-cyan-400 transition-colors">{item.icon}</span>}
-                            <span className={item.special ? "group-hover/link:text-cyan-300 transition-colors text-sm" : ""}>{item.name}</span>
-                          </span>
-                        </Link>
-                      )}
-                    </li>
-                  ))}
-                </ul>
-              </nav>
-            </div>
-          </div>
-        </div>
-      </header>
-
-      {/* Mobile Sidebar Menu */}
+      {/* ── 1. Top-Left Corner: Quest IT Logo (Prominent & Visible) ──────── */}
       <div
-        className={`fixed inset-0 z-[10001] lg:hidden transition-all duration-500 ease-in-out ${is_sidebar_open ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
-          }`}
+        className="fixed top-0 left-0 z-[10001] pointer-events-none"
+        style={{
+          paddingTop: "calc(env(safe-area-inset-top, 0px) + 14px)",
+          paddingLeft: "clamp(16px, 3vw, 40px)",
+          transition: isHidden
+            ? "transform .55s cubic-bezier(.65,0,.35,1), opacity .35s .1s, filter .45s"
+            : "transform .7s cubic-bezier(.34,1.5,.64,1), opacity .4s, filter .5s",
+          transform: isHidden ? "translateY(-140%) scale(.9)" : "translateY(0) scale(1)",
+          opacity: isHidden ? 0 : 1,
+          filter: isHidden ? "blur(10px)" : "none",
+        }}
       >
-        {/* Backdrop - Click to close */}
-        <div
-          className="absolute inset-0 bg-black/80 touch-none"
-          onClick={() => set_is_sidebar_open(false)}
-          onTouchMove={(e) => e.preventDefault()}
-        />
-
-        {/* Sidebar Content */}
-        <div
-          className={`absolute top-0 left-0 h-full w-[310px] bg-gradient-to-b from-black via-zinc-950 to-black border-r border-neutral-800 shadow-2xl transition-transform duration-500 ease-in-out ${
-            is_sidebar_open ? "translate-x-0" : "-translate-x-full"
-          } flex flex-col p-6 overflow-y-auto overscroll-contain`}
+        <Link
+          href="/"
+          aria-label="Quest IT Home"
+          className="pointer-events-auto block transition-transform duration-200 hover:scale-[1.03] active:scale-95"
         >
-          <div className="flex justify-between items-center mb-2">
-            <div className="w-[190px]">
-              <Image
-                src="/images/logo.webp"
-                width={190}
-                height={65}
-                alt="Logo"
-                unoptimized
-              />
-            </div>
-            <button
-              onClick={() => set_is_sidebar_open(false)}
-              aria-label="Close Menu"
-              className="p-2 text-gray-400 hover:text-white transition-colors"
-            >
-              <X size={28} />
-            </button>
-          </div>
+          <Image
+            priority
+            src="/images/logo-460.webp"
+            alt="Quest IT Logo"
+            width={240}
+            height={126}
+            unoptimized
+            className="w-[160px] sm:w-[190px] md:w-[220px] lg:w-[240px] h-auto object-contain filter drop-shadow-[0_2px_14px_rgba(0,0,0,0.85)]"
+          />
+        </Link>
+      </div>
 
-          <div className="h-px w-full bg-white/20 mb-2" />
+      {/* ── 2. Top-Right Corner: Mobile Menu Button ──────────────────────── */}
+      <div
+        className="md:hidden fixed top-0 right-0 z-[10001] pointer-events-none"
+        style={{
+          paddingTop: "calc(env(safe-area-inset-top, 0px) + 14px)",
+          paddingRight: "16px",
+          transition: isHidden
+            ? "transform .55s cubic-bezier(.65,0,.35,1), opacity .35s .1s, filter .45s"
+            : "transform .7s cubic-bezier(.34,1.5,.64,1), opacity .4s, filter .5s",
+          transform: isHidden ? "translateY(-140%) scale(.9)" : "translateY(0) scale(1)",
+          opacity: isHidden ? 0 : 1,
+          filter: isHidden ? "blur(10px)" : "none",
+        }}
+      >
+        <button
+          className="pointer-events-auto relative w-11 h-11 rounded-full border border-white/20 bg-black/75 backdrop-blur-xl cursor-pointer text-white flex items-center justify-center shadow-[0_8px_24px_rgba(0,0,0,0.7)] transition-all active:scale-90 hover:border-cyan-400/50"
+          aria-label="Menu"
+          aria-expanded={sheetOpen}
+          onClick={() => setSheetOpen((o) => !o)}
+        >
+          <span
+            className="absolute left-3 right-3 h-0.5 bg-current rounded-sm transition-all duration-300"
+            style={{
+              top: sheetOpen ? "21px" : "15px",
+              transform: sheetOpen ? "rotate(45deg)" : "none",
+            }}
+          />
+          <span
+            className="absolute left-3 right-3 h-0.5 bg-current rounded-sm transition-all duration-300"
+            style={{
+              top: "21px",
+              opacity: sheetOpen ? 0 : 1,
+            }}
+          />
+          <span
+            className="absolute left-3 right-3 h-0.5 bg-current rounded-sm transition-all duration-300"
+            style={{
+              top: sheetOpen ? "21px" : "27px",
+              transform: sheetOpen ? "rotate(-45deg)" : "none",
+            }}
+          />
+        </button>
+      </div>
 
-          <nav className="flex-1">
-            <ul className="space-y-1">
-              {menu.map((item, index) => (
-                <li key={index} className="overflow-hidden">
-                  {index !== 0 && <div className="h-px w-full bg-white/5 my-1" />}
-                  {item.dropdown ? (
-                    <div className="space-y-2">
+      {/* ── 3. Desktop Floating Pill Navigation Bar (Centered) ───────────── */}
+      <header
+        ref={wrapRef}
+        className="hidden md:flex fixed top-0 left-0 right-0 z-[10000] justify-center pointer-events-none"
+        style={{
+          paddingTop: "calc(env(safe-area-inset-top, 0px) + 16px)",
+          paddingInline: "16px",
+          transition: isHidden
+            ? "transform .55s cubic-bezier(.65,0,.35,1), opacity .35s .1s, filter .45s"
+            : "transform .7s cubic-bezier(.34,1.5,.64,1), opacity .4s, filter .5s",
+          transform: isHidden ? "translateY(-140%) scale(.9)" : "translateY(0) scale(1)",
+          opacity: isHidden ? 0 : 1,
+          filter: isHidden ? "blur(10px)" : "none",
+        }}
+      >
+        <nav
+          className="pointer-events-auto relative flex items-center justify-center gap-1.5 max-w-full"
+          style={{
+            width: "fit-content",
+            padding: isScrolled ? "6px 10px" : "8px 14px",
+            borderRadius: "999px",
+            background:
+              "linear-gradient(135deg,rgba(255,255,255,.14),rgba(255,255,255,.03) 50%,rgba(255,255,255,.14)),rgba(12,16,24,.8)",
+            border: "1px solid rgba(255,255,255,.2)",
+            backdropFilter: "blur(30px) saturate(120%) brightness(1.04)",
+            WebkitBackdropFilter: "blur(30px) saturate(120%) brightness(1.04)",
+            boxShadow:
+              "0 16px 48px -14px rgba(0,0,0,.65), inset 0 1px 0 rgba(255,255,255,.35), inset 0 -1px 0 rgba(255,255,255,.08), inset 0 0 22px rgba(255,255,255,.05)",
+            transition: "padding .3s",
+          }}
+        >
+          {/* Animated conic cyan hairline */}
+          <span
+            aria-hidden
+            style={{
+              position: "absolute",
+              inset: "-1px",
+              borderRadius: "inherit",
+              pointerEvents: "none",
+              background:
+                "conic-gradient(from var(--quest-a,0deg), transparent 0 70%, #22d3ee 85%, transparent 100%)",
+              WebkitMask:
+                "linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0)",
+              WebkitMaskComposite: "xor",
+              maskComposite: "exclude",
+              padding: "1px",
+              opacity: 0.75,
+              animation: "questNavSpin 6s linear infinite",
+            }}
+          />
+
+          {/* Inner top-gloss sheen */}
+          <span
+            aria-hidden
+            style={{
+              position: "absolute",
+              inset: 0,
+              borderRadius: "inherit",
+              pointerEvents: "none",
+              background:
+                "linear-gradient(180deg,rgba(255,255,255,.18),transparent 45%)",
+              opacity: 0.55,
+            }}
+          />
+
+          {/* Desktop links + sliding indicator */}
+          <ul
+            ref={listRef}
+            className="relative flex items-center list-none p-0 gap-0.5"
+            onMouseLeave={() => {
+              const activeEl = listRef.current?.querySelector("a.quest-active");
+              moveTo(activeEl || null);
+            }}
+          >
+            {/* Sliding pill indicator */}
+            <span
+              ref={indRef}
+              style={{
+                position: "absolute",
+                zIndex: 0,
+                top: 0,
+                left: 0,
+                height: "100%",
+                borderRadius: "999px",
+                background: "rgba(34,211,238,.12)",
+                border: "1px solid rgba(34,211,238,.25)",
+                opacity: 0,
+                pointerEvents: "none",
+                transition:
+                  "transform .35s cubic-bezier(.2,.9,.3,1.1), width .35s cubic-bezier(.2,.9,.3,1.1), opacity .2s",
+              }}
+            />
+
+            {desktopLinks.map((item, i) => {
+              const active = isItemActive(item);
+              const hasDropdown = Boolean(item.dropdown);
+
+              return (
+                <li key={i} className="relative group">
+                  {hasDropdown ? (
+                    <>
                       <button
-                        onClick={() => toggle_dropdown(item.name)}
-                        className={`w-full flex items-center justify-between p-3 rounded-xl transition-all duration-300 ${open_dropdown === item.name ? "bg-cyan-500/10 text-cyan-400" : "text-gray-200 hover:bg-neutral-900"
-                          }`}
+                        className={`relative z-10 flex items-center gap-1 px-4 py-2 rounded-full text-sm font-medium transition-colors whitespace-nowrap ${
+                          active
+                            ? "text-white"
+                            : "text-[#9aa6b5] hover:text-white"
+                        }`}
+                        onMouseEnter={(e) => moveTo(e.currentTarget)}
+                        onFocus={(e) => moveTo(e.currentTarget)}
                       >
-                        <div className="flex items-center gap-4">
-                          <div className={`p-2 rounded-lg transition-colors text-cyan-500 ${open_dropdown === item.name ? "bg-cyan-500/20" : "bg-neutral-900"
-                            }`}>
-                            {item.icon}
-                          </div>
-                          <span className="text-xl font-semibold tracking-tight">{item.name}</span>
-                        </div>
-                        <ChevronDown className={`w-5 h-5 transition-transform duration-300 ${open_dropdown === item.name ? "rotate-180" : ""}`} />
+                        {item.name}
+                        <ChevronDown className="w-3.5 h-3.5 transition-transform duration-300 group-hover:rotate-180" />
+                        {active && (
+                          <span className="absolute left-1/2 bottom-[3px] w-1 h-1 -ml-0.5 rounded-full bg-cyan-400" />
+                        )}
                       </button>
-
-                      <div
-                        className={`grid transition-all duration-300 ease-in-out ${open_dropdown === item.name ? "grid-rows-[1fr] opacity-100 mt-2" : "grid-rows-[0fr] opacity-0"
-                          }`}
-                      >
-                        <div className="overflow-hidden">
-                          <ul className="pl-6 space-y-2 border-l-2 border-neutral-800 ml-6">
-                            {item.dropdown.map((subItem, subIndex) => (
-                              <li key={subIndex}>
-                                <Link
-                                  href={subItem.path}
-                                  onClick={() => set_is_sidebar_open(false)}
-                                  className="flex items-center gap-3 py-2 text-gray-400 hover:text-cyan-400 transition-colors"
-                                >
-                                  <div className="w-1.5 h-1.5 rounded-full bg-neutral-700 group-hover:bg-cyan-500"></div>
-                                  <span className="text-lg font-medium">{subItem.name}</span>
-                                </Link>
-                              </li>
-                            ))}
-                          </ul>
+                      <ul className="absolute left-0 top-full pt-2 w-48 hidden group-hover:block z-50">
+                        <div className="bg-black/90 border border-neutral-800 rounded-xl overflow-hidden shadow-xl backdrop-blur-xl">
+                          {item.dropdown.map((sub, si) => (
+                            <li
+                              key={si}
+                              className="border-b border-neutral-800 last:border-none"
+                            >
+                              <Link
+                                href={sub.path}
+                                className="block px-4 py-3 text-sm text-gray-300 hover:text-cyan-400 hover:bg-white/5 transition-colors"
+                              >
+                                {sub.name}
+                              </Link>
+                            </li>
+                          ))}
                         </div>
-                      </div>
-                    </div>
+                      </ul>
+                    </>
                   ) : (
                     <Link
                       href={item.path}
-                      onClick={() => set_is_sidebar_open(false)}
                       target={item.external ? "_blank" : undefined}
                       rel={item.external ? "noopener noreferrer" : undefined}
-                      className="flex items-center gap-4 p-3 text-gray-200 hover:text-cyan-400 hover:bg-neutral-900 rounded-xl transition-all group"
+                      className={`${
+                        active ? "quest-active " : ""
+                      }relative z-10 flex items-center gap-1 px-4 py-2 rounded-full text-sm font-medium transition-colors whitespace-nowrap ${
+                        active
+                          ? "text-white"
+                          : "text-[#9aa6b5] hover:text-white"
+                      }`}
+                      onMouseEnter={(e) => moveTo(e.currentTarget)}
+                      onFocus={(e) => moveTo(e.currentTarget)}
+                      onClick={(e) => {
+                        spawnSparks(e, e.currentTarget);
+                        moveTo(e.currentTarget);
+                      }}
                     >
-                      <div className="p-2 bg-neutral-900 text-cyan-500 rounded-lg group-hover:bg-cyan-500/20 transition-all">
-                        {item.icon}
-                      </div>
-                      <span className="text-xl font-semibold tracking-tight flex-1">
-                        {item.name}
-                      </span>
-                      {item.external && <ExternalLink size={14} className="opacity-40" />}
+                      {item.name}
+                      {active && (
+                        <span className="absolute left-1/2 bottom-[3px] w-1 h-1 -ml-0.5 rounded-full bg-cyan-400" />
+                      )}
+                      {item.external && (
+                        <ExternalLink className="w-3 h-3 opacity-50" />
+                      )}
                     </Link>
                   )}
                 </li>
-              ))}
-            </ul>
-          </nav>
+              );
+            })}
+          </ul>
 
-          <div className="mt-auto pt-4 border-t border-neutral-800/50 flex flex-col items-center">
-            <p className="text-neutral-500 text-sm mb-2">© {new Date().getFullYear()} QuestIT</p>
-            <div className="flex gap-4">
-              {/* Social icons could go here if available */}
-            </div>
-          </div>
+          {/* CTA "Contact Us" button */}
+          {ctaItem && (
+            <Link
+              href={ctaItem.path}
+              className={`relative inline-flex items-center gap-2 px-5 py-2 rounded-full text-sm font-semibold whitespace-nowrap ml-1 transition-all duration-200 overflow-hidden ${
+                isItemActive(ctaItem)
+                  ? "bg-cyan-400/10 text-white border border-cyan-400/25 shadow-none"
+                  : "bg-cyan-400 text-[#021018] shadow-[0_4px_14px_-6px_rgba(34,211,238,.4)] hover:-translate-y-px hover:shadow-[0_6px_18px_-6px_rgba(34,211,238,.5)] active:scale-[.94]"
+              }`}
+              onClick={(e) => spawnSparks(e, e.currentTarget)}
+            >
+              Contact Us
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="w-3.5 h-3.5 transition-transform duration-200 group-hover:translate-x-0.5"
+              >
+                <path d="M5 12h14M13 6l6 6-6 6" />
+              </svg>
+            </Link>
+          )}
+        </nav>
+      </header>
+
+      {/* ── 4. Mobile Full-Screen Sheet ──────────────────────────────────── */}
+      <div
+        className="fixed inset-0 z-[9999] md:hidden flex flex-col justify-center items-center gap-2 px-6"
+        style={{
+          background: "rgba(10,14,22,.96)",
+          backdropFilter: "blur(28px)",
+          WebkitBackdropFilter: "blur(28px)",
+          clipPath: sheetOpen
+            ? "circle(150% at calc(100% - 40px) 40px)"
+            : "circle(0 at calc(100% - 40px) 40px)",
+          visibility: sheetOpen ? "visible" : "hidden",
+          transition: sheetOpen
+            ? "clip-path .8s cubic-bezier(.77,0,.18,1), visibility 0s"
+            : "clip-path .75s cubic-bezier(.77,0,.18,1), visibility 0s .75s",
+        }}
+      >
+        {/* Logo at top of sheet */}
+        <div className="absolute top-6 left-6">
+          <Link href="/" onClick={() => setSheetOpen(false)}>
+            <Image
+              src="/images/logo-460.webp"
+              width={180}
+              height={94}
+              alt="Quest IT"
+              unoptimized
+              className="w-[150px] h-auto object-contain"
+            />
+          </Link>
         </div>
+
+        {sheetLinks.map((item, i) => {
+          const active = isItemActive(item);
+          return (
+            <Link
+              key={i}
+              href={item.path}
+              onClick={() => setSheetOpen(false)}
+              target={item.external ? "_blank" : undefined}
+              rel={item.external ? "noopener noreferrer" : undefined}
+              className={`text-[1.8rem] font-semibold px-5 py-2 transition-colors flex items-center gap-3 ${
+                active ? "text-cyan-400" : "text-white hover:text-cyan-400"
+              }`}
+              style={{
+                transform: sheetOpen ? "none" : "translateY(36px) scale(.92)",
+                opacity: sheetOpen ? 1 : 0,
+                filter: sheetOpen ? "none" : "blur(6px)",
+                transition: sheetOpen
+                  ? `transform .7s cubic-bezier(.22,1,.36,1) ${
+                      0.25 + i * 0.05
+                    }s, opacity .5s ${0.25 + i * 0.05}s, filter .5s ${
+                      0.25 + i * 0.05
+                    }s, color .2s`
+                  : "transform .3s, opacity .25s, filter .25s, color .2s",
+              }}
+            >
+              {item.name}
+              {active && (
+                <span className="w-2 h-2 rounded-full bg-cyan-400 shadow-[0_0_8px_#22d3ee]" />
+              )}
+              {item.external && (
+                <ExternalLink className="inline w-4 h-4 ml-1 opacity-50" />
+              )}
+            </Link>
+          );
+        })}
+
+        <p className="absolute bottom-6 text-neutral-500 text-xs tracking-wider">
+          © {new Date().getFullYear()} QUEST IT
+        </p>
       </div>
     </>
   );
