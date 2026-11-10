@@ -30,9 +30,9 @@ const ORBITAL_IMAGES = [
 
 const INITIAL_OFFSET_INDEX = 2;
 const TOTAL_CARDS = ORBITAL_IMAGES.length;
-const PAUSE_MS = 3800;
-const ROTATION_DURATION = 2.0;
-const INITIAL_ARRIVAL_PAUSE_MS = 2500;
+const PAUSE_MS = 5500;
+const ROTATION_DURATION = 2.4;
+const INITIAL_ARRIVAL_PAUSE_MS = 3500;
 const ORBIT_EASE = [0.16, 1, 0.3, 1];
 
 const mod = (n, m) => ((n % m) + m) % m;
@@ -122,7 +122,7 @@ const MemoryCard = ({
       >
         {/* FRONT FACE: Mirrored photograph (visible when inactive in orbit at rotateY: 0) */}
         <div
-          className={`absolute inset-0 w-full h-full rounded-2xl md:rounded-3xl overflow-hidden bg-neutral-950 transition-all duration-300 outline-none ${
+          className={`absolute inset-0 w-full h-full rounded-2xl md:rounded-3xl overflow-hidden bg-neutral-950 transition-all duration-700 ease-out outline-none ${
             !isFocal
               ? "group-hover:border-cyan-400/70 group-hover:shadow-[0_0_25px_rgba(0,212,255,0.45)] group-hover:scale-[1.03]"
               : ""
@@ -167,7 +167,7 @@ const MemoryCard = ({
 
         {/* BACK FACE: Original photograph (visible when active in focal spotlight at rotateY: 180) */}
         <div
-          className="absolute inset-0 w-full h-full rounded-2xl md:rounded-3xl overflow-hidden bg-neutral-950 transition-colors duration-200 outline-none"
+          className="absolute inset-0 w-full h-full rounded-2xl md:rounded-3xl overflow-hidden bg-neutral-950 transition-all duration-700 ease-out outline-none"
           style={{
             transform: "rotateY(180deg) translateZ(1px)",
             backfaceVisibility: "hidden",
@@ -333,9 +333,9 @@ const MemoriesSection = () => {
 
     if (targetStep === focalStepRef.current) return;
 
-    // Responsive duration proportional to travel distance (scaled smoothly between 1.4s and 2.4s)
+    // Responsive duration proportional to travel distance (scaled smoothly between 1.8s and 2.8s)
     const dist = Math.abs(targetStep - currentVal);
-    const customDuration = Math.min(1.4 + Math.max(dist - 1, 0) * 0.25, 2.4);
+    const customDuration = Math.min(1.8 + Math.max(dist - 1, 0) * 0.3, 2.8);
 
     rotateToStep(targetStep, customDuration);
   };
