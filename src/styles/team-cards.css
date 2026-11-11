@@ -829,14 +829,13 @@
 .dev-showcase-section {
   position: relative;
   width: 100%;
-  min-height: 100vh;
-  min-height: 100lvh;
-  min-height: 100dvh;
+  min-height: 4400px;
   background:
     radial-gradient(ellipse at 50% 18%, rgba(34, 211, 238, 0.12) 0%, transparent 60%),
     linear-gradient(180deg, #040711 0%, #07101f 25%, #040711 50%, #07101f 75%, #03050a 100%);
   color: #f6e7c1;
-  overflow: clip;
+  overflow-x: clip;
+  overflow-y: visible;
 }
 
 .showcase-sticky {
@@ -852,10 +851,7 @@
   min-height: 100lvh;
   min-height: 100dvh;
   overflow: hidden;
-  -webkit-transform: translateZ(0);
-  transform: translateZ(0);
-  will-change: transform;
-  backface-visibility: hidden;
+  isolation: isolate;
   background:
     radial-gradient(ellipse at 50% 18%, rgba(34, 211, 238, 0.12) 0%, transparent 60%),
     linear-gradient(125deg, #040711 0%, #07101f 50%, #03050a 100%);

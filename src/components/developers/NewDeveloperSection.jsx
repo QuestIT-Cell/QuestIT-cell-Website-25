@@ -476,8 +476,17 @@ export default function NewDeveloperSection() {
 
   const totalMembers = developers.length;
 
-  // Ensure body and html never have overflow-x: hidden which disables position: sticky
+  // Ensure body and html never have overflow-x: hidden which disables position: sticky,
+  // and ensure scroll restoration starts cleanly at top on refresh
   useEffect(() => {
+    if (typeof window !== "undefined") {
+      if ("scrollRestoration" in window.history) {
+        window.history.scrollRestoration = "manual";
+      }
+      if (window.scrollY > 0 && !window.location.hash) {
+        window.scrollTo(0, 0);
+      }
+    }
     if (typeof document !== "undefined") {
       document.documentElement.style.setProperty("overflow-x", "clip", "important");
       document.body.style.setProperty("overflow-x", "clip", "important");
@@ -533,8 +542,8 @@ export default function NewDeveloperSection() {
         const dt = lastTime > 0 ? Math.min(0.05, (now - lastTime) / 1000) : 0.016;
         lastTime = now;
 
-        // Responsive critical damping: 16 on mobile, 14 on desktop for effortless gliding with zero drag
-        const decay = cachedIsMobile ? 16 : 14;
+        // Responsive critical damping: 20 on mobile, 16 on desktop for immediate effortless response from first scroll
+        const decay = cachedIsMobile ? 20 : 16;
         const factor = 1 - Math.exp(-decay * dt);
         current += (target - current) * factor;
 
@@ -637,20 +646,34 @@ export default function NewDeveloperSection() {
       cachedIsMobile = cachedVw < 768;
       focusWidth = cachedIsMobile ? cachedVw * 0.6 : cachedVw * 0.45;
 
-      // Cache document-relative section position once during resize/measure
+      // Stable document-relative section position
       const rect = section.getBoundingClientRect();
       cachedSectionTop = rect.top + window.scrollY;
 
-      maxTravel = Math.max(0, track.scrollWidth - cachedVw);
+      // Deterministic fallback based on exact card count and spacing:
+      // Guarantees immediate scroll distance on frame 0 even before images/fonts load
+      const expectedTravel = cachedIsMobile
+        ? (items.length - 1) * (230 + 36)
+        : (items.length - 1) * (270 + 50);
+      maxTravel = Math.max(expectedTravel, track.scrollWidth - cachedVw);
 
       // Balanced scroll ratio: on mobile, 1 natural thumb flick moves exactly 1 card
       const scrollMultiplier = cachedIsMobile ? 1.55 : 1.35;
       const scrollTrackDistance = maxTravel * scrollMultiplier;
       const vh = Math.max(window.innerHeight || 0, document.documentElement.clientHeight || 0, 800);
       section.style.height = `${vh + scrollTrackDistance}px`;
-      cachedDistance = section.offsetHeight - vh;
+      cachedDistance = Math.max(scrollTrackDistance, section.offsetHeight - vh);
 
-      centers = items.map((el) => el.offsetLeft + el.offsetWidth / 2);
+      const cardW = cachedIsMobile ? 230 : 270;
+      const cardGap = cachedIsMobile ? 36 : 50;
+      const startPad = cachedVw / 2;
+      centers = items.map((el, i) => {
+        if (el && el.offsetLeft > 0) {
+          return el.offsetLeft + el.offsetWidth / 2;
+        }
+        return startPad + i * (cardW + cardGap);
+      });
+
       readTarget();
       current = target;
       render(performance.now());
