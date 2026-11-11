@@ -347,14 +347,16 @@ function CollectibleTeamCard({
                 {/* Avatar & Profile */}
                 <div className="dossier-top">
                   <div className="dossier-avatar-wrap">
-                    {member.image && !imgFailed ? (
-                      <img src={member.image} alt={member.name} />
-                    ) : (
-                      <svg viewBox="0 0 100 130" className="w-full h-full fill-amber-300">
-                        <circle cx="50" cy="44" r="22" />
-                        <path d="M8 130 C8 92 30 78 50 78 C70 78 92 92 92 130Z" />
-                      </svg>
-                    )}
+                    <div className="dossier-avatar-inner">
+                      {member.image && !imgFailed ? (
+                        <img src={member.image} alt={member.name} />
+                      ) : (
+                        <svg viewBox="0 0 100 130" className="w-full h-full fill-amber-300">
+                          <circle cx="50" cy="44" r="22" />
+                          <path d="M8 130 C8 92 30 78 50 78 C70 78 92 92 92 130Z" />
+                        </svg>
+                      )}
+                    </div>
                   </div>
                   <h3 className="dossier-name" title={member.name}>
                     {member.name}
