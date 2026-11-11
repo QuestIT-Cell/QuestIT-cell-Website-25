@@ -350,16 +350,14 @@ const Header = () => {
             </Link>
           </div>
 
-          {/* 2. Center: Desktop Floating Pill Navbar (Perfect horizontal alignment) */}
+          {/* 2. Center: Desktop Floating Pill Navbar (Perfect horizontal alignment & concentric capsule curvature) */}
           <div className="hidden md:flex absolute inset-x-0 justify-center items-center pointer-events-none z-10">
             <nav
-              className="pointer-events-auto relative flex items-center justify-between gap-2 md:gap-3 lg:gap-4 max-w-[94vw] md:min-w-[660px] lg:min-w-[800px] xl:min-w-[900px] 2xl:min-w-[980px]"
+              className="pointer-events-auto relative flex items-center gap-1.5 md:gap-2 lg:gap-2.5 max-w-[96vw]"
               style={{
                 width: "fit-content",
-                padding: isScrolled
-                  ? "6px 14px 6px 18px"
-                  : "8px 16px 8px 22px",
-                borderRadius: "999px",
+                padding: "6px 8px",
+                borderRadius: "9999px",
                 background:
                   "linear-gradient(135deg,rgba(255,255,255,.14),rgba(255,255,255,.03) 50%,rgba(255,255,255,.14)),rgba(12,16,24,.8)",
                 border: "1px solid rgba(255,255,255,.2)",
@@ -367,26 +365,28 @@ const Header = () => {
                 WebkitBackdropFilter: "blur(30px) saturate(120%) brightness(1.04)",
                 boxShadow:
                   "0 16px 48px -14px rgba(0,0,0,.65), inset 0 1px 0 rgba(255,255,255,.35), inset 0 -1px 0 rgba(255,255,255,.08), inset 0 0 22px rgba(255,255,255,.05)",
-                transition: "padding .3s, min-width .3s",
+                transition: "padding .3s",
               }}
             >
-              {/* Conic subtle hairline border */}
+              {/* Conic luminous glowing border - thicker blue line moving on boundary */}
               <span
                 aria-hidden
                 style={{
                   position: "absolute",
-                  inset: "-1px",
+                  inset: "-2.5px",
                   borderRadius: "inherit",
                   pointerEvents: "none",
                   background:
-                    "conic-gradient(from var(--quest-a,0deg), transparent 0 70%, #22d3ee 85%, transparent 100%)",
+                    "conic-gradient(from var(--quest-a,0deg), transparent 0 52%, rgba(34,211,238,0.18) 66%, rgba(56,189,248,0.7) 78%, #22d3ee 86%, #67e8f9 92%, #38bdf8 97%, transparent 100%)",
                   WebkitMask:
                     "linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0)",
                   WebkitMaskComposite: "xor",
                   maskComposite: "exclude",
-                  padding: "1px",
-                  opacity: 0.75,
-                  animation: "questNavSpin 6s linear infinite",
+                  padding: "3.5px",
+                  opacity: 1,
+                  filter:
+                    "drop-shadow(0 0 8px rgba(34,211,238,1)) drop-shadow(0 0 16px rgba(34,211,238,0.75)) drop-shadow(0 0 24px rgba(56,189,248,0.4))",
+                  animation: "questNavSpin 5.5s linear infinite",
                 }}
               />
 
@@ -407,7 +407,7 @@ const Header = () => {
               {/* Desktop links + sliding indicator */}
               <ul
                 ref={listRef}
-                className="relative flex items-center list-none p-0 gap-1 md:gap-1.5 lg:gap-2.5 flex-1 justify-center"
+                className="relative flex items-center list-none p-0 gap-1 md:gap-1.5 lg:gap-2"
                 onMouseLeave={() => {
                   const activeEl = listRef.current?.querySelector("a.quest-active");
                   moveTo(activeEl || null);

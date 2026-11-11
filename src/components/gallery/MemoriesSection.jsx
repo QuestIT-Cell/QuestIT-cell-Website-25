@@ -30,13 +30,13 @@ const ORBITAL_IMAGES = [
 
 const INITIAL_OFFSET_INDEX = 0;
 const TOTAL_CARDS = ORBITAL_IMAGES.length;
-// Exactly 3 seconds active resting window per photo
-const PAUSE_MS = 3000;
-const INITIAL_ARRIVAL_PAUSE_MS = 3000;
-// Swift, fluid 1.6s sweep with smooth in-flight card flipping
-const ROTATION_DURATION = 1.6;
-// Smooth cinematic bezier curve
-const ORBIT_EASE = [0.16, 1, 0.3, 1];
+// Exactly 3.2 seconds active resting window per photo
+const PAUSE_MS = 3200;
+const INITIAL_ARRIVAL_PAUSE_MS = 3200;
+// Smooth, majestic 2.4s sweep with clearly noticeable in-flight card flipping
+const ROTATION_DURATION = 2.4;
+// Smooth cinematic cubic bezier (silky launch, majestic mid-flight flip, gentle landing)
+const ORBIT_EASE = [0.25, 1, 0.35, 1];
 
 const mod = (n, m) => ((n % m) + m) % m;
 
@@ -61,13 +61,13 @@ const MemoryCard = ({
   const src = ORBITAL_IMAGES[cardIndex % TOTAL_CARDS];
 
   // ─── Continuous Flip Angle & Lift Elevation ────────────────────────────────
-  // As card sweeps into center (|diff|: 0.85 -> 0.0), it smoothly flips 0 -> 180deg.
+  // As card sweeps into center (|diff|: 0.95 -> 0.0), it smoothly flips 0 -> 180deg.
   // When resting at center (|diff| = 0), it is fully flipped at 180deg facing forward.
-  // As it drifts away (|diff|: 0.0 -> 0.85), it smoothly flips 180 -> 0deg back into ring.
+  // As it drifts away (|diff|: 0.0 -> 0.95), it smoothly flips 180 -> 0deg back into ring.
   const flipAngle = useTransform(progressMV, (p) => {
     const diff = getDiff(cardIndex, p);
     const absDiff = Math.abs(diff);
-    const flipZone = 0.85;
+    const flipZone = 0.95;
     if (absDiff >= flipZone) return 0;
     const progress = (flipZone - absDiff) / flipZone;
     const smoothT = (1 - Math.cos(progress * Math.PI)) / 2;
@@ -77,7 +77,7 @@ const MemoryCard = ({
   const liftVal = useTransform(progressMV, (p) => {
     const diff = getDiff(cardIndex, p);
     const absDiff = Math.abs(diff);
-    const flipZone = 0.85;
+    const flipZone = 0.95;
     if (absDiff >= flipZone) return 0;
     const progress = (flipZone - absDiff) / flipZone;
     const smoothT = (1 - Math.cos(progress * Math.PI)) / 2;
@@ -235,9 +235,9 @@ const MemoryCard = ({
           position: "relative",
         }}
       >
-        {/* FRONT FACE — mirrored photo (visible at rotateY: 0deg when in orbital ring) */}
+        {/* FRONT FACE — Quest IT Holographic Archive Card Back (visible at rotateY: 0deg when in orbital ring) */}
         <motion.div
-          className="absolute inset-0 w-full h-full rounded-2xl md:rounded-3xl overflow-hidden bg-neutral-950 group-hover:scale-[1.03] transition-transform duration-500 ease-out"
+          className="absolute inset-0 w-full h-full rounded-2xl md:rounded-3xl overflow-hidden bg-[#090d16] group-hover:scale-[1.03] transition-transform duration-500 ease-out flex flex-col justify-between p-3.5 sm:p-5 select-none"
           style={{
             transform: "rotateY(0deg) translateZ(1px)",
             backfaceVisibility: "hidden",
@@ -245,32 +245,86 @@ const MemoryCard = ({
             border: borderStyle,
             boxShadow: shadowVal,
             isolation: "isolate",
-            imageRendering: "-webkit-optimize-contrast",
           }}
         >
-          <div className="relative w-full h-full" style={{ transform: "scaleX(-1)" }}>
+          {/* Subtle grayscale photo watermark in background */}
+          <div className="absolute inset-0 w-full h-full opacity-15 pointer-events-none mix-blend-luminosity">
             <Image
               src={src}
-              alt={`Quest-IT Memory ${cardIndex + 1} (Mirrored)`}
+              alt=""
               fill
-              quality={100}
               unoptimized
-              sizes="(max-width: 768px) 50vw, (max-width: 1200px) 40vw, 450px"
-              className="object-cover select-none pointer-events-none"
-              style={{ imageRendering: "-webkit-optimize-contrast" }}
-              priority={cardIndex < 6}
+              className="object-cover filter grayscale contrast-125"
             />
           </div>
-          {/* Subtle dimming for orbit cards (no CSS filter blur) */}
-          <motion.div
-            className="absolute inset-0 bg-black pointer-events-none"
-            style={{ opacity: dimOpacity }}
+
+          {/* Cybernetic Grid & Sheen */}
+          <div
+            className="absolute inset-0 pointer-events-none"
+            style={{
+              backgroundImage:
+                "linear-gradient(rgba(34,211,238,0.06) 1px, transparent 1px), linear-gradient(90deg, rgba(34,211,238,0.06) 1px, transparent 1px)",
+              backgroundSize: "20px 20px",
+              opacity: 0.6,
+            }}
           />
           <div
             className="absolute inset-0 pointer-events-none"
             style={{
-              background: "linear-gradient(to top, rgba(0,0,0,0.28), transparent 55%)",
+              background:
+                "radial-gradient(ellipse at 50% 40%, rgba(34,211,238,0.14) 0%, transparent 70%)",
             }}
+          />
+
+          {/* Cyber Framing Corner Brackets */}
+          <div className="absolute top-2.5 left-2.5 w-3 h-3 border-t-2 border-l-2 border-cyan-400/50 pointer-events-none" />
+          <div className="absolute top-2.5 right-2.5 w-3 h-3 border-t-2 border-r-2 border-cyan-400/50 pointer-events-none" />
+          <div className="absolute bottom-2.5 left-2.5 w-3 h-3 border-b-2 border-l-2 border-cyan-400/50 pointer-events-none" />
+          <div className="absolute bottom-2.5 right-2.5 w-3 h-3 border-b-2 border-r-2 border-cyan-400/50 pointer-events-none" />
+
+          {/* Top Header */}
+          <div className="relative z-10 flex items-center justify-between w-full">
+            <div className="flex items-center gap-1.5">
+              <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 shadow-[0_0_8px_#22d3ee] animate-pulse" />
+              <span className="font-mono text-[9px] sm:text-[10px] tracking-[0.22em] text-cyan-400/90 font-bold uppercase">
+                QUEST-IT // ARCHIVE
+              </span>
+            </div>
+            <span className="font-mono text-[8px] sm:text-[9px] tracking-widest text-cyan-400/60 font-semibold">
+              ✦ 2026
+            </span>
+          </div>
+
+          {/* Center Emblem with glowing Quest IT Logo */}
+          <div className="relative z-10 flex flex-col items-center justify-center my-auto py-2">
+            <div className="relative w-24 sm:w-32 h-9 sm:h-11">
+              <Image
+                src="/images/logo.webp"
+                alt="Quest IT"
+                fill
+                className="object-contain filter drop-shadow-[0_0_14px_rgba(34,211,238,0.7)]"
+              />
+            </div>
+            <span className="font-mono text-[8px] sm:text-[9px] tracking-[0.28em] text-neutral-400 font-medium uppercase mt-2">
+              ORBITAL DOSSIER
+            </span>
+          </div>
+
+          {/* Bottom Footer */}
+          <div className="relative z-10 flex items-center justify-between w-full pt-1 border-t border-cyan-400/15">
+            <span className="font-mono text-[9px] sm:text-[10px] tracking-wider text-cyan-400/95 font-bold">
+              NO. {String((cardIndex % TOTAL_CARDS) + 1).padStart(2, "0")}
+            </span>
+            <span className="font-mono text-[8px] sm:text-[9px] text-neutral-400 tracking-wider flex items-center gap-1">
+              SWEEP TO REVEAL
+              <span className="text-cyan-400 font-bold">↻</span>
+            </span>
+          </div>
+
+          {/* Subtle dimming for non-focal cards */}
+          <motion.div
+            className="absolute inset-0 bg-black pointer-events-none"
+            style={{ opacity: dimOpacity }}
           />
         </motion.div>
 
