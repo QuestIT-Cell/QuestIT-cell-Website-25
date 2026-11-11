@@ -193,7 +193,30 @@ const Header = () => {
     [pathname, activeId]
   );
 
-  /* ─── Scroll behaviour: hide on down, show on up, section spy ─────────── */
+  /* ─── Route & Hash synchronization on page navigation ────────────────── */
+  useEffect(() => {
+    if (pathname === "/" || pathname === "") {
+      const hash = (typeof window !== "undefined" ? window.location.hash : "").replace("#", "");
+      if (hash === "about") {
+        setActiveId("about");
+        setTimeout(() => {
+          document.getElementById("about")?.scrollIntoView({ behavior: "smooth" });
+        }, 80);
+      } else if (hash === "contact") {
+        setActiveId("contact");
+        setTimeout(() => {
+          document.getElementById("contact")?.scrollIntoView({ behavior: "smooth" });
+        }, 80);
+      } else {
+        setActiveId("home");
+        if (typeof window !== "undefined" && window.scrollY > 0 && (hash === "home" || !hash)) {
+          window.scrollTo({ top: 0, behavior: "smooth" });
+        }
+      }
+    }
+  }, [pathname]);
+
+  /* ─── Scroll behaviour: hide on down, show on up, precise section spy ─── */
   useEffect(() => {
     let last = 0;
     const onScroll = () => {
@@ -207,17 +230,48 @@ const Header = () => {
       });
       last = y;
 
-      // Section spy: only evaluate section headings when browsing the home page
+      // Precise Section spy: only mark the section currently present in viewport
       if (pathname === "/" || pathname === "") {
-        const ids = ["home", "about", "contact"];
-        let cur = "home";
-        ids.forEach((id) => {
-          const el = document.getElementById(id);
-          if (el && el.getBoundingClientRect().top <= window.innerHeight * 0.4) {
-            cur = id;
+        // If near the top of the home page, it is strictly "home"
+        if (y < 120) {
+          setActiveId("home");
+          return;
+        }
+
+        // If scrolled to the bottom of the page, it is "contact"
+        const scrollBottom = window.innerHeight + y;
+        const docHeight = document.documentElement.scrollHeight;
+        if (docHeight - scrollBottom < 80) {
+          const contactEl = document.getElementById("contact");
+          if (contactEl) {
+            setActiveId("contact");
+            return;
           }
-        });
-        setActiveId(cur);
+        }
+
+        // Check which section is actively occupying the focal viewport
+        const focalY = window.innerHeight * 0.35;
+        const sections = [
+          { id: "contact", el: document.getElementById("contact") },
+          { id: "about", el: document.getElementById("about") },
+          { id: "home", el: document.getElementById("home") },
+        ];
+
+        let matchedId = null;
+        for (const sec of sections) {
+          if (!sec.el) continue;
+          const rect = sec.el.getBoundingClientRect();
+          if (rect.top <= focalY && rect.bottom > focalY) {
+            matchedId = sec.id;
+            break;
+          }
+        }
+
+        if (matchedId) {
+          setActiveId(matchedId);
+        } else if (y < window.innerHeight * 0.8) {
+          setActiveId("home");
+        }
       }
     };
 
@@ -289,6 +343,28 @@ const Header = () => {
     setSheetOpen((prev) => !prev);
   };
 
+  /* ─── Desktop navigation link click handler ───────────────────────────── */
+  const handleDesktopNavClick = (e, item) => {
+    if (item.path.startsWith("/#")) {
+      const hash = item.path.split("#")[1];
+      setActiveId(hash);
+
+      if (pathname === "/" || pathname === "") {
+        e.preventDefault();
+        if (hash === "home") {
+          window.scrollTo({ top: 0, behavior: "smooth" });
+          window.history.pushState(null, "", "/#home");
+        } else {
+          const el = document.getElementById(hash);
+          if (el) {
+            el.scrollIntoView({ behavior: "smooth" });
+            window.history.pushState(null, "", `/#${hash}`);
+          }
+        }
+      }
+    }
+  };
+
   /* ─── Mobile menu link click: first clicked button moves outside, then all others follow ─ */
   const handleMobileNavClick = (e, item, index) => {
     e.preventDefault();
@@ -305,12 +381,20 @@ const Header = () => {
 
       if (item.path.startsWith("/#")) {
         const hash = item.path.split("#")[1];
+        setActiveId(hash);
+
         if (pathname === "/" || pathname === "") {
-          const el = document.getElementById(hash);
-          if (el) {
-            el.scrollIntoView({ behavior: "smooth" });
+          if (hash === "home") {
+            window.scrollTo({ top: 0, behavior: "smooth" });
+            window.history.pushState(null, "", "/#home");
           } else {
-            window.location.hash = hash;
+            const el = document.getElementById(hash);
+            if (el) {
+              el.scrollIntoView({ behavior: "smooth" });
+              window.history.pushState(null, "", `/#${hash}`);
+            } else {
+              window.location.hash = hash;
+            }
           }
         } else {
           router.push(item.path);
@@ -373,7 +457,13 @@ const Header = () => {
             <Link
               href="/"
               aria-label="Quest IT Home"
-              onClick={() => setSheetOpen(false)}
+              onClick={() => {
+                setActiveId("home");
+                setSheetOpen(false);
+                if (pathname === "/" || pathname === "") {
+                  window.scrollTo({ top: 0, behavior: "smooth" });
+                }
+              }}
               className="pointer-events-auto block transition-transform duration-200 hover:scale-[1.03] active:scale-95"
             >
               <Image
@@ -530,6 +620,7 @@ const Header = () => {
                           onClick={(e) => {
                             spawnSparks(e, e.currentTarget);
                             moveTo(e.currentTarget);
+                            handleDesktopNavClick(e, item);
                           }}
                         >
                           {item.name}
@@ -557,7 +648,10 @@ const Header = () => {
                       ? "bg-cyan-400/10 text-white border border-cyan-400/25 shadow-none"
                       : "bg-cyan-400 text-[#021018] shadow-[0_4px_14px_-6px_rgba(34,211,238,.4)] hover:-translate-y-px hover:shadow-[0_6px_18px_-6px_rgba(34,211,238,.5)] active:scale-[.94]"
                   }`}
-                  onClick={(e) => spawnSparks(e, e.currentTarget)}
+                  onClick={(e) => {
+                    spawnSparks(e, e.currentTarget);
+                    handleDesktopNavClick(e, ctaItem);
+                  }}
                 >
                   Contact Us
                   <svg
