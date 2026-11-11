@@ -1202,9 +1202,14 @@
   }
 
   .showcase-heading {
-    top: 8%;
+    top: calc(7% + var(--mobile-stage-y, 36px));
     font-size: 14vw;
     opacity: 0.22;
+  }
+
+  .timeline {
+    top: var(--mobile-stage-y, 36px);
+    bottom: -140px;
   }
 
   /* Centre-aligned track with exact card half-width margin */
@@ -1276,6 +1281,14 @@
       linear-gradient(125deg, #040711 0%, #07101f 50%, #03050a 100%);
   }
 
+  .showcase-sticky::before {
+    inset: -20px 0 -140px 0;
+  }
+
+  .showcase-sticky::after {
+    inset: -20px 0 -140px 0;
+  }
+
   .showcase-footer {
     font-size: 7px;
     letter-spacing: 1px;
@@ -1293,6 +1306,7 @@
 }
 
 /* Ensure background continues seamlessly below developer section */
+html:has(.dev-showcase-section),
 body:has(.dev-showcase-section) {
   background-color: #03050a !important;
 }

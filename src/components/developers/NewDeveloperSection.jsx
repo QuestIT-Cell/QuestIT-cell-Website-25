@@ -543,7 +543,18 @@ export default function NewDeveloperSection() {
 
       const x = -current * maxTravel;
 
-      track.style.transform = `translate3d(${x.toFixed(3)}px, 0, 0)`;
+      if (cachedIsMobile) {
+        // Initially keep stage a little down (36px). As user scrolls, let it glide up
+        // to maximum top (-8px) without creating any gap in the viewport.
+        const scrolled = Math.max(0, window.scrollY - cachedSectionTop);
+        const shiftProgress = Math.min(1, Math.max(0, scrolled / 140));
+        const stageY = 36 - shiftProgress * 44;
+        section.style.setProperty("--mobile-stage-y", `${stageY.toFixed(1)}px`);
+        track.style.transform = `translate3d(${x.toFixed(3)}px, ${stageY.toFixed(1)}px, 0)`;
+      } else {
+        section.style.setProperty("--mobile-stage-y", "0px");
+        track.style.transform = `translate3d(${x.toFixed(3)}px, 0, 0)`;
+      }
 
       if (heading) {
         heading.style.transform = `translate3d(${(x * 0.16).toFixed(3)}px, 0, 0)`;
