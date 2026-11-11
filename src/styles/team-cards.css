@@ -830,9 +830,7 @@
   position: relative;
   width: 100%;
   min-height: 4400px;
-  background:
-    radial-gradient(ellipse at 50% 18%, rgba(34, 211, 238, 0.12) 0%, transparent 60%),
-    linear-gradient(180deg, #040711 0%, #07101f 25%, #040711 50%, #07101f 75%, #03050a 100%);
+  background: linear-gradient(180deg, #040711 0%, #07101f 25%, #040711 50%, #07101f 75%, #03050a 100%);
   color: #f6e7c1;
   overflow-x: clip;
   overflow-y: visible;
@@ -846,10 +844,8 @@
   width: 100%;
   height: 100vh;
   height: 100lvh;
-  height: 100dvh;
   min-height: 100vh;
   min-height: 100lvh;
-  min-height: 100dvh;
   overflow: hidden;
   isolation: isolate;
   background:
@@ -1198,14 +1194,14 @@
   }
 
   .showcase-heading {
-    top: calc(7% + var(--mobile-stage-y, 36px));
+    top: 8%;
     font-size: 14vw;
     opacity: 0.22;
   }
 
   .timeline {
-    top: var(--mobile-stage-y, 36px);
-    bottom: -140px;
+    top: 0;
+    bottom: 0;
   }
 
   /* Centre-aligned track with exact card half-width margin */
@@ -1268,21 +1264,19 @@
   .showcase-sticky {
     height: 100vh;
     height: 100lvh;
-    height: 100dvh;
     min-height: 100vh;
     min-height: 100lvh;
-    min-height: 100dvh;
     background:
       radial-gradient(ellipse at 50% 18%, rgba(34, 211, 238, 0.10) 0%, transparent 60%),
       linear-gradient(125deg, #040711 0%, #07101f 50%, #03050a 100%);
   }
 
   .showcase-sticky::before {
-    inset: -20px 0 -140px 0;
+    inset: 0;
   }
 
   .showcase-sticky::after {
-    inset: -20px 0 -140px 0;
+    inset: 0;
   }
 
   .showcase-footer {
