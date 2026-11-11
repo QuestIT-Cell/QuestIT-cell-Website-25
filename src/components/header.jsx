@@ -276,12 +276,8 @@ const Header = () => {
     };
   }, [sheetOpen]);
 
-  /* ─── Hamburger click: toggle menu + smooth cyan backdrop reveal ──────── */
-  const handleBurgerClick = (e) => {
-    if (e?.clientX && e?.clientY) {
-      document.documentElement.style.setProperty("--wave-x", `${e.clientX}px`);
-      document.documentElement.style.setProperty("--wave-y", `${e.clientY}px`);
-    }
+  /* ─── Hamburger click: toggle mobile menu ──────────────────────────────── */
+  const handleBurgerClick = () => {
     setSheetOpen((prev) => !prev);
   };
 
@@ -633,9 +629,9 @@ const Header = () => {
         </div>
       </header>
 
-      {/* ── Full-Screen Cyan 400 Color Spreading Backdrop from Hamburger Icon ── */}
+      {/* ── Full-Screen Frosted Glass Backdrop (Blurs the Page Behind) ── */}
       <div
-        className="qm-cyan-backdrop"
+        className="qm-backdrop"
         aria-hidden="true"
         onClick={() => setSheetOpen(false)}
       />

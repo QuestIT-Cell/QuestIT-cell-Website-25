@@ -4,9 +4,9 @@
   --qm-top: 78px;                  /* where the first button starts (header height + gap) */
   --qm-z: 10005;                   /* header has z-[10010] so the cross stays visible and clickable */
   --qm-text: #ffffff;
-  --qm-base: rgba(8, 12, 20, 0.92);   /* glass base: dark obsidian matching Quest IT theme */
-  --qm-glass: rgba(255, 255, 255, 0.12);
-  --qm-line: rgba(255, 255, 255, 0.24);
+  --qm-base: rgba(10, 16, 26, 0.55);   /* frosted glass base */
+  --qm-glass: rgba(255, 255, 255, 0.16);
+  --qm-line: rgba(255, 255, 255, 0.22);
   --qm-chip: rgba(34, 211, 238, 0.16);
 }
 
@@ -14,51 +14,29 @@ html.qm-open {
   overflow: hidden;
 }
 
-/* ─── Full-Screen Cyan 400 Spreading Backdrop from Hamburger ─── */
-.qm-cyan-backdrop {
+/* ─── Full-Screen Frosted Glass Backdrop (Blurs the Page Behind) ─── */
+.qm-backdrop {
   position: fixed;
   inset: 0;
   z-index: 10003;
   pointer-events: none;
-  background: radial-gradient(
-    circle at var(--wave-x, calc(100vw - 38px)) var(--wave-y, 38px),
-    #22d3ee 0%,
-    #06b6d4 30%,
-    #0891b2 60%,
-    #0e7490 82%,
-    #083344 100%
-  );
-  clip-path: circle(0px at var(--wave-x, calc(100vw - 38px)) var(--wave-y, 38px));
+  background: rgba(3, 7, 18, 0.50);
+  backdrop-filter: blur(28px) saturate(180%);
+  -webkit-backdrop-filter: blur(28px) saturate(180%);
   opacity: 0;
   visibility: hidden;
-  transition: clip-path 0.55s cubic-bezier(0.16, 1, 0.3, 1),
-              opacity 0.4s ease,
-              visibility 0s 0.55s;
-  will-change: clip-path, opacity;
+  transition: opacity 0.4s cubic-bezier(0.16, 1, 0.3, 1),
+              visibility 0s 0.4s;
+  will-change: opacity;
 }
 
-/* Subtle tech grid over the cyan backdrop */
-.qm-cyan-backdrop::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background-image:
-    linear-gradient(rgba(255, 255, 255, 0.08) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 255, 255, 0.08) 1px, transparent 1px);
-  background-size: 24px 24px;
-  opacity: 0.35;
-  pointer-events: none;
-}
-
-/* When menu is open, the cyan color stays and covers the whole screen */
-html.qm-open .qm-cyan-backdrop,
-.qm-open .qm-cyan-backdrop {
+/* When menu is open, the blurred backdrop stays active and covers the whole screen */
+html.qm-open .qm-backdrop,
+.qm-open .qm-backdrop {
   opacity: 1;
   visibility: visible;
-  clip-path: circle(160vmax at var(--wave-x, calc(100vw - 38px)) var(--wave-y, 38px));
   pointer-events: auto;
-  transition: clip-path 0.55s cubic-bezier(0.16, 1, 0.3, 1),
-              opacity 0.4s ease,
+  transition: opacity 0.4s cubic-bezier(0.16, 1, 0.3, 1),
               visibility 0s 0s;
 }
 
@@ -69,19 +47,21 @@ html.qm-open .qm-cyan-backdrop,
   flex: none;
   width: 44px;
   height: 44px;
-  border: 1px solid var(--qm-line);
+  border: 1px solid rgba(255, 255, 255, 0.22);
   border-radius: 50%;
-  background: rgba(12, 16, 24, 0.82);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
-  color: var(--qm-text);
+  background: rgba(10, 16, 26, 0.65);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.35), 0 8px 24px rgba(0, 0, 0, 0.4);
+  color: #ffffff;
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
-  transition: transform .35s cubic-bezier(.16, 1, .3, 1), background .3s, border-color .3s;
+  transition: transform .35s cubic-bezier(.16, 1, .3, 1), background .3s, border-color .3s, box-shadow .3s;
 }
 
 .qm-burger:hover {
-  border-color: rgba(34, 211, 238, 0.4);
+  border-color: rgba(34, 211, 238, 0.6);
+  box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.5), 0 0 16px rgba(34, 211, 238, 0.3);
 }
 
 .qm-burger:active {
@@ -97,7 +77,7 @@ html.qm-open .qm-cyan-backdrop,
   margin-top: -1px;
   border-radius: 2px;
   background: currentColor;
-  transition: transform .55s cubic-bezier(.16, 1, .3, 1), opacity .25s;
+  transition: transform .55s cubic-bezier(.16, 1, .3, 1), opacity .25s, background .3s;
 }
 
 .qm-burger span:nth-child(1) {
@@ -109,9 +89,10 @@ html.qm-open .qm-cyan-backdrop,
 }
 
 .qm-burger[aria-expanded="true"] {
-  background: var(--qm-chip);
-  border-color: rgba(34, 211, 238, 0.5);
-  box-shadow: 0 0 16px rgba(34, 211, 238, 0.25);
+  background: rgba(14, 22, 36, 0.85);
+  border-color: rgba(34, 211, 238, 0.7);
+  box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.5), 0 0 20px rgba(34, 211, 238, 0.4);
+  color: #22d3ee;
 }
 
 .qm-burger[aria-expanded="true"] span:nth-child(1) {
@@ -152,7 +133,7 @@ html.qm-open .qm-menu {
   transition: visibility 0s;
 }
 
-/* ─── Glass Pill Buttons (Cascading in from the right) ─── */
+/* ─── Ultra-Glassy Pill Buttons (Cascading in from the right) ─── */
 .qm-menu a.qm-nav-link,
 .qm-menu .qm-social-pill {
   position: relative;
@@ -163,15 +144,24 @@ html.qm-open .qm-menu {
   width: min(284px, 100%);
   padding: 10px 22px 10px 10px;
   border-radius: 999px;
-  color: var(--qm-text);
+  color: #ffffff;
   text-decoration: none;
   font: 600 1.02rem/1 'Poppins', system-ui, sans-serif;
   letter-spacing: 0.01em;
-  border: 1px solid var(--qm-line);
-  background: linear-gradient(135deg, var(--qm-glass), transparent), var(--qm-base);
-  -webkit-backdrop-filter: blur(18px) saturate(140%);
-  backdrop-filter: blur(18px) saturate(140%);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .28), 0 12px 30px -14px rgba(0, 0, 0, .6);
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.18) 0%,
+    rgba(255, 255, 255, 0.04) 50%,
+    rgba(255, 255, 255, 0.10) 100%
+  ), rgba(10, 16, 26, 0.55);
+  -webkit-backdrop-filter: blur(24px) saturate(190%) brightness(1.08);
+  backdrop-filter: blur(24px) saturate(190%) brightness(1.08);
+  box-shadow:
+    inset 0 1px 1px 0 rgba(255, 255, 255, 0.42),
+    inset 0 -1px 1px 0 rgba(0, 0, 0, 0.2),
+    0 16px 36px -10px rgba(0, 0, 0, 0.55),
+    0 0 20px -6px rgba(34, 211, 238, 0.12);
   opacity: 0;
   transform: translate3d(110%, 0, 0);
   will-change: transform, opacity;
@@ -194,16 +184,35 @@ html.qm-open .qm-menu .qm-social-pill {
 .qm-open .qm-menu a.qm-nav-link:active,
 html.qm-open .qm-menu a.qm-nav-link:active {
   transform: scale(.97);
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.26) 0%,
+    rgba(255, 255, 255, 0.08) 50%,
+    rgba(255, 255, 255, 0.16) 100%
+  ), rgba(12, 20, 32, 0.65);
+  border-color: rgba(34, 211, 238, 0.5);
+  box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.6), 0 0 18px rgba(34, 211, 238, 0.25);
   transition-duration: .15s;
   transition-delay: 0s;
 }
 
+/* Active current route button: glowing glassy cyan accent */
 .qm-menu a.qm-nav-link[aria-current="true"] {
-  color: var(--qm-accent);
-  border-color: rgba(34, 211, 238, .5);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .35), 0 0 18px rgba(34, 211, 238, 0.25);
+  color: #ffffff;
+  border-color: rgba(34, 211, 238, 0.75);
+  background: linear-gradient(
+    135deg,
+    rgba(34, 211, 238, 0.32) 0%,
+    rgba(255, 255, 255, 0.10) 50%,
+    rgba(34, 211, 238, 0.18) 100%
+  ), rgba(8, 20, 34, 0.70);
+  box-shadow:
+    inset 0 1px 1.5px 0 rgba(255, 255, 255, 0.65),
+    0 16px 36px -10px rgba(0, 0, 0, 0.6),
+    0 0 24px rgba(34, 211, 238, 0.38);
 }
 
+/* Glassy Icon Capsule */
 .qm-menu i {
   display: grid;
   place-items: center;
@@ -211,17 +220,18 @@ html.qm-open .qm-menu a.qm-nav-link:active {
   width: 40px;
   height: 40px;
   border-radius: 50%;
-  background: var(--qm-chip);
-  border: 1px solid rgba(34, 211, 238, .28);
-  color: var(--qm-accent);
-  transition: background .3s, border-color .3s, color .3s;
+  background: rgba(34, 211, 238, 0.14);
+  border: 1px solid rgba(34, 211, 238, 0.35);
+  color: #22d3ee;
+  box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.4), 0 0 14px rgba(34, 211, 238, 0.25);
+  transition: background .3s, border-color .3s, color .3s, box-shadow .3s;
 }
 
 .qm-menu a.qm-nav-link[aria-current="true"] i {
-  background: rgba(34, 211, 238, 0.22);
-  border-color: rgba(34, 211, 238, 0.6);
-  color: #22d3ee;
-  box-shadow: 0 0 10px rgba(34, 211, 238, 0.4);
+  background: rgba(34, 211, 238, 0.28);
+  border-color: rgba(34, 211, 238, 0.8);
+  color: #ffffff;
+  box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.6), 0 0 16px rgba(34, 211, 238, 0.55);
 }
 
 .qm-menu i svg {
@@ -234,11 +244,20 @@ html.qm-open .qm-menu a.qm-nav-link:active {
   stroke-linejoin: round;
 }
 
-/* ─── Contact Us Glow Accent ─── */
+/* ─── Contact Us Glow Glass Pill Accent ─── */
 .qm-menu a.qm-glow {
   position: relative;
-  border-color: rgba(34, 211, 238, .7);
-  background: linear-gradient(135deg, rgba(34, 211, 238, .35), rgba(34, 211, 238, .12)), var(--qm-base);
+  border-color: rgba(34, 211, 238, 0.85);
+  background: linear-gradient(
+    135deg,
+    rgba(34, 211, 238, 0.42) 0%,
+    rgba(6, 182, 212, 0.22) 50%,
+    rgba(34, 211, 238, 0.30) 100%
+  ), rgba(8, 20, 32, 0.75);
+  box-shadow:
+    inset 0 1px 2px 0 rgba(255, 255, 255, 0.7),
+    0 16px 36px -10px rgba(0, 0, 0, 0.6),
+    0 0 28px rgba(34, 211, 238, 0.45);
 }
 
 .qm-glow::after {
@@ -253,20 +272,29 @@ html.qm-open .qm-menu a.qm-nav-link:active {
 }
 
 .qm-menu a.qm-glow i {
-  background: var(--qm-accent);
+  background: #22d3ee;
   color: #031219;
   border-color: transparent;
-  box-shadow: 0 0 12px rgba(34, 211, 238, 0.8);
+  box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.6), 0 0 14px rgba(34, 211, 238, 0.9);
 }
 
 @keyframes qmGlow {
-  50% { opacity: 1; }
+  50% { opacity: 0.9; }
 }
 
-/* ─── Social Media Pill (GitHub, LinkedIn, Instagram) ─── */
+/* ─── Social Media Glass Pill (GitHub, LinkedIn, Instagram) ─── */
 .qm-menu .qm-social-pill {
   padding: 8px 18px 8px 10px;
   justify-content: space-between;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.14) 0%,
+    rgba(255, 255, 255, 0.04) 100%
+  ), rgba(10, 16, 26, 0.55);
+  border: 1px solid rgba(255, 255, 255, 0.20);
+  box-shadow:
+    inset 0 1px 1px 0 rgba(255, 255, 255, 0.35),
+    0 16px 36px -10px rgba(0, 0, 0, 0.55);
 }
 
 .qm-social-items {
@@ -285,9 +313,12 @@ html.qm-open .qm-menu a.qm-nav-link:active {
   width: 36px;
   height: 36px;
   border-radius: 50%;
-  color: #cbd5e1;
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: #e2e8f0;
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.3);
   transition: all 0.25s ease;
   text-decoration: none;
 }
@@ -295,9 +326,9 @@ html.qm-open .qm-menu a.qm-nav-link:active {
 .qm-social-btn:hover,
 .qm-social-btn:active {
   color: #ffffff;
-  background: rgba(34, 211, 238, 0.2);
-  border-color: rgba(34, 211, 238, 0.5);
-  box-shadow: 0 0 10px rgba(34, 211, 238, 0.4);
+  background: rgba(34, 211, 238, 0.25);
+  border-color: rgba(34, 211, 238, 0.6);
+  box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.5), 0 0 12px rgba(34, 211, 238, 0.5);
   transform: translateY(-2px);
 }
 
