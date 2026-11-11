@@ -122,7 +122,7 @@ const MemoryCard = ({
     const theta = diff * angularSpacing;
     const cosT = Math.cos(theta);
     const depthFactor = (cosT + 1) / 2;
-    return isMobile ? 0.65 + depthFactor * 0.35 : 0.60 + depthFactor * 0.40;
+    return isMobile ? 0.62 + depthFactor * 0.53 : 0.58 + depthFactor * 0.62;
   });
   const opacityVal = useTransform(progressMV, (p) => {
     const diff = getDiff(cardIndex, p);
@@ -213,6 +213,19 @@ const MemoryCard = ({
         WebkitFontSmoothing: "subpixel-antialiased",
       }}
     >
+      {/* Active Card Ambient Backlight Halo Glow */}
+      <motion.div
+        aria-hidden="true"
+        className="absolute -inset-4 sm:-inset-6 md:-inset-8 rounded-3xl pointer-events-none"
+        style={{
+          opacity: glowOpacity,
+          background:
+            "radial-gradient(circle at 50% 50%, rgba(34, 211, 238, 0.45) 0%, rgba(6, 182, 212, 0.20) 45%, transparent 75%)",
+          filter: "blur(24px)",
+          transform: "translateZ(-4px)",
+        }}
+      />
+
       {/* Dynamic Flip wrapper — rotates 0 -> 180deg during orbit transition */}
       <motion.div
         style={{
@@ -265,7 +278,7 @@ const MemoryCard = ({
             style={{
               opacity: glowOpacity,
               border: "2px solid rgba(0, 212, 255, 0.85)",
-              boxShadow: "0 0 30px rgba(0, 212, 255, 0.5)",
+              boxShadow: "0 0 35px rgba(0, 212, 255, 0.65), 0 0 15px rgba(34, 211, 238, 0.45)",
             }}
           />
         </motion.div>
@@ -302,7 +315,7 @@ const MemoryCard = ({
             style={{
               opacity: glowOpacity,
               border: "2px solid rgba(0, 212, 255, 0.9)",
-              boxShadow: "0 0 35px rgba(0, 212, 255, 0.6)",
+              boxShadow: "0 0 45px rgba(0, 212, 255, 0.70), 0 0 20px rgba(34, 211, 238, 0.50)",
             }}
           />
         </motion.div>
@@ -548,9 +561,10 @@ const MemoriesSection = () => {
             style={{ transform: "translate3d(-50%, -50%, -20px)", zIndex: 0 }}
           >
             <div
-              className="absolute w-[220px] h-[220px] sm:w-[320px] sm:h-[320px] md:w-[480px] md:h-[380px] rounded-full blur-[45px] md:blur-[75px] pointer-events-none"
+              className="absolute w-[280px] h-[280px] sm:w-[420px] sm:h-[420px] md:w-[640px] md:h-[460px] rounded-full blur-[55px] md:blur-[85px] pointer-events-none"
               style={{
-                background: "radial-gradient(circle, rgba(0,212,255,0.20) 0%, rgba(34,211,238,0.07) 50%, transparent 75%)",
+                background:
+                  "radial-gradient(circle, rgba(0, 212, 255, 0.30) 0%, rgba(6, 182, 212, 0.15) 45%, rgba(14, 165, 233, 0.05) 65%, transparent 80%)",
               }}
             />
             <div className="relative w-[180px] h-[75px] sm:w-[250px] sm:h-[105px] md:w-[400px] md:h-[160px] lg:w-[480px] lg:h-[190px] opacity-25 md:opacity-30">
