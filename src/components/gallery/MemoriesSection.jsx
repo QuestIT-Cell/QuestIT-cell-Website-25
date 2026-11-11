@@ -156,23 +156,12 @@ const MemoryCard = ({
     return Math.round(depthFactor * 100) + 1;
   });
 
-  // Glowing borders & shadows that smoothly intensify as card centers
-  const borderStyle = useTransform(progressMV, (p) => {
+  // High-performance GPU glow opacity for focal card (zero per-frame string parsing)
+  const glowOpacity = useTransform(progressMV, (p) => {
     const diff = getDiff(cardIndex, p);
     const absDiff = Math.abs(diff);
-    if (absDiff >= 0.5) return "1px solid rgba(0, 212, 255, 0.18)";
-    const t = (0.5 - absDiff) / 0.5;
-    const op = 0.18 + t * 0.77;
-    return `2px solid rgba(0, 212, 255, ${op})`;
-  });
-
-  const shadowVal = useTransform(progressMV, (p) => {
-    const diff = getDiff(cardIndex, p);
-    const absDiff = Math.abs(diff);
-    if (absDiff >= 0.5) return "0 8px 24px rgba(0, 0, 0, 0.7)";
-    const t = (0.5 - absDiff) / 0.5;
-    const glow = Math.round(t * 50);
-    return `0 0 ${glow}px rgba(0, 212, 255, ${t * 0.65}), 0 28px 56px rgba(0, 0, 0, 0.95)`;
+    if (absDiff >= 0.5) return 0;
+    return (0.5 - absDiff) / 0.5;
   });
 
   // 3D Orbital Trajectory + Scale combined in one transform to prevent matrix rounding blur
@@ -216,8 +205,8 @@ const MemoryCard = ({
         transform: posTransform,
         zIndex: zIndexVal,
         opacity: opacityVal,
-        transformStyle: "preserve-3d",
         pointerEvents: "auto",
+        willChange: "transform",
         WebkitTapHighlightColor: "transparent",
         outline: "none",
         imageRendering: "-webkit-optimize-contrast",
@@ -233,98 +222,51 @@ const MemoryCard = ({
           width: "100%",
           height: "100%",
           position: "relative",
+          willChange: "transform",
         }}
       >
-        {/* FRONT FACE — Quest IT Holographic Archive Card Back (visible at rotateY: 0deg when in orbital ring) */}
+        {/* FRONT FACE — mirrored photo (as it was before) */}
         <motion.div
-          className="absolute inset-0 w-full h-full rounded-2xl md:rounded-3xl overflow-hidden bg-[#090d16] group-hover:scale-[1.03] transition-transform duration-500 ease-out flex flex-col justify-between p-3.5 sm:p-5 select-none"
+          className="absolute inset-0 w-full h-full rounded-2xl md:rounded-3xl overflow-hidden bg-neutral-950 group-hover:scale-[1.03] transition-transform duration-500 ease-out"
           style={{
             transform: "rotateY(0deg) translateZ(1px)",
             backfaceVisibility: "hidden",
             WebkitBackfaceVisibility: "hidden",
-            border: borderStyle,
-            boxShadow: shadowVal,
+            border: "1.5px solid rgba(0, 212, 255, 0.22)",
+            boxShadow: "0 12px 30px -8px rgba(0, 0, 0, 0.85)",
             isolation: "isolate",
           }}
         >
-          {/* Subtle grayscale photo watermark in background */}
-          <div className="absolute inset-0 w-full h-full opacity-15 pointer-events-none mix-blend-luminosity">
+          <div className="relative w-full h-full" style={{ transform: "scaleX(-1)" }}>
             <Image
               src={src}
-              alt=""
+              alt={`Quest-IT Memory ${cardIndex + 1} (Mirrored)`}
               fill
-              unoptimized
-              className="object-cover filter grayscale contrast-125"
+              quality={90}
+              sizes="(max-width: 768px) 50vw, (max-width: 1200px) 40vw, 450px"
+              className="object-cover select-none pointer-events-none"
+              priority={cardIndex < 3}
             />
           </div>
-
-          {/* Cybernetic Grid & Sheen */}
-          <div
-            className="absolute inset-0 pointer-events-none"
-            style={{
-              backgroundImage:
-                "linear-gradient(rgba(34,211,238,0.06) 1px, transparent 1px), linear-gradient(90deg, rgba(34,211,238,0.06) 1px, transparent 1px)",
-              backgroundSize: "20px 20px",
-              opacity: 0.6,
-            }}
-          />
-          <div
-            className="absolute inset-0 pointer-events-none"
-            style={{
-              background:
-                "radial-gradient(ellipse at 50% 40%, rgba(34,211,238,0.14) 0%, transparent 70%)",
-            }}
-          />
-
-          {/* Cyber Framing Corner Brackets */}
-          <div className="absolute top-2.5 left-2.5 w-3 h-3 border-t-2 border-l-2 border-cyan-400/50 pointer-events-none" />
-          <div className="absolute top-2.5 right-2.5 w-3 h-3 border-t-2 border-r-2 border-cyan-400/50 pointer-events-none" />
-          <div className="absolute bottom-2.5 left-2.5 w-3 h-3 border-b-2 border-l-2 border-cyan-400/50 pointer-events-none" />
-          <div className="absolute bottom-2.5 right-2.5 w-3 h-3 border-b-2 border-r-2 border-cyan-400/50 pointer-events-none" />
-
-          {/* Top Header */}
-          <div className="relative z-10 flex items-center justify-between w-full">
-            <div className="flex items-center gap-1.5">
-              <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 shadow-[0_0_8px_#22d3ee] animate-pulse" />
-              <span className="font-mono text-[9px] sm:text-[10px] tracking-[0.22em] text-cyan-400/90 font-bold uppercase">
-                QUEST-IT // ARCHIVE
-              </span>
-            </div>
-            <span className="font-mono text-[8px] sm:text-[9px] tracking-widest text-cyan-400/60 font-semibold">
-              ✦ 2026
-            </span>
-          </div>
-
-          {/* Center Emblem with glowing Quest IT Logo */}
-          <div className="relative z-10 flex flex-col items-center justify-center my-auto py-2">
-            <div className="relative w-24 sm:w-32 h-9 sm:h-11">
-              <Image
-                src="/images/logo.webp"
-                alt="Quest IT"
-                fill
-                className="object-contain filter drop-shadow-[0_0_14px_rgba(34,211,238,0.7)]"
-              />
-            </div>
-            <span className="font-mono text-[8px] sm:text-[9px] tracking-[0.28em] text-neutral-400 font-medium uppercase mt-2">
-              ORBITAL DOSSIER
-            </span>
-          </div>
-
-          {/* Bottom Footer */}
-          <div className="relative z-10 flex items-center justify-between w-full pt-1 border-t border-cyan-400/15">
-            <span className="font-mono text-[9px] sm:text-[10px] tracking-wider text-cyan-400/95 font-bold">
-              NO. {String((cardIndex % TOTAL_CARDS) + 1).padStart(2, "0")}
-            </span>
-            <span className="font-mono text-[8px] sm:text-[9px] text-neutral-400 tracking-wider flex items-center gap-1">
-              SWEEP TO REVEAL
-              <span className="text-cyan-400 font-bold">↻</span>
-            </span>
-          </div>
-
-          {/* Subtle dimming for non-focal cards */}
+          {/* Subtle dimming for orbit cards */}
           <motion.div
             className="absolute inset-0 bg-black pointer-events-none"
             style={{ opacity: dimOpacity }}
+          />
+          <div
+            className="absolute inset-0 pointer-events-none"
+            style={{
+              background: "linear-gradient(to top, rgba(0,0,0,0.28), transparent 55%)",
+            }}
+          />
+          {/* High-performance GPU glow overlay on focal card */}
+          <motion.div
+            className="absolute inset-0 rounded-2xl md:rounded-3xl pointer-events-none"
+            style={{
+              opacity: glowOpacity,
+              border: "2px solid rgba(0, 212, 255, 0.85)",
+              boxShadow: "0 0 30px rgba(0, 212, 255, 0.5)",
+            }}
           />
         </motion.div>
 
@@ -335,27 +277,33 @@ const MemoryCard = ({
             transform: "rotateY(180deg) translateZ(1px)",
             backfaceVisibility: "hidden",
             WebkitBackfaceVisibility: "hidden",
-            border: borderStyle,
-            boxShadow: shadowVal,
+            border: "1.5px solid rgba(0, 212, 255, 0.45)",
+            boxShadow: "0 16px 40px -8px rgba(0, 0, 0, 0.95)",
             isolation: "isolate",
-            imageRendering: "-webkit-optimize-contrast",
           }}
         >
           <Image
             src={src}
             alt={`Quest-IT Memory ${cardIndex + 1}`}
             fill
-            quality={100}
-            unoptimized
+            quality={95}
             sizes="(max-width: 768px) 50vw, (max-width: 1200px) 40vw, 450px"
             className="object-cover select-none pointer-events-none"
-            style={{ imageRendering: "-webkit-optimize-contrast" }}
-            priority={cardIndex < 6}
+            priority={cardIndex < 3}
           />
-          {/* Subtle dimming for orbit cards (no CSS filter blur) */}
+          {/* Subtle dimming for orbit cards */}
           <motion.div
             className="absolute inset-0 bg-black pointer-events-none"
             style={{ opacity: dimOpacity }}
+          />
+          {/* High-performance GPU glow overlay on focal card */}
+          <motion.div
+            className="absolute inset-0 rounded-2xl md:rounded-3xl pointer-events-none"
+            style={{
+              opacity: glowOpacity,
+              border: "2px solid rgba(0, 212, 255, 0.9)",
+              boxShadow: "0 0 35px rgba(0, 212, 255, 0.6)",
+            }}
           />
         </motion.div>
       </motion.div>
@@ -419,13 +367,13 @@ const MemoriesSection = () => {
     if (animControlsRef.current) animControlsRef.current.stop();
 
     stepRef.current = targetStep;
-    setStep(targetStep);
 
     animControlsRef.current = animate(progressMV, targetStep, {
       duration: customDuration,
       ease: ORBIT_EASE,
       onComplete: () => {
         if (isCancelledRef.current) return;
+        setStep(targetStep);
         if (scheduleNextRef.current) scheduleNextRef.current();
       },
     });
