@@ -45,62 +45,62 @@ const getDeveloperCardClass = (name) => {
   return "";
 };
 
-const UNIFORM_STATS = {
-  "Atharva Lotankar": [
-    { label: "CODE", value: 94 },
-    { label: "SYSTEMS", value: 91 },
-    { label: "TEAMWORK", value: 92 },
-  ],
-  "Shravanya Andhale": [
-    { label: "CODE", value: 89 },
-    { label: "SYSTEMS", value: 95 },
-    { label: "TEAMWORK", value: 93 },
-  ],
-  "Jay Kerkar": [
-    { label: "CODE", value: 93 },
-    { label: "SYSTEMS", value: 92 },
-    { label: "TEAMWORK", value: 90 },
-  ],
-  "Pranav Titambe": [
-    { label: "CODE", value: 95 },
-    { label: "SYSTEMS", value: 94 },
-    { label: "TEAMWORK", value: 91 },
-  ],
-  "Shivam Mishra": [
-    { label: "CODE", value: 92 },
-    { label: "SYSTEMS", value: 93 },
-    { label: "TEAMWORK", value: 90 },
-  ],
-  "Karthik Kotian": [
-    { label: "CODE", value: 95 },
-    { label: "SYSTEMS", value: 93 },
-    { label: "TEAMWORK", value: 94 },
-  ],
-  "Avani Killekar": [
-    { label: "CODE", value: 90 },
-    { label: "SYSTEMS", value: 89 },
-    { label: "TEAMWORK", value: 93 },
-  ],
-  "Chaitali Rane": [
-    { label: "CODE", value: 89 },
-    { label: "SYSTEMS", value: 91 },
-    { label: "TEAMWORK", value: 94 },
-  ],
-  "Manish Awari": [
-    { label: "CODE", value: 90 },
-    { label: "SYSTEMS", value: 90 },
-    { label: "TEAMWORK", value: 91 },
-  ],
-  "Sarra Khadse": [
-    { label: "CODE", value: 89 },
-    { label: "SYSTEMS", value: 92 },
-    { label: "TEAMWORK", value: 91 },
-  ],
-  "Sankalp Mane": [
-    { label: "CODE", value: 91 },
-    { label: "SYSTEMS", value: 90 },
-    { label: "TEAMWORK", value: 92 },
-  ],
+const PERSONALITY_TRAITS = {
+  "Atharva Lotankar": {
+    vibe: "Calm & Creative",
+    favouriteThing: "Late-night brainstorming",
+    motto: "Think different. Build better.",
+  },
+  "Shravanya Andhale": {
+    vibe: "The Perfectionist",
+    favouriteThing: "Getting every detail right",
+    motto: "Details make the difference.",
+  },
+  "Jay Kerkar": {
+    vibe: "Chaos & Creativity",
+    favouriteThing: "Spontaneous ideas",
+    motto: "Make it happen.",
+  },
+  "Pranav Titambe": {
+    vibe: "Quietly Ambitious",
+    favouriteThing: "Learning something new",
+    motto: "Let the work speak.",
+  },
+  "Shivam Mishra": {
+    vibe: "The Social Butterfly",
+    favouriteThing: "Meeting new people",
+    motto: "Better together.",
+  },
+  "Karthik Kotian": {
+    vibe: "Always Curious",
+    favouriteThing: "Exploring new technologies",
+    motto: "Stay curious. Keep creating.",
+  },
+  "Avani Killekar": {
+    vibe: "The Problem Solver",
+    favouriteThing: "Cracking tough challenges",
+    motto: "Every problem has a way.",
+  },
+  "Chaitali Rane": {
+    vibe: "Creative Soul",
+    favouriteThing: "Turning ideas into visuals",
+    motto: "Create your own perspective.",
+  },
+  "Manish Awari": {
+    vibe: "The Night Owl",
+    favouriteThing: "Midnight productivity",
+    motto: "Great ideas have no bedtime.",
+  },
+  "Sarra Khadse": {
+    vibe: "The Optimist",
+    favouriteThing: "Making things happen",
+    motto: "Good energy, great outcomes.",
+  },
+  "Sankalp Mane": {
+    vibe: "The Wildcard",
+    favouriteThing: "Trying the unexpected",
+    motto: "Expect the unexpected.",
+  },
 };
 
 function CollectibleTeamCard({
@@ -118,11 +118,11 @@ function CollectibleTeamCard({
 
   const workTitle = DEVELOPER_WORK_TITLES[member.name] || member.role || "Developer";
   const designation = getCardDesignation(member.name);
-  const stats = UNIFORM_STATS[member.name] || [
-    { label: "CODE", value: 90 },
-    { label: "SYSTEMS", value: 88 },
-    { label: "TEAMWORK", value: 90 },
-  ];
+  const personality = PERSONALITY_TRAITS[member.name] || {
+    vibe: "Always Curious",
+    favouriteThing: "Exploring new technologies",
+    motto: "Stay curious. Keep creating.",
+  };
 
   // When card is flipped, reset pointer tilt so the back face text is rock-steady and crisp
   useEffect(() => {
@@ -295,21 +295,26 @@ function CollectibleTeamCard({
                   {member.role}
                 </p>
 
-                {/* Stats */}
-                <div className="stats">
-                  {stats.map((s) => (
-                    <div
-                      className="stat"
-                      key={s.label}
-                      style={{ "--v": `${s.value}%` }}
-                    >
-                      <span className="stat-label">{s.label}</span>
-                      <span className="stat-track">
-                        <i />
-                      </span>
-                      <span className="stat-value">{s.value}</span>
-                    </div>
-                  ))}
+                {/* Personality Traits */}
+                <div className="personality-traits">
+                  <div className="trait-row">
+                    <span className="trait-label">VIBE</span>
+                    <span className="trait-val" title={personality.vibe}>
+                      {personality.vibe}
+                    </span>
+                  </div>
+                  <div className="trait-row">
+                    <span className="trait-label">FAVOURITE THING</span>
+                    <span className="trait-val" title={personality.favouriteThing}>
+                      {personality.favouriteThing}
+                    </span>
+                  </div>
+                  <div className="trait-row">
+                    <span className="trait-label">MOTTO</span>
+                    <span className="trait-val trait-motto" title={personality.motto}>
+                      &ldquo;{personality.motto}&rdquo;
+                    </span>
+                  </div>
                 </div>
 
                 {/* Footer */}
