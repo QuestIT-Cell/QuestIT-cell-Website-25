@@ -2,6 +2,7 @@
 
 // Next's Imports
 import Image from "next/image";
+import Link from "next/link";
 
 // App's Internal Imports
 import { Highlight, HeroHighlight } from "@/components/ui/hero-highlight";
@@ -12,7 +13,7 @@ import { motion } from "framer-motion";
 const Home = () => {
   return (
     <>
-      <HeroHighlight id="home" className="relative">
+      <HeroHighlight id="home" className="relative" containerClassName="h-[100svh] md:h-[40rem]">
         <motion.h1
           initial={{
             y: 20,
@@ -36,20 +37,33 @@ const Home = () => {
             what&apos;s possible in tech.
           </Highlight>
         </motion.h1>
+
+        {/* Subtle mobile scroll indicator */}
+        <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-20 flex flex-col items-center gap-1.5 opacity-60 md:hidden pointer-events-none">
+          <motion.div
+            animate={{ y: [0, 6, 0] }}
+            transition={{ repeat: Infinity, duration: 1.6, ease: "easeInOut" }}
+            className="w-4 h-7 rounded-full border border-white/50 flex items-start justify-center p-1"
+          >
+            <div className="w-1 h-1.5 bg-white/80 rounded-full" />
+          </motion.div>
+        </div>
       </HeroHighlight>
 
-      <div className="relative left-1/2 w-[100vw] -translate-x-1/2 flex z-10 min-h-[70vh] lg:min-h-[85vh] -mt-4 md:-mt-8 lg:-mt-10">
+      <div className="relative left-1/2 w-[100vw] -translate-x-1/2 flex z-10 min-h-[70vh] lg:min-h-[85vh] mt-0 md:-mt-8 lg:-mt-10">
         <Image
           src="/images/Genesis2.0banner.webp"
           alt="Genesis 2.0 Banner"
           width={1920}
           height={1080}
+          sizes="100vw"
           className="absolute inset-0 w-full h-full object-cover object-right md:object-center block m-0 p-0"
           style={{
             maskImage: "linear-gradient(to bottom, transparent 0%, black 15%, black 85%, transparent 100%)",
             WebkitMaskImage: "linear-gradient(to bottom, transparent 0%, black 15%, black 85%, transparent 100%)",
           }}
           priority
+          fetchPriority="high"
         />
 
         <div className="relative z-10 flex flex-col justify-center w-full px-6 md:px-12 lg:px-24 xl:px-32 pt-[5%]">
@@ -59,35 +73,38 @@ const Home = () => {
             transition={{ duration: 0.7, ease: "easeOut", delay: 0.2 }}
             className="flex flex-col items-start max-w-2xl"
           >
-            <p className="text-white/60 tracking-[0.3em] uppercase text-xs md:text-sm mb-4 ml-1">
-              Upcoming Event
-            </p>
 
             <Image
-              src="/images/Genesis2.0logo.webp"
+              src="/images/Genesis2.0logo-600.webp"
               alt="Genesis 2.0"
-              width={1000}
-              height={500}
+              width={600}
+              height={338}
               className="w-full max-w-[280px] md:max-w-[380px] lg:max-w-[500px] h-auto mb-6 drop-shadow-lg"
-              priority
+              loading="lazy"
             />
 
-            <p className="text-sm md:text-base text-gray-300 mb-8 leading-relaxed max-w-xl">
+            <p className="text-sm md:text-base text-cyan-300 md:text-gray-300 font-medium md:font-normal drop-shadow-[0_2px_4px_rgba(0,0,0,0.9)] md:drop-shadow-none mb-8 leading-relaxed max-w-xl">
               Genesis 2.0 is QuestIT&apos;s flagship hackathon, bringing together
               curious minds, creative thinkers and problem solvers to build
               impactful solutions over 24 hours. Ideate. Build. Collaborate. Create
               what&apos;s next.
             </p>
 
-            <a 
-              href="https://questit.vesit.ves.ac.in/genesis-cour2/"
-              target="_blank"
-              rel="noopener noreferrer"
+            <Link 
+              href="/#genesis-2-0"
+              onClick={(e) => {
+                const el = document.getElementById("genesis-2-0") || document.getElementById("genesis-2.0");
+                if (el) {
+                  e.preventDefault();
+                  el.scrollIntoView({ behavior: "smooth", block: "center" });
+                  window.history.pushState(null, "", "#genesis-2-0");
+                }
+              }}
               className="w-fit group flex items-center gap-3 border border-orange-500/40 bg-black/40 hover:bg-orange-500/40 hover:border-orange-400 hover:shadow-[0_0_20px_rgba(249,115,22,0.4)] backdrop-blur-sm px-10 py-4 text-base md:text-lg text-orange-100 hover:text-white transition-all duration-300 rounded-lg"
             >
               Explore Genesis 2.0
               <span className="text-2xl leading-none group-hover:translate-x-1 transition-transform">&rarr;</span>
-            </a>
+            </Link>
           </motion.div>
         </div>
       </div>

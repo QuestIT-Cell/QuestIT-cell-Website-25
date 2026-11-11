@@ -1,226 +1,640 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
-import { motion } from "framer-motion";
+import { useEffect, useRef, useState, useMemo, useCallback } from "react";
 import Image from "next/image";
+import {
+  motion,
+  useMotionValue,
+  useTransform,
+  animate,
+  useInView,
+} from "framer-motion";
+import { ChevronLeft, ChevronRight } from "lucide-react";
+import PhotoLightboxModal from "./PhotoLightboxModal";
 
-const MemoriesSection = () => {
-  const [isVisible, setIsVisible] = useState(false);
-  const [isMobile, setIsMobile] = useState(false);
-  const sectionRef = useRef(null);
-  const totalCards = 15;
+/* ─── Orbital Memories Exhibition Images ───────────────────────────────────── */
+const ORBITAL_IMAGES = [
+  "/images/gallery-images/Orbital/diagonal_9.webp",
+  "/images/gallery-images/Orbital/diagonal_12.webp",
+  "/images/gallery-images/Orbital/Council_photos_genesis.webp",
+  "/images/gallery-images/Orbital/download_1920x1080.webp",
+  "/images/gallery-images/Orbital/firstmeet_1920x1080.webp",
+  "/images/gallery-images/Orbital/Tech-Team.webp",
+  "/images/gallery-images/Orbital/IMG_2829_1920x1080.webp",
+  "/images/gallery-images/Orbital/IMG_3955_1920x1080.webp",
+  "/images/gallery-images/Orbital/rshb-vwq_1920x1080.webp",
+  "/images/gallery-images/Orbital/shivam-bw1_1920x1080.webp",
+  "/images/gallery-images/Orbital/IMG_2522_1920x1080.webp",
+  "/images/gallery-images/Orbital/table-2_1920x1080.webp",
+];
 
-  useEffect(() => {
-    // Check if mobile
-    const checkMobile = () => {
-      setIsMobile(window.innerWidth < 768);
-    };
-    
-    checkMobile();
-    window.addEventListener('resize', checkMobile);
+const INITIAL_OFFSET_INDEX = 0;
+const TOTAL_CARDS = ORBITAL_IMAGES.length;
+// Exactly 3.2 seconds active resting window per photo
+const PAUSE_MS = 3200;
+const INITIAL_ARRIVAL_PAUSE_MS = 3200;
+// Smooth, majestic 2.4s sweep with clearly noticeable in-flight card flipping
+const ROTATION_DURATION = 2.4;
+// Smooth cinematic cubic bezier (silky launch, majestic mid-flight flip, gentle landing)
+const ORBIT_EASE = [0.25, 1, 0.35, 1];
 
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          setIsVisible(true);
-        }
-      },
-      { threshold: 0.1 } // Reduced from 0.2 to 0.1 for better mobile detection
-    );
+const mod = (n, m) => ((n % m) + m) % m;
 
-    if (sectionRef.current) {
-      observer.observe(sectionRef.current);
+// ─── MemoryCard ───────────────────────────────────────────────────────────────
+// Derives its 3D orbital trajectory, smooth flip (0 -> 180deg), lift, scale,
+// border glow, and shadow continuously from progressMV via useTransform.
+// Zero React re-renders during motion.
+const MemoryCard = ({
+  cardIndex,
+  progressMV,
+  cardWidth,
+  cardHeight,
+  liftY,
+  isMobile,
+  Rx, Ry, Rz,
+  angularSpacing,
+  maxDiff,
+  fadeZone,
+  onCardClick,
+  onActivePhotoClick,
+}) => {
+  const src = ORBITAL_IMAGES[cardIndex % TOTAL_CARDS];
+
+  // ─── Continuous Flip Angle & Lift Elevation ────────────────────────────────
+  // As card sweeps into center (|diff|: 0.95 -> 0.0), it smoothly flips 0 -> 180deg.
+  // When resting at center (|diff| = 0), it is fully flipped at 180deg facing forward.
+  // As it drifts away (|diff|: 0.0 -> 0.95), it smoothly flips 180 -> 0deg back into ring.
+  const flipAngle = useTransform(progressMV, (p) => {
+    const diff = getDiff(cardIndex, p);
+    const absDiff = Math.abs(diff);
+    const flipZone = 0.95;
+    if (absDiff >= flipZone) return 0;
+    const progress = (flipZone - absDiff) / flipZone;
+    const smoothT = (1 - Math.cos(progress * Math.PI)) / 2;
+    return smoothT * 180;
+  });
+
+  const liftVal = useTransform(progressMV, (p) => {
+    const diff = getDiff(cardIndex, p);
+    const absDiff = Math.abs(diff);
+    const flipZone = 0.95;
+    if (absDiff >= flipZone) return 0;
+    const progress = (flipZone - absDiff) / flipZone;
+    const smoothT = (1 - Math.cos(progress * Math.PI)) / 2;
+    return smoothT * liftY;
+  });
+
+  // ─── 3D Orbital Trajectory ────────────────────────────────────────────────
+  const transformX = useTransform(progressMV, (p) => {
+    const diff = getDiff(cardIndex, p);
+    const theta = diff * angularSpacing;
+    return Rx * Math.sin(theta);
+  });
+  const transformY = useTransform(progressMV, (p) => {
+    const diff = getDiff(cardIndex, p);
+    const theta = diff * angularSpacing;
+    return Ry * Math.cos(theta);
+  });
+  const transformZ = useTransform(progressMV, (p) => {
+    const diff = getDiff(cardIndex, p);
+    const theta = diff * angularSpacing;
+    return Rz * Math.cos(theta);
+  });
+  const rotX = useTransform(progressMV, (p) => {
+    const diff = getDiff(cardIndex, p);
+    const theta = diff * angularSpacing;
+    const cosT = Math.cos(theta);
+    return (1 - Math.max(0, cosT)) * (isMobile ? 5 : 7);
+  });
+  const rotY = useTransform(progressMV, (p) => {
+    const diff = getDiff(cardIndex, p);
+    const theta = diff * angularSpacing;
+    return -Math.sin(theta) * (isMobile ? 32 : 40);
+  });
+  const rotZ = useTransform(progressMV, (p) => {
+    const diff = getDiff(cardIndex, p);
+    const theta = diff * angularSpacing;
+    return Math.sin(theta) * (isMobile ? 2.5 : 3);
+  });
+
+  const scaleVal = useTransform(progressMV, (p) => {
+    const diff = getDiff(cardIndex, p);
+    const theta = diff * angularSpacing;
+    const cosT = Math.cos(theta);
+    const depthFactor = (cosT + 1) / 2;
+    return isMobile ? 0.62 + depthFactor * 0.53 : 0.58 + depthFactor * 0.62;
+  });
+  const opacityVal = useTransform(progressMV, (p) => {
+    const diff = getDiff(cardIndex, p);
+    const absDiff = Math.abs(diff);
+    if (absDiff >= maxDiff) return 0;
+    const fade = absDiff > maxDiff - fadeZone ? (maxDiff - absDiff) / fadeZone : 1.0;
+    const theta = diff * angularSpacing;
+    const cosT = Math.cos(theta);
+    const depthFactor = (cosT + 1) / 2;
+    const minOp = isMobile ? 0.72 : 0.65;
+    return (minOp + depthFactor * (1 - minOp)) * fade;
+  });
+  // Dim overlay opacity for non-focal cards (Zero CSS filter -> preserves 100% crystal clear sharpness)
+  const dimOpacity = useTransform(progressMV, (p) => {
+    const diff = getDiff(cardIndex, p);
+    const absDiff = Math.abs(diff);
+    if (absDiff < 0.35) return 0;
+    const theta = diff * angularSpacing;
+    const cosT = Math.cos(theta);
+    const depthFactor = (cosT + 1) / 2;
+    const b = isMobile ? 0.88 + depthFactor * 0.12 : 0.85 + depthFactor * 0.15;
+    return Math.max(0, Math.min(1, 1 - b));
+  });
+  const zIndexVal = useTransform(progressMV, (p) => {
+    const diff = getDiff(cardIndex, p);
+    const absDiff = Math.abs(diff);
+    if (absDiff < 0.5) return 150;
+    const theta = diff * angularSpacing;
+    const cosT = Math.cos(theta);
+    const depthFactor = (cosT + 1) / 2;
+    return Math.round(depthFactor * 100) + 1;
+  });
+
+  // High-performance GPU glow opacity for focal card (zero per-frame string parsing)
+  const glowOpacity = useTransform(progressMV, (p) => {
+    const diff = getDiff(cardIndex, p);
+    const absDiff = Math.abs(diff);
+    if (absDiff >= 0.5) return 0;
+    return (0.5 - absDiff) / 0.5;
+  });
+
+  // 3D Orbital Trajectory + Scale combined in one transform to prevent matrix rounding blur
+  const posTransform = useTransform(
+    [transformX, transformY, transformZ, rotX, rotY, rotZ, scaleVal],
+    ([x, y, z, rx, ry, rz, s]) =>
+      `translate3d(${x}px,${y}px,${z}px) rotateX(${rx}deg) rotateY(${ry}deg) rotateZ(${rz}deg) scale(${s})`
+  );
+
+  const handleClick = useCallback(() => {
+    const currentVal = progressMV.get();
+    const curDiff = Math.abs(getDiff(cardIndex, currentVal));
+    if (curDiff < 0.35) {
+      if (onActivePhotoClick) onActivePhotoClick(src, cardIndex);
+    } else {
+      if (onCardClick) onCardClick(cardIndex);
     }
+  }, [cardIndex, progressMV, onCardClick, onActivePhotoClick, src]);
 
-    // Fallback: Set visible after a short delay to ensure rendering on mobile
-    const fallbackTimer = setTimeout(() => {
-      setIsVisible(true);
-    }, 100);
+  return (
+    <motion.div
+      onClick={handleClick}
+      role="button"
+      tabIndex={0}
+      onKeyDown={(e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          handleClick();
+        }
+      }}
+      aria-label={`Quest-IT Memory ${cardIndex + 1}`}
+      className="group outline-none focus:outline-none select-none cursor-pointer"
+      style={{
+        position: "absolute",
+        left: "50%",
+        top: "50%",
+        width: `${cardWidth}px`,
+        height: `${cardHeight}px`,
+        marginLeft: `-${cardWidth / 2}px`,
+        marginTop: `-${cardHeight / 2}px`,
+        transform: posTransform,
+        zIndex: zIndexVal,
+        opacity: opacityVal,
+        pointerEvents: "auto",
+        willChange: "transform",
+        WebkitTapHighlightColor: "transparent",
+        outline: "none",
+        imageRendering: "-webkit-optimize-contrast",
+        WebkitFontSmoothing: "subpixel-antialiased",
+      }}
+    >
+      {/* Active Card Ambient Backlight Halo Glow */}
+      <motion.div
+        aria-hidden="true"
+        className="absolute -inset-4 sm:-inset-6 md:-inset-8 rounded-3xl pointer-events-none"
+        style={{
+          opacity: glowOpacity,
+          background:
+            "radial-gradient(circle at 50% 50%, rgba(34, 211, 238, 0.45) 0%, rgba(6, 182, 212, 0.20) 45%, transparent 75%)",
+          filter: "blur(24px)",
+          transform: "translateZ(-4px)",
+        }}
+      />
 
-    return () => {
-      window.removeEventListener('resize', checkMobile);
-      clearTimeout(fallbackTimer);
-      if (sectionRef.current) {
-        observer.unobserve(sectionRef.current);
-      }
-    };
+      {/* Dynamic Flip wrapper — rotates 0 -> 180deg during orbit transition */}
+      <motion.div
+        style={{
+          rotateY: flipAngle,
+          y: liftVal,
+          transformStyle: "preserve-3d",
+          width: "100%",
+          height: "100%",
+          position: "relative",
+          willChange: "transform",
+        }}
+      >
+        {/* FRONT FACE — mirrored photo (as it was before) */}
+        <motion.div
+          className="absolute inset-0 w-full h-full rounded-2xl md:rounded-3xl overflow-hidden bg-neutral-950 group-hover:scale-[1.03] transition-transform duration-500 ease-out"
+          style={{
+            transform: "rotateY(0deg) translateZ(1px)",
+            backfaceVisibility: "hidden",
+            WebkitBackfaceVisibility: "hidden",
+            border: "1.5px solid rgba(0, 212, 255, 0.22)",
+            boxShadow: "0 12px 30px -8px rgba(0, 0, 0, 0.85)",
+            isolation: "isolate",
+          }}
+        >
+          <div className="relative w-full h-full" style={{ transform: "scaleX(-1)" }}>
+            <Image
+              src={src}
+              alt={`Quest-IT Memory ${cardIndex + 1} (Mirrored)`}
+              fill
+              quality={90}
+              sizes="(max-width: 768px) 50vw, (max-width: 1200px) 40vw, 450px"
+              className="object-cover select-none pointer-events-none"
+              priority={cardIndex < 3}
+            />
+          </div>
+          {/* Subtle dimming for orbit cards */}
+          <motion.div
+            className="absolute inset-0 bg-black pointer-events-none"
+            style={{ opacity: dimOpacity }}
+          />
+          <div
+            className="absolute inset-0 pointer-events-none"
+            style={{
+              background: "linear-gradient(to top, rgba(0,0,0,0.28), transparent 55%)",
+            }}
+          />
+          {/* High-performance GPU glow overlay on focal card */}
+          <motion.div
+            className="absolute inset-0 rounded-2xl md:rounded-3xl pointer-events-none"
+            style={{
+              opacity: glowOpacity,
+              border: "2px solid rgba(0, 212, 255, 0.85)",
+              boxShadow: "0 0 35px rgba(0, 212, 255, 0.65), 0 0 15px rgba(34, 211, 238, 0.45)",
+            }}
+          />
+        </motion.div>
+
+        {/* BACK FACE — original photograph (visible at rotateY: 180deg in focal spotlight) */}
+        <motion.div
+          className="absolute inset-0 w-full h-full rounded-2xl md:rounded-3xl overflow-hidden bg-neutral-950"
+          style={{
+            transform: "rotateY(180deg) translateZ(1px)",
+            backfaceVisibility: "hidden",
+            WebkitBackfaceVisibility: "hidden",
+            border: "1.5px solid rgba(0, 212, 255, 0.45)",
+            boxShadow: "0 16px 40px -8px rgba(0, 0, 0, 0.95)",
+            isolation: "isolate",
+          }}
+        >
+          <Image
+            src={src}
+            alt={`Quest-IT Memory ${cardIndex + 1}`}
+            fill
+            quality={95}
+            sizes="(max-width: 768px) 50vw, (max-width: 1200px) 40vw, 450px"
+            className="object-cover select-none pointer-events-none"
+            priority={cardIndex < 3}
+          />
+          {/* Subtle dimming for orbit cards */}
+          <motion.div
+            className="absolute inset-0 bg-black pointer-events-none"
+            style={{ opacity: dimOpacity }}
+          />
+          {/* High-performance GPU glow overlay on focal card */}
+          <motion.div
+            className="absolute inset-0 rounded-2xl md:rounded-3xl pointer-events-none"
+            style={{
+              opacity: glowOpacity,
+              border: "2px solid rgba(0, 212, 255, 0.9)",
+              boxShadow: "0 0 45px rgba(0, 212, 255, 0.70), 0 0 20px rgba(34, 211, 238, 0.50)",
+            }}
+          />
+        </motion.div>
+      </motion.div>
+    </motion.div>
+  );
+};
+
+// Pure helper: compute signed angular difference for card `i` given progress `p`
+function getDiff(i, p) {
+  const currentCenter = INITIAL_OFFSET_INDEX + p;
+  let diff = (i - currentCenter) % TOTAL_CARDS;
+  while (diff > TOTAL_CARDS / 2) diff -= TOTAL_CARDS;
+  while (diff < -TOTAL_CARDS / 2) diff += TOTAL_CARDS;
+  return diff;
+}
+
+// ─── MemoriesSection ─────────────────────────────────────────────────────────
+const MemoriesSection = () => {
+  const sectionRef = useRef(null);
+  const stageRef = useRef(null);
+
+  const isInView = useInView(sectionRef, {
+    amount: 0.15,
+  });
+
+  const [stageDimensions, setStageDimensions] = useState({ width: 1200, height: 700 });
+  const [step, setStep] = useState(0);
+  const stepRef = useRef(0);
+
+  // progressMV drives ALL orbital trajectories & flips continuously
+  const progressMV = useMotionValue(0);
+
+  const [modalPhoto, setModalPhoto] = useState(null);
+
+  const timeoutRef = useRef(null);
+  const animControlsRef = useRef(null);
+  const isCancelledRef = useRef(false);
+  const scheduleNextRef = useRef(null);
+
+  const handleActivePhotoClick = useCallback((src, index) => {
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+      timeoutRef.current = null;
+    }
+    if (animControlsRef.current) animControlsRef.current.stop();
+    setModalPhoto({ src, title: `QUEST-IT Memory ${index + 1}` });
   }, []);
 
-  const getImageExtension = (index) => {
-    // Based on actual files (using 15 images):
-    // diagonal_1,2,3,5,6,7,8,10: jpeg
-    // diagonal_4,11,12: jpg
-    // diagonal_9,13,14,15: png
-    const jpgIndices = [4, 11, 12];
-    const pngIndices = [9, 13, 14, 15];
-    if (pngIndices.includes(index)) return 'png';
-    return jpgIndices.includes(index) ? 'jpg' : 'jpeg';
+  const handleCloseModal = useCallback(() => {
+    setModalPhoto(null);
+    if (scheduleNextRef.current) scheduleNextRef.current();
+  }, []);
+
+  // ─── Core Orbital Transition ───────────────────────────────────────────────
+  const rotateToStep = useCallback((targetStep, customDuration = ROTATION_DURATION) => {
+    if (isCancelledRef.current) return;
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+      timeoutRef.current = null;
+    }
+    if (animControlsRef.current) animControlsRef.current.stop();
+
+    stepRef.current = targetStep;
+
+    animControlsRef.current = animate(progressMV, targetStep, {
+      duration: customDuration,
+      ease: ORBIT_EASE,
+      onComplete: () => {
+        if (isCancelledRef.current) return;
+        setStep(targetStep);
+        if (scheduleNextRef.current) scheduleNextRef.current();
+      },
+    });
+  }, [progressMV]);
+
+  // Schedule next auto-rotation: exactly 3 seconds active resting time per card
+  scheduleNextRef.current = () => {
+    if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    timeoutRef.current = setTimeout(() => {
+      if (isCancelledRef.current) return;
+      rotateToStep(stepRef.current + 1, ROTATION_DURATION);
+    }, PAUSE_MS);
   };
 
-  // Pinterest-style masonry layout with varying heights
-  // Cards flow top-left to bottom-right with edge bleed
-  const masonryLayout = {
-    // Desktop: 5 columns with A4 portrait aspect ratio (taller cards)
-    desktop: [
-      // Column 1
-      { col: 0, row: 0, height: 340, offsetX: 0, offsetY: 0 },      // index 0
-      { col: 0, row: 1, height: 320, offsetX: 0, offsetY: 360 },    // index 1
-      { col: 0, row: 2, height: 300, offsetX: 0, offsetY: 700 },    // index 2
-      
-      // Column 2
-      { col: 1, row: 0, height: 360, offsetX: 0, offsetY: 0 },      // index 3
-      { col: 1, row: 1, height: 340, offsetX: 0, offsetY: 380 },    // index 4
-      { col: 1, row: 2, height: 280, offsetX: 0, offsetY: 740 },    // index 5
-      
-      // Column 3
-      { col: 2, row: 0, height: 320, offsetX: 0, offsetY: 0 },      // index 6
-      { col: 2, row: 1, height: 360, offsetX: 0, offsetY: 340 },    // index 7
-      { col: 2, row: 2, height: 320, offsetX: 0, offsetY: 720 },    // index 8
-      
-      // Column 4
-      { col: 3, row: 0, height: 350, offsetX: 0, offsetY: 0 },      // index 9
-      { col: 3, row: 1, height: 330, offsetX: 0, offsetY: 370 },    // index 10
-      { col: 3, row: 2, height: 300, offsetX: 0, offsetY: 720 },    // index 11
-      
-      // Column 5 (NEW)
-      { col: 4, row: 0, height: 340, offsetX: 0, offsetY: 0 },      // index 12
-      { col: 4, row: 1, height: 320, offsetX: 0, offsetY: 360 },    // index 13
-      { col: 4, row: 2, height: 320, offsetX: 0, offsetY: 700 },    // index 14
-    ],
-    // Mobile: 2 columns with A4 portrait aspect ratio
-    mobile: [
-      { col: 0, row: 0, height: 300, offsetX: 0, offsetY: 0 },      // index 0
-      { col: 1, row: 0, height: 300, offsetX: 0, offsetY: 0 },      // index 1
-      { col: 0, row: 1, height: 320, offsetX: 0, offsetY: 316 },    // index 2
-      { col: 1, row: 1, height: 320, offsetX: 0, offsetY: 316 },    // index 3
-      { col: 0, row: 2, height: 340, offsetX: 0, offsetY: 652 },    // index 4
-      { col: 1, row: 2, height: 340, offsetX: 0, offsetY: 652 },    // index 5
-      { col: 0, row: 3, height: 300, offsetX: 0, offsetY: 1008 },   // index 6
-      { col: 1, row: 3, height: 300, offsetX: 0, offsetY: 1008 },   // index 7
-      { col: 0, row: 4, height: 320, offsetX: 0, offsetY: 1324 },   // index 8
-      { col: 1, row: 4, height: 320, offsetX: 0, offsetY: 1324 },   // index 9
-      { col: 0, row: 5, height: 340, offsetX: 0, offsetY: 1660 },   // index 10
-      { col: 1, row: 5, height: 340, offsetX: 0, offsetY: 1660 },   // index 11
-      { col: 0, row: 6, height: 300, offsetX: 0, offsetY: 2016 },   // index 12
-      { col: 1, row: 6, height: 300, offsetX: 0, offsetY: 2016 },   // index 13
-      { col: 0, row: 7, height: 320, offsetX: 0, offsetY: 2332 },   // index 14
-    ]
+  const handleCardClick = useCallback((targetIndex) => {
+    const currentVal = progressMV.get();
+    const baseK = Math.round((currentVal - (targetIndex - INITIAL_OFFSET_INDEX)) / TOTAL_CARDS);
+    const targetStep = targetIndex - INITIAL_OFFSET_INDEX + baseK * TOTAL_CARDS;
+    if (targetStep === stepRef.current) return;
+
+    const dist = Math.abs(targetStep - currentVal);
+    const customDuration = dist <= 1
+      ? ROTATION_DURATION
+      : ROTATION_DURATION * Math.min(1 + (dist - 1) * 0.3, 1.6);
+
+    rotateToStep(targetStep, customDuration);
+  }, [progressMV, rotateToStep]);
+
+  // Mobile Touch Swipe
+  const touchStartX = useRef(0);
+  const touchStartY = useRef(0);
+  const handleTouchStart = (e) => {
+    touchStartX.current = e.touches[0].clientX;
+    touchStartY.current = e.touches[0].clientY;
+  };
+  const handleTouchEnd = (e) => {
+    const dx = e.changedTouches[0].clientX - touchStartX.current;
+    const dy = e.changedTouches[0].clientY - touchStartY.current;
+    if (Math.abs(dx) > 35 && Math.abs(dx) > Math.abs(dy)) {
+      rotateToStep(dx < 0 ? stepRef.current + 1 : stepRef.current - 1);
+    }
   };
 
-  const getCardLayout = (index) => {
-    const layout = isMobile ? masonryLayout.mobile[index] : masonryLayout.desktop[index];
-    const columnWidth = isMobile ? 180 : 220; // Smaller width for 4 columns
-    const gutterSize = isMobile ? 16 : 20; // consistent gutter spacing
-    
-    return {
-      x: layout.col * (columnWidth + gutterSize) + layout.offsetX,
-      y: layout.offsetY, // Use pre-calculated offsetY for uniform spacing
-      height: layout.height,
-      width: columnWidth,
+  // ─── Viewport Lifecycle: Start only when in view, calm 3s arrival ─────────
+  useEffect(() => {
+    if (!isInView) {
+      isCancelledRef.current = true;
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+        timeoutRef.current = null;
+      }
+      if (animControlsRef.current) animControlsRef.current.stop();
+      return;
+    }
+
+    isCancelledRef.current = false;
+    // Exactly 3 seconds arrival resting window for the initial card
+    if (!timeoutRef.current) {
+      timeoutRef.current = setTimeout(() => {
+        if (!isCancelledRef.current) rotateToStep(stepRef.current + 1, ROTATION_DURATION);
+      }, INITIAL_ARRIVAL_PAUSE_MS);
+    }
+
+    return () => {
+      isCancelledRef.current = true;
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+        timeoutRef.current = null;
+      }
+      if (animControlsRef.current) animControlsRef.current.stop();
     };
-  };
+  }, [isInView, rotateToStep]);
 
-  // Get slight rotation for natural scrapbook/polaroid tilt - ALL LEFT -4°
-  const getCardRotation = (index) => {
-    // All cards tilted left at -4 degrees
-    return -4;
-  };
+  // ResizeObserver for Container Dimensions
+  useEffect(() => {
+    if (!stageRef.current) return;
+    const observer = new ResizeObserver(([entry]) => {
+      if (entry?.contentRect) {
+        setStageDimensions({
+          width: entry.contentRect.width || window.innerWidth,
+          height: entry.contentRect.height || window.innerHeight,
+        });
+      }
+    });
+    observer.observe(stageRef.current);
+    return () => observer.disconnect();
+  }, []);
+
+  // ─── Responsive Geometry ───────────────────────────────────────────────────
+  const geo = useMemo(() => {
+    const W = stageDimensions.width;
+    const H = stageDimensions.height;
+    const mobile = W < 768;
+    if (mobile) {
+      const cw = Math.min(Math.max(Math.round(W * 0.44), 155), 195);
+      const ch = Math.round(cw * 0.68);
+      const rx = Math.max(Math.round(W * 0.38), 125);
+      return {
+        isMobile: true,
+        Rx: rx, Ry: Math.round(rx * 0.18), Rz: Math.round(rx * 0.44),
+        cardWidth: cw, cardHeight: ch,
+        angularSpacing: 0.82, maxDiff: 1.35, fadeZone: 0.35,
+        liftY: -12,
+      };
+    }
+    const tablet = W < 1024;
+    const slots = tablet ? 6 : 8;
+    const rawCw = tablet ? Math.min(W * 0.28, H * 0.30) : Math.min(W * 0.22, H * 0.35);
+    const cw = tablet
+      ? Math.min(Math.max(Math.round(rawCw), 230), 290)
+      : Math.min(Math.max(Math.round(rawCw), 280), 360);
+    const ch = Math.round(cw * 0.72);
+    const rx = Math.max(Math.round((W * 0.86 - cw * 0.45) / 2), 100);
+    return {
+      isMobile: false,
+      Rx: rx, Ry: Math.round(rx * 0.32), Rz: Math.round(rx * 0.44),
+      cardWidth: cw, cardHeight: ch,
+      angularSpacing: (2 * Math.PI) / slots, maxDiff: slots / 2, fadeZone: 0.75,
+      liftY: tablet ? -85 : -110,
+    };
+  }, [stageDimensions]);
+
+  const { isMobile, Rx, Ry, Rz, cardWidth, cardHeight, angularSpacing, maxDiff, fadeZone, liftY } = geo;
 
   return (
     <section
       ref={sectionRef}
-      className="relative min-h-screen w-full flex flex-col items-start justify-start bg-black py-12 md:py-20 px-4 md:px-8 lg:px-16 overflow-hidden"
+      className={`relative w-full bg-black overflow-hidden flex flex-col items-center justify-center select-none ${
+        isMobile ? "py-4 min-h-0" : "py-6 md:py-8 min-h-[80vh] justify-between"
+      }`}
+      style={isMobile ? undefined : { height: "min(95dvh, 800px)", minHeight: "560px" }}
     >
-      {/* Title - Top Left Anchored */}
-      <motion.div
-        initial={{ opacity: 0, x: -30 }}
-        animate={isVisible ? { opacity: 1, x: 0 } : { opacity: 0, x: -30 }}
-        transition={{ duration: 0.6 }}
-        className="mb-12 md:mb-16 z-20 ml-0 md:ml-8"
+      {/* 3D Stage */}
+      <div
+        ref={stageRef}
+        onTouchStart={handleTouchStart}
+        onTouchEnd={handleTouchEnd}
+        className={`relative w-full flex flex-col overflow-visible bg-black select-none ${
+          isMobile
+            ? "items-center justify-center gap-1 sm:gap-2 h-auto"
+            : "h-full justify-between"
+        }`}
+        style={{
+          perspective: isMobile ? "900px" : "1400px",
+          perspectiveOrigin: "50% 50%",
+          paddingInline: isMobile ? "0" : "clamp(2rem, 4vw, 4rem)",
+        }}
       >
-        <h2 className="text-3xl md:text-5xl lg:text-6xl font-bold text-white mb-2">
-          QUEST-IT <span className="text-cyan-400">Memories</span>
-        </h2>
-        <p className="text-gray-400 text-sm md:text-base tracking-wide">
-          A Journey of Moments
-        </p>
-      </motion.div>
-
-      {/* Pinterest-Style Masonry Grid - Top-Left Anchored */}
-      <div className="relative w-full max-w-7xl mx-auto">
-        <div className="relative w-full" style={{ 
-          minHeight: isMobile ? '2700px' : '1060px',
-          marginLeft: isMobile ? '0' : '2rem',
-          maxWidth: isMobile ? '100%' : 'auto'
-        }}>
-          {/* Memory Cards in Masonry Layout */}
-          {Array.from({ length: totalCards }).map((_, index) => {
-            const layout = getCardLayout(index);
-            const rotation = getCardRotation(index);
-
-            return (
-              <motion.div
-                key={index}
-                initial={{
-                  opacity: 0,
-                  y: 50,
-                  scale: 0.9,
-                  rotate: rotation,
-                }}
-                animate={
-                  isVisible
-                    ? {
-                        opacity: 1,
-                        y: 0,
-                        scale: 1,
-                        rotate: rotation,
-                      }
-                    : {
-                        opacity: 0,
-                        y: 50,
-                        scale: 0.9,
-                        rotate: rotation,
-                      }
-                }
-                transition={{
-                  duration: 0.5,
-                  delay: index * 0.08,
-                  ease: [0.25, 0.46, 0.45, 0.94],
-                }}
-                whileHover={{
-                  scale: 1.05,
-                  rotate: rotation + 2,
-                  zIndex: 50,
-                  boxShadow: "0 25px 60px rgba(6, 182, 212, 0.3)",
-                  transition: { duration: 0.2 }
-                }}
-                className="absolute cursor-pointer"
-                style={{
-                  left: `${layout.x}px`,
-                  top: `${layout.y}px`,
-                  width: `${layout.width}px`,
-                  height: `${layout.height}px`,
-                  zIndex: 10,
-                }}
-              >
-                {/* Card without polaroid frame - just portrait image with shadow */}
-                <div className="relative w-full h-full shadow-xl rounded-sm overflow-hidden">
-                  {/* Image container - full size */}
-                  <Image
-                    src={`/images/gallery-images/diagonal_images/diagonal_${index + 1}.${getImageExtension(index + 1)}`}
-                    alt={`Quest-IT Memory ${index + 1}`}
-                    fill
-                    className="object-cover gallery-image-mobile"
-                    sizes="(max-width: 768px) 180px, 220px"
-                    quality={90}
-                    loading="lazy"
-                  />
-                </div>
-              </motion.div>
-            );
-          })}
+        {/* Header */}
+        <div className="pt-2 sm:pt-4 md:pt-8 px-4 sm:px-6 md:px-12 lg:px-16 z-30 pointer-events-none text-center md:text-left w-full">
+          <h2 className="text-2xl sm:text-3xl md:text-5xl lg:text-6xl font-bold text-white mb-1 md:mb-2 tracking-tight">
+            QUEST-IT <span className="text-cyan-400">Memories</span>
+          </h2>
+          <p className="text-gray-400 text-xs sm:text-sm md:text-base tracking-wide">
+            A Journey of Moments
+          </p>
         </div>
+
+        {/* 3D Orbital Canvas */}
+        <div
+          className={`relative w-full flex items-center justify-center overflow-visible ${
+            isMobile
+              ? "h-[190px] sm:h-[220px] my-2"
+              : "flex-1 -translate-y-4 md:-translate-y-8 my-0"
+          }`}
+          style={{ transformStyle: "preserve-3d", marginInline: "auto" }}
+        >
+          {/* Ambient Cyan Glow + Quest Logo Watermark */}
+          <div
+            aria-hidden="true"
+            className="absolute left-1/2 top-1/2 pointer-events-none select-none flex items-center justify-center"
+            style={{ transform: "translate3d(-50%, -50%, -20px)", zIndex: 0 }}
+          >
+            <div
+              className="absolute w-[280px] h-[280px] sm:w-[420px] sm:h-[420px] md:w-[640px] md:h-[460px] rounded-full blur-[55px] md:blur-[85px] pointer-events-none"
+              style={{
+                background:
+                  "radial-gradient(circle, rgba(0, 212, 255, 0.30) 0%, rgba(6, 182, 212, 0.15) 45%, rgba(14, 165, 233, 0.05) 65%, transparent 80%)",
+              }}
+            />
+            <div className="relative w-[180px] h-[75px] sm:w-[250px] sm:h-[105px] md:w-[400px] md:h-[160px] lg:w-[480px] lg:h-[190px] opacity-25 md:opacity-30">
+              <Image
+                src="/images/logo.webp"
+                alt=""
+                fill
+                className="object-contain filter drop-shadow-[0_0_25px_rgba(0,212,255,0.45)]"
+                priority
+              />
+            </div>
+          </div>
+
+          {/* Orbital Cards */}
+          {ORBITAL_IMAGES.map((_, i) => (
+            <MemoryCard
+              key={i}
+              cardIndex={i}
+              progressMV={progressMV}
+              cardWidth={cardWidth}
+              cardHeight={cardHeight}
+              liftY={liftY}
+              isMobile={isMobile}
+              Rx={Rx} Ry={Ry} Rz={Rz}
+              angularSpacing={angularSpacing}
+              maxDiff={maxDiff}
+              fadeZone={fadeZone}
+              onCardClick={handleCardClick}
+              onActivePhotoClick={handleActivePhotoClick}
+            />
+          ))}
+        </div>
+
+        {/* Mobile Navigation Controls */}
+        {isMobile ? (
+          <div className="flex items-center justify-center gap-4 sm:gap-5 z-30 pt-1 pb-1 select-none">
+            <button
+              type="button"
+              onClick={() => rotateToStep(stepRef.current - 1)}
+              aria-label="Previous Memory"
+              className="p-2 sm:p-2.5 rounded-full border border-cyan-400/30 bg-black/60 backdrop-blur-md text-cyan-400 shadow-[0_0_12px_rgba(0,212,255,0.2)] active:scale-90 transition-all hover:bg-cyan-400/15 hover:border-cyan-400"
+            >
+              <ChevronLeft className="w-4 h-4 sm:w-5 sm:h-5" />
+            </button>
+            <span className="font-mono text-xs sm:text-sm tracking-widest text-cyan-400/90 font-medium">
+              {String(mod(INITIAL_OFFSET_INDEX + step, TOTAL_CARDS) + 1).padStart(2, "0")}{" "}
+              <span className="text-neutral-500">/</span> {String(TOTAL_CARDS).padStart(2, "0")}
+            </span>
+            <button
+              type="button"
+              onClick={() => rotateToStep(stepRef.current + 1)}
+              aria-label="Next Memory"
+              className="p-2 sm:p-2.5 rounded-full border border-cyan-400/30 bg-black/60 backdrop-blur-md text-cyan-400 shadow-[0_0_12px_rgba(0,212,255,0.2)] active:scale-90 transition-all hover:bg-cyan-400/15 hover:border-cyan-400"
+            >
+              <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5" />
+            </button>
+          </div>
+        ) : (
+          <div className="pb-4 md:pb-6 px-6 md:px-12 pointer-events-none" />
+        )}
       </div>
+
+      {/* Lightbox Modal */}
+      <PhotoLightboxModal
+        isOpen={Boolean(modalPhoto)}
+        onClose={handleCloseModal}
+        src={modalPhoto?.src}
+        title={modalPhoto?.title}
+        alt="Maximized Quest-IT Memory Photo"
+      />
     </section>
   );
 };

@@ -25,6 +25,13 @@ import team from "@/constants/team";
 // Only the current council gets the card animations
 const CURRENT_COUNCIL = "Quest IT Council 2026-27";
 
+// Councils shown as the fairy-light polaroid clothesline
+const CLOTHESLINE_COUNCILS = [
+  CURRENT_COUNCIL,
+  "Quest IT Council 2025-26",
+  "Quest IT Council 2024-25",
+];
+
 // Cards fade and slide up one after another when the dropdown opens
 const card_entrance = (index) => ({
   initial: { opacity: 0, y: 24 },
@@ -121,7 +128,7 @@ const Team = () => {
                         <AccordionTrigger className="team-sub-accordion-trigger">{subTitle}</AccordionTrigger>
 
                         <AccordionContent className="py-8 relative z-10">
-                          {value === CURRENT_COUNCIL ? (
+                          {CLOTHESLINE_COUNCILS.includes(value) ? (
                             <PolaroidClothesline members={subMembers} title={subTitle} subtitle={title} />
                           ) : (
                           <div className="flex flex-wrap justify-center gap-10 w-full max-w-none mx-auto team-card-container-mobile">
@@ -162,7 +169,8 @@ const Team = () => {
                                     <div className="mt-4 flex items-center divide-x divide-white/20">
                                       <Link
                                         aria-label="Email"
-                                        href={`mailto:${email}`}
+                                        href={`mailto:${email}?subject=${encodeURIComponent(`Quest-IT Inquiry - ${name}`)}`}
+                                        title={`Send email draft to ${name}`}
                                         className="inline-flex justify-center items-center h-6 px-3 first:pl-0 text-white transition hover:text-cyan-300 focus:outline-none focus-visible:text-cyan-300"
                                       >
                                         <Mail className="size-[22px]" />
@@ -241,7 +249,8 @@ const Team = () => {
                               <div className="mt-4 flex items-center divide-x divide-white/20">
                                 <Link
                                   aria-label="Email"
-                                  href={`mailto:${email}`}
+                                  href={`mailto:${email}?subject=${encodeURIComponent(`Quest-IT Inquiry - ${name}`)}`}
+                                  title={`Send email draft to ${name}`}
                                   className="inline-flex justify-center items-center h-6 px-3 first:pl-0 text-white transition hover:text-cyan-300 focus:outline-none focus-visible:text-cyan-300"
                                 >
                                   <Mail className="size-[22px]" />

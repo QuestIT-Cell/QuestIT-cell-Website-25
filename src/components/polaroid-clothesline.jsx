@@ -37,6 +37,10 @@ const rope_y = (t) => ROPE_TOP + 4 * ROPE_SAG * t * (1 - t);
 // How many two-row strips are open; while switching TE -> SE both exist for a moment
 let open_two_row_strips = 0;
 
+// How long after any strip opens to ignore the page's own movement (ms)
+const OPEN_SETTLE_TIME = 1200;
+let last_strip_opened_at = 0;
+
 // Horizontal centre of a polaroid, measured from the visible left edge of the strip
 const center_in_track = (track, card) => {
   const card_rect = card.getBoundingClientRect();
@@ -48,6 +52,8 @@ const PolaroidClothesline = ({ members, title, subtitle }) => {
   const card_refs = useRef([]);
   const line_refs = useRef([]);
   const resume_timer = useRef(null);
+  const scroll_timer = useRef(null);
+  const is_scrolling_programmatically = useRef(false);
   const has_moved = useRef(false);
   const [active, setActive] = useState(0);
   const [interacting, setInteracting] = useState(false);
@@ -127,7 +133,13 @@ const PolaroidClothesline = ({ members, title, subtitle }) => {
 
     // The first column shows next to the title, the rest are centred
     const left = active === 0 ? 0 : track.scrollLeft + center_in_track(track, card) - track.clientWidth / 2;
-    track.scrollTo({ left, behavior: reduce_motion ? "auto" : "smooth" });
+    if (Math.abs(track.scrollLeft - left) > 15) {
+      is_scrolling_programmatically.current = true;
+      track.scrollTo({ left, behavior: reduce_motion ? "auto" : "smooth" });
+      setTimeout(() => {
+        is_scrolling_programmatically.current = false;
+      }, 400);
+    }
   }, [active, reduce_motion, row_count]);
 
   // Move the spotlight to the next column every few seconds (sooner the first time, right after opening)
@@ -140,7 +152,11 @@ const PolaroidClothesline = ({ members, title, subtitle }) => {
         // Wait while the tab is in the background, then carry on
         if (document.hidden) return schedule(SPOTLIGHT_EVERY);
         has_moved.current = true;
+        is_scrolling_programmatically.current = true;
         setActive((current) => (current + 1) % column_count);
+        setTimeout(() => {
+          is_scrolling_programmatically.current = false;
+        }, 400);
       }, delay);
     };
 
@@ -148,7 +164,10 @@ const PolaroidClothesline = ({ members, title, subtitle }) => {
     return () => clearTimeout(timer);
   }, [active, paused, column_count]);
 
-  useEffect(() => () => clearTimeout(resume_timer.current), []);
+  useEffect(() => () => {
+    clearTimeout(resume_timer.current);
+    clearTimeout(scroll_timer.current);
+  }, []);
 
   // Tall two-row strips scroll under the sticky menu bar, so hide the bar on scroll down while open
   useEffect(() => {
@@ -156,9 +175,18 @@ const PolaroidClothesline = ({ members, title, subtitle }) => {
 
     const body = document.body;
     let last_y = window.scrollY;
+    last_strip_opened_at = performance.now();
 
     const on_scroll = () => {
       const y = window.scrollY;
+
+      // Right after opening, the page moves by itself (the section above closes and the page
+      // scrolls this one to the top), so don't let that bring the menu bar back
+      if (performance.now() - last_strip_opened_at < OPEN_SETTLE_TIME) {
+        last_y = y;
+        return;
+      }
+
       if (y > last_y + 4 && y > 150) body.dataset.menuHidden = "true";
       else if (y < last_y - 4) delete body.dataset.menuHidden;
       last_y = y;
@@ -166,6 +194,8 @@ const PolaroidClothesline = ({ members, title, subtitle }) => {
 
     open_two_row_strips += 1;
     body.dataset.clotheslineOpen = "true";
+    // The section is scrolled to the top of the screen where the menu bar sits, so start with it hidden
+    body.dataset.menuHidden = "true";
     window.addEventListener("scroll", on_scroll, { passive: true });
 
     return () => {
@@ -199,176 +229,192 @@ const PolaroidClothesline = ({ members, title, subtitle }) => {
     return Math.floor(nearest / row_count_ref.current);
   };
 
+  // Handle manual horizontal scroll on both phone & laptop view: glow centered photo after 0.5s of no scroll
+  const handle_manual_scroll = useCallback(() => {
+    if (is_scrolling_programmatically.current) return;
+
+    setInteracting(true);
+    clearTimeout(resume_timer.current);
+    clearTimeout(scroll_timer.current);
+
+    // Glow the centered photo after stopping scroll for 0.5s (500ms) on phone and laptop
+    scroll_timer.current = setTimeout(() => {
+      setActive(nearest_to_center());
+      setInteracting(false);
+    }, 500);
+  }, []);
+
   // Stop the autoplay while someone swipes or scrolls, then pick up from where they left it
   const pause_for_user = useCallback(() => {
     setInteracting(true);
     clearTimeout(resume_timer.current);
-    resume_timer.current = setTimeout(() => {
+    clearTimeout(scroll_timer.current);
+    scroll_timer.current = setTimeout(() => {
       setActive(nearest_to_center());
       setInteracting(false);
-    }, RESUME_AFTER);
+    }, 500);
   }, []);
 
   const go_to = (column) => {
+    is_scrolling_programmatically.current = true;
     setActive((column + column_count) % column_count);
+    setTimeout(() => {
+      is_scrolling_programmatically.current = false;
+    }, 400);
     pause_for_user();
   };
 
   // One rope with its fairy lights and polaroids
   const render_row = (indices, row) => (
-        <div
-          key={row}
-          ref={(element) => (line_refs.current[row] = element)}
-          className="relative flex w-max max-w-none items-start gap-12 pb-12 pt-4 sm:gap-20"
-        >
-          {/* The rope stretches across every polaroid and scrolls with them */}
-          <svg
-            aria-hidden="true"
-            className="pointer-events-none absolute -left-12 top-4 h-24 w-[calc(100%+6rem)] max-w-none"
-            viewBox="0 0 1000 96"
-            preserveAspectRatio="none"
+    <div
+      key={row}
+      ref={(element) => (line_refs.current[row] = element)}
+      className="relative flex w-max max-w-none items-start gap-12 pb-12 pt-4 sm:gap-20"
+    >
+      {/* The rope stretches across every polaroid and scrolls with them */}
+      <svg
+        aria-hidden="true"
+        className="pointer-events-none absolute -left-12 top-4 h-24 w-[calc(100%+6rem)] max-w-none"
+        viewBox="0 0 1000 96"
+        preserveAspectRatio="none"
+      >
+        <path
+          d={`M0 ${ROPE_TOP} Q500 ${ROPE_TOP + 2 * ROPE_SAG} 1000 ${ROPE_TOP}`}
+          fill="none"
+          stroke="#b08a5f"
+          strokeWidth="3"
+          vectorEffect="non-scaling-stroke"
+        />
+        <path
+          d={`M0 ${ROPE_TOP} Q500 ${ROPE_TOP + 2 * ROPE_SAG} 1000 ${ROPE_TOP}`}
+          fill="none"
+          stroke="#d9b98c"
+          strokeWidth="1.5"
+          strokeDasharray="5 4"
+          vectorEffect="non-scaling-stroke"
+        />
+      </svg>
+
+      {/* Warm white-yellow fairy lights along the rope */}
+      <div aria-hidden="true" className="pointer-events-none absolute -inset-x-12 top-4 h-24 max-w-none">
+        {Array.from({ length: indices.length * BULBS_PER_CARD }).map((_, index) => {
+          const t = (index + 0.5) / (indices.length * BULBS_PER_CARD);
+          return (
+            <span
+              key={index}
+              className="absolute size-2 -translate-x-1/2 -translate-y-1/2 rounded-full bg-[#fff7d6] shadow-[0_0_8px_3px_rgba(255,224,130,0.65)] animate-pulse motion-reduce:animate-none"
+              style={{
+                left: `${t * 100}%`,
+                top: rope_y(t),
+                animationDuration: `${2.2 + (index % 5) * 0.4}s`,
+                animationDelay: `${(index % 7) * 0.3}s`,
+              }}
+            />
+          );
+        })}
+      </div>
+
+      {indices.map((index) => {
+        const {
+          name,
+          image,
+          designation,
+          email = "questit@ves.ac.in",
+          github = "https://github.com/QuestIT-Cell",
+          linkedin = "https://www.linkedin.com/company/questit-vesit",
+        } = sorted[index];
+        const hang_at = rope_y(rope_positions[index] ?? 0.5);
+        const is_active = column_of(index) === active;
+
+        return (
+          <div
+            key={name}
+            ref={(element) => (card_refs.current[index] = element)}
+            className={`relative max-w-none shrink-0 snap-center origin-top transition-all duration-700 ease-out motion-reduce:transition-none ${is_active ? "z-20 scale-[1.08]" : "z-0 brightness-[0.55] saturate-[0.8]"
+              }`}
+            style={{ marginTop: hang_at + 10 }}
+            onClick={() => go_to(column_of(index))}
           >
-            <path
-              d={`M0 ${ROPE_TOP} Q500 ${ROPE_TOP + 2 * ROPE_SAG} 1000 ${ROPE_TOP}`}
-              fill="none"
-              stroke="#b08a5f"
-              strokeWidth="3"
-              vectorEffect="non-scaling-stroke"
+            {/* Soft warm glow behind the spotlighted polaroid */}
+            <div
+              aria-hidden="true"
+              className={`pointer-events-none absolute -inset-8 -z-10 max-w-none rounded-full bg-[radial-gradient(circle,rgba(255,236,170,0.4),transparent_70%)] blur-xl transition-opacity duration-700 ${is_active ? "opacity-100" : "opacity-0"
+                }`}
             />
-            <path
-              d={`M0 ${ROPE_TOP} Q500 ${ROPE_TOP + 2 * ROPE_SAG} 1000 ${ROPE_TOP}`}
-              fill="none"
-              stroke="#d9b98c"
-              strokeWidth="1.5"
-              strokeDasharray="5 4"
-              vectorEffect="non-scaling-stroke"
-            />
-          </svg>
 
-          {/* Warm white-yellow fairy lights along the rope */}
-          <div aria-hidden="true" className="pointer-events-none absolute -inset-x-12 top-4 h-24 max-w-none">
-            {Array.from({ length: indices.length * BULBS_PER_CARD }).map((_, index) => {
-              const t = (index + 0.5) / (indices.length * BULBS_PER_CARD);
-              return (
-                <span
-                  key={index}
-                  className="absolute size-2 -translate-x-1/2 -translate-y-1/2 rounded-full bg-[#fff7d6] shadow-[0_0_8px_3px_rgba(255,224,130,0.65)] animate-pulse motion-reduce:animate-none"
-                  style={{
-                    left: `${t * 100}%`,
-                    top: rope_y(t),
-                    animationDuration: `${2.2 + (index % 5) * 0.4}s`,
-                    animationDelay: `${(index % 7) * 0.3}s`,
-                  }}
+            {/* Brighter bulb right next to the pin of the spotlighted polaroid */}
+            <span
+              aria-hidden="true"
+              className={`absolute left-[calc(50%+16px)] -top-2.5 z-20 size-3 -translate-y-1/2 rounded-full bg-[#fffbe8] transition-all duration-700 ${is_active
+                  ? "opacity-100 shadow-[0_0_14px_6px_rgba(255,230,150,0.9)]"
+                  : "opacity-0"
+                }`}
+            />
+
+            {/* Wooden clothespin */}
+            <div className="absolute left-1/2 -top-5 z-10 h-10 w-4 max-w-none -translate-x-1/2 rounded-sm bg-gradient-to-b from-[#d8b48a] to-[#a97e52] shadow-md">
+              <div className="mx-auto mt-4 h-px w-3 bg-[#7a5634]" />
+            </div>
+
+            <div
+              className={`w-44 max-w-none bg-[#efe8dc] p-3 pb-4 transition-shadow duration-700 sm:w-52 ${is_active
+                  ? "shadow-[0_18px_40px_rgba(0,0,0,0.6),0_0_30px_rgba(255,230,150,0.25)]"
+                  : "shadow-[0_12px_30px_rgba(0,0,0,0.55)]"
+                }`}
+            >
+              <div className="relative aspect-square w-full overflow-hidden bg-neutral-800">
+                <Image
+                  src={image}
+                  alt={name}
+                  fill
+                  unoptimized
+                  className="object-cover"
                 />
-              );
-            })}
-          </div>
+              </div>
 
-          {indices.map((index) => {
-              const {
-                name,
-                image,
-                designation,
-                email = "questit@ves.ac.in",
-                github = "https://github.com/QuestIT-Cell",
-                linkedin = "https://www.linkedin.com/company/questit-vesit",
-              } = sorted[index];
-              const hang_at = rope_y(rope_positions[index] ?? 0.5);
-              const is_active = column_of(index) === active;
+              <h3 className="mt-3 text-base font-semibold leading-tight text-neutral-900">
+                {name}
+              </h3>
+              <p className="mt-1 text-xs leading-tight text-neutral-600">
+                {designation}
+              </p>
 
-              return (
-                <div
-                  key={name}
-                  ref={(element) => (card_refs.current[index] = element)}
-                  className={`relative max-w-none shrink-0 snap-center origin-top transition-all duration-700 ease-out motion-reduce:transition-none ${
-                    is_active ? "z-20 scale-[1.08]" : "z-0 brightness-[0.55] saturate-[0.8]"
-                  }`}
-                  style={{ marginTop: hang_at + 10 }}
-                  onClick={() => go_to(column_of(index))}
+              <div className="mt-3 flex gap-2">
+                <Link
+                  aria-label={`Email ${name}`}
+                  href={`mailto:${email}`}
+                  className="inline-flex size-7 items-center justify-center rounded-md border border-neutral-400 text-neutral-700 transition hover:bg-neutral-900 hover:text-white"
                 >
-                  {/* Soft warm glow behind the spotlighted polaroid */}
-                  <div
-                    aria-hidden="true"
-                    className={`pointer-events-none absolute -inset-8 -z-10 max-w-none rounded-full bg-[radial-gradient(circle,rgba(255,236,170,0.4),transparent_70%)] blur-xl transition-opacity duration-700 ${
-                      is_active ? "opacity-100" : "opacity-0"
-                    }`}
-                  />
-
-                  {/* Brighter bulb right next to the pin of the spotlighted polaroid */}
-                  <span
-                    aria-hidden="true"
-                    className={`absolute left-[calc(50%+16px)] -top-2.5 z-20 size-3 -translate-y-1/2 rounded-full bg-[#fffbe8] transition-all duration-700 ${
-                      is_active
-                        ? "opacity-100 shadow-[0_0_14px_6px_rgba(255,230,150,0.9)]"
-                        : "opacity-0"
-                    }`}
-                  />
-
-                  {/* Wooden clothespin */}
-                  <div className="absolute left-1/2 -top-5 z-10 h-10 w-4 max-w-none -translate-x-1/2 rounded-sm bg-gradient-to-b from-[#d8b48a] to-[#a97e52] shadow-md">
-                    <div className="mx-auto mt-4 h-px w-3 bg-[#7a5634]" />
-                  </div>
-
-                  <div
-                    className={`w-44 max-w-none bg-[#efe8dc] p-3 pb-4 transition-shadow duration-700 sm:w-52 ${
-                      is_active
-                        ? "shadow-[0_18px_40px_rgba(0,0,0,0.6),0_0_30px_rgba(255,230,150,0.25)]"
-                        : "shadow-[0_12px_30px_rgba(0,0,0,0.55)]"
-                    }`}
-                  >
-                    <div className="relative aspect-square w-full overflow-hidden bg-neutral-800">
-                      <Image
-                        src={image}
-                        alt={name}
-                        fill
-                        unoptimized
-                        className="object-cover"
-                      />
-                    </div>
-
-                    <h3 className="mt-3 text-base font-semibold leading-tight text-neutral-900">
-                      {name}
-                    </h3>
-                    <p className="mt-1 text-xs leading-tight text-neutral-600">
-                      {designation}
-                    </p>
-
-                    <div className="mt-3 flex gap-2">
-                      <Link
-                        aria-label={`Email ${name}`}
-                        href={`mailto:${email}`}
-                        className="inline-flex size-7 items-center justify-center rounded-md border border-neutral-400 text-neutral-700 transition hover:bg-neutral-900 hover:text-white"
-                      >
-                        <Mail className="h-3.5 w-3.5" />
-                      </Link>
-                      <a
-                        aria-label={`${name} on GitHub`}
-                        href={github}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex size-7 items-center justify-center rounded-md border border-neutral-400 text-neutral-700 transition hover:bg-neutral-900 hover:text-white"
-                      >
-                        <Github className="h-3.5 w-3.5" />
-                      </a>
-                      <a
-                        aria-label={`${name} on LinkedIn`}
-                        href={linkedin}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex size-7 items-center justify-center rounded-md border border-neutral-400 text-neutral-700 transition hover:bg-neutral-900 hover:text-white"
-                      >
-                        <Linkedin className="h-3.5 w-3.5" />
-                      </a>
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
-        </div>
+                  <Mail className="h-3.5 w-3.5" />
+                </Link>
+                <a
+                  aria-label={`${name} on GitHub`}
+                  href={github}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex size-7 items-center justify-center rounded-md border border-neutral-400 text-neutral-700 transition hover:bg-neutral-900 hover:text-white"
+                >
+                  <Github className="h-3.5 w-3.5" />
+                </a>
+                <a
+                  aria-label={`${name} on LinkedIn`}
+                  href={linkedin}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex size-7 items-center justify-center rounded-md border border-neutral-400 text-neutral-700 transition hover:bg-neutral-900 hover:text-white"
+                >
+                  <Linkedin className="h-3.5 w-3.5" />
+                </a>
+              </div>
+            </div>
+          </div>
+        );
+      })}
+    </div>
   );
 
   return (
-    <div className="relative w-full">
+    <div className="polaroid-clothesline relative w-full">
       <button
         type="button"
         aria-label="Previous members"
@@ -389,12 +435,15 @@ const PolaroidClothesline = ({ members, title, subtitle }) => {
 
       <div
         ref={track_ref}
+        onScroll={handle_manual_scroll}
         onWheel={(event) => {
           // Only sideways scrolling moves the strip; scrolling the page past it shouldn't pause
-          if (Math.abs(event.deltaX) > Math.abs(event.deltaY)) pause_for_user();
+          if (Math.abs(event.deltaX) > Math.abs(event.deltaY)) handle_manual_scroll();
         }}
         onTouchStart={pause_for_user}
+        onTouchEnd={handle_manual_scroll}
         onPointerDown={pause_for_user}
+        onPointerUp={handle_manual_scroll}
         className="overflow-x-auto overflow-y-hidden snap-x snap-proximity [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
       >
         <div className="relative w-max max-w-none px-[calc(50vw-5.5rem)] sm:px-[40vw]">
@@ -427,11 +476,10 @@ const PolaroidClothesline = ({ members, title, subtitle }) => {
               .map(({ name }) => name)
               .join(" and ")}`}
             onClick={() => go_to(column)}
-            className={`h-1.5 w-4 rounded-full transition-colors duration-500 sm:w-6 ${
-              column === active
+            className={`h-1.5 w-4 rounded-full transition-colors duration-500 sm:w-6 ${column === active
                 ? "bg-[#ffe9a8] shadow-[0_0_8px_2px_rgba(255,224,130,0.6)]"
                 : "bg-white/25 hover:bg-white/50"
-            }`}
+              }`}
           />
         ))}
       </div>

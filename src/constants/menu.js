@@ -54,7 +54,7 @@ const menu = [
     icon: <Mail />,
     name: "Contact",
     mobile_nav: true,
-    path: "/#contact",
+    path: "/contact",
   },
   {
     mobile_nav: false,

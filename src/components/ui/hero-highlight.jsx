@@ -35,8 +35,8 @@ export const HeroHighlight = ({
       onMouseEnter={handleMouseEnter}
       onMouseMove={handleMouseMove}
       className={cn(
-        containerClassName,
-        "relative h-[40rem] flex items-center bg-white dark:bg-black justify-center w-full group"
+        "relative h-[100svh] md:h-[40rem] flex items-center bg-white dark:bg-black justify-center w-full group",
+        containerClassName
       )}
     >
       <div className="absolute inset-0 bg-dot-thick-neutral-300 dark:bg-dot-thick-neutral-800  pointer-events-none" />

@@ -1,0 +1,1314 @@
+/* Gilded Obsidian Collectible Developer Cards & Scroll Showcase */
+
+.team-card {
+  --gold-1: #fde8a6;
+  --gold-2: #e2b24f;
+  --gold-3: #a8741f;
+  --ink: #0d0b14;
+
+  --mx: 50%;
+  --my: 50%;
+  --px: 0;
+  --py: 0;
+  --rx: 0deg;
+  --ry: 0deg;
+
+  position: relative;
+  width: 270px;
+  aspect-ratio: 0.61;
+  perspective: 1400px;
+  transform-style: preserve-3d;
+  -webkit-transform-style: preserve-3d;
+  animation: card-float 6s ease-in-out infinite;
+  will-change: transform;
+  cursor: pointer;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.team-card.is-card-flipped {
+  z-index: 50 !important;
+  animation-play-state: paused !important;
+}
+
+.team-card:nth-child(2) { animation-delay: -1.2s; }
+.team-card:nth-child(3) { animation-delay: -2.4s; }
+.team-card:nth-child(4) { animation-delay: -3.6s; }
+.team-card:nth-child(5) { animation-delay: -4.8s; }
+.team-card:nth-child(6) { animation-delay: -1.8s; }
+.team-card:nth-child(7) { animation-delay: -3.0s; }
+.team-card:nth-child(8) { animation-delay: -4.2s; }
+.team-card:nth-child(9) { animation-delay: -5.4s; }
+.team-card:nth-child(10) { animation-delay: -2.1s; }
+.team-card:nth-child(11) { animation-delay: -3.9s; }
+
+.team-card.is-active { animation-play-state: paused; }
+
+/* While track is actively scrolling, pause float bobbing so cards glide in a solid, jitter-free arc */
+.dev-showcase-section.is-scrolling .team-card {
+  animation-play-state: paused !important;
+}
+
+@keyframes card-float {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-8px); }
+}
+
+/* ───────── 3D Object ───────── */
+.card-3d {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transform-style: preserve-3d;
+  -webkit-transform-style: preserve-3d;
+  transform: rotateX(var(--rx)) rotateY(var(--ry));
+  transition: transform 0.12s linear;
+  will-change: transform;
+}
+
+.team-card.is-active .card-3d {
+  transition: transform 0.08s linear;
+  transform: translateY(-8px) rotateX(var(--rx)) rotateY(var(--ry)) scale(1.03);
+}
+
+/* ───────── 3D Card Flipper & Smooth GPU Flip ───────── */
+.card-flipper {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transform-style: preserve-3d;
+  -webkit-transform-style: preserve-3d;
+  transition: transform 0.6s cubic-bezier(0.2, 0.8, 0.2, 1);
+  transform: rotateY(0deg);
+  will-change: transform;
+}
+
+.card-flipper.is-flipped {
+  transform: rotateY(180deg);
+}
+
+/* White Specular Shine Sweep strictly contained within card */
+.card-flip-shine {
+  position: absolute;
+  inset: 0;
+  border-radius: 14px;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 10;
+}
+
+.card-flip-shine::before {
+  content: "";
+  position: absolute;
+  top: -50%;
+  left: 0;
+  width: 120px;
+  height: 200%;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.45) 40%,
+    rgba(255, 255, 255, 0.95) 50%,
+    rgba(255, 255, 255, 0.45) 60%,
+    transparent 100%
+  );
+  transform: translate3d(-160%, 0, 0) rotate(25deg);
+  opacity: 0;
+  will-change: transform, opacity;
+}
+
+.card-flipper.is-flipped .card-face-back .card-flip-shine::before {
+  animation: cardWhiteShineSweep 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+  animation-delay: 0.1s;
+}
+
+.card-flipper:not(.is-flipped) .card-face-front .card-flip-shine::before {
+  animation: cardWhiteShineSweep 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+  animation-delay: 0.1s;
+}
+
+@keyframes cardWhiteShineSweep {
+  0% {
+    transform: translate3d(-160%, 0, 0) rotate(25deg);
+    opacity: 0;
+  }
+  25% {
+    opacity: 0.95;
+  }
+  65% {
+    opacity: 0.8;
+  }
+  100% {
+    transform: translate3d(260%, 0, 0) rotate(25deg);
+    opacity: 0;
+  }
+}
+
+.card-face {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  transform-style: preserve-3d;
+}
+
+.card-face-front {
+  transform: rotateY(0deg) translateZ(1px);
+}
+
+.card-face-back {
+  transform: rotateY(180deg) translateZ(1px);
+}
+
+/* ───────── Gold Bezel ───────── */
+.card-body {
+  position: relative;
+  height: 100%;
+  width: 100%;
+  padding: 7px;
+  border-radius: 20px;
+  box-sizing: border-box;
+  background: linear-gradient(
+    135deg,
+    var(--gold-1) 0%,
+    var(--gold-2) 22%,
+    var(--gold-3) 45%,
+    var(--gold-2) 62%,
+    var(--gold-1) 80%,
+    var(--gold-3) 100%
+  );
+  box-shadow:
+    inset 0 1px 0 #ffffffaa,
+    inset 0 -1px 0 #00000088,
+    inset 1px 0 0 #ffffff55,
+    inset -1px 0 0 #00000055,
+    0 12px 34px rgba(0, 0, 0, 0.7);
+}
+
+/* ───────── Card Frame (Obsidian Face) ───────── */
+.card-frame {
+  position: relative;
+  height: 100%;
+  width: 100%;
+  box-sizing: border-box;
+  overflow: hidden;
+  border-radius: 14px;
+  padding: 12px 14px 10px;
+  display: flex;
+  flex-direction: column;
+  color: #f6e7c1;
+  background:
+    radial-gradient(circle at 50% 22%, #2a2350 0%, #15112b 45%, var(--ink) 100%);
+  box-shadow: inset 0 0 22px #000000cc, inset 0 0 0 1px #e2b24f66;
+}
+
+/* fine inner gold line */
+.card-frame::before {
+  content: "";
+  position: absolute;
+  inset: 5px;
+  border: 1px solid #e2b24f88;
+  border-radius: 10px;
+  pointer-events: none;
+  z-index: 6;
+}
+
+/* engraved scan-lines */
+.card-frame::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  background: repeating-linear-gradient(
+    0deg,
+    rgba(255, 255, 255, 0.03) 0 1px,
+    transparent 1px 3px
+  );
+}
+
+/* ───────── Front: Header ───────── */
+.card-header {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  font-size: 8px;
+  letter-spacing: 1.2px;
+  font-weight: 800;
+  color: #fde8a6;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.9);
+  padding: 0 2px 7px;
+  position: relative;
+  z-index: 4;
+}
+
+.card-header > span:first-child {
+  text-align: left;
+  white-space: normal;
+  overflow: visible;
+  text-overflow: clip;
+  line-height: 1.2;
+}
+
+.gem {
+  width: 7px;
+  height: 7px;
+  background: linear-gradient(135deg, var(--gold-1), var(--gold-3));
+  transform: rotate(45deg);
+  box-shadow: 0 0 8px #e2b24f;
+  margin: 0 auto;
+  justify-self: center;
+  flex-shrink: 0;
+}
+
+.card-header > span:last-child {
+  text-align: right;
+  white-space: nowrap;
+  font-weight: 800;
+  color: #fde8a6;
+}
+
+/* ───────── Arched Portrait Window ───────── */
+.portrait-window {
+  position: relative;
+  flex: 1;
+  min-height: 180px;
+  border-radius: 95px 95px 12px 12px;
+  overflow: hidden;
+  border: 2px solid var(--gold-2);
+  background:
+    radial-gradient(ellipse at 50% 100%, rgba(34, 211, 238, 0.45) 0%, rgba(8, 145, 178, 0.35) 45%, #050d18 100%);
+  box-shadow:
+    inset 0 0 20px #000000aa,
+    0 0 0 1px #00000099,
+    0 0 14px rgba(34, 211, 238, 0.3);
+  z-index: 1;
+}
+
+.rays {
+  position: absolute;
+  inset: -10%;
+  background: repeating-conic-gradient(
+    from 0deg at 50% 100%,
+    rgba(255, 224, 150, 0.16) 0deg 5deg,
+    transparent 5deg 12deg
+  );
+  transform: translate(calc(var(--px) * 10px), calc(var(--py) * 10px));
+}
+
+.portrait {
+  position: absolute;
+  inset: 0;
+  transform:
+    translate(calc(var(--px) * -14px), calc(var(--py) * -10px))
+    scale(1.05);
+}
+
+.portrait img,
+.portrait svg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center top;
+  mask-image: linear-gradient(to bottom, black 80%, transparent 100%);
+  -webkit-mask-image: linear-gradient(to bottom, black 80%, transparent 100%);
+}
+
+/* ───────── Centered Developer Portraits (Front Arched Window Only) ───────── */
+/* Atharva Lotankar: Centered horizontally in front portrait window */
+.dev-card-atharva .portrait img {
+  transform: scale(1.15) translate(-6.5%, 1.5%);
+  transform-origin: center top;
+}
+
+/* Karthik Kotian: Centered horizontally with balanced headroom under front arched window */
+.dev-card-karthik .portrait img {
+  transform: scale(1.12) translate(5.5%, 4%);
+  transform-origin: center top;
+}
+
+.portrait svg {
+  fill: #22d3ee;
+  filter: drop-shadow(0 0 10px rgba(34, 211, 238, 0.6));
+}
+
+/* twinkling sparkles */
+.spark {
+  position: absolute;
+  color: var(--gold-1);
+  font-size: 10px;
+  text-shadow: 0 0 8px #fde8a6;
+  animation: twinkle 3s ease-in-out infinite;
+  z-index: 3;
+}
+.s1 { top: 18%; left: 16%; }
+.s2 { top: 30%; right: 14%; font-size: 13px; animation-delay: -1s; }
+.s3 { top: 52%; left: 10%; font-size: 8px; animation-delay: -2s; }
+.s4 { top: 12%; right: 32%; font-size: 8px; animation-delay: -1.5s; }
+
+@keyframes twinkle {
+  0%, 100% { opacity: 0.15; transform: scale(0.7); }
+  50%      { opacity: 1;    transform: scale(1.15); }
+}
+
+/* ───────── Name Ribbon ───────── */
+.ribbon-wrap {
+  position: relative;
+  z-index: 4;
+  margin: -17px -6px 0;
+  filter: drop-shadow(0 5px 6px rgba(0, 0, 0, 0.8));
+  transform: translate(calc(var(--px) * 6px), calc(var(--py) * 5px));
+}
+
+.ribbon {
+  margin: 0;
+  padding: 6px 14px;
+  text-align: center;
+  text-transform: uppercase;
+  font-size: clamp(11px, 3.2vw, 13px);
+  font-weight: 900;
+  letter-spacing: 0.8px;
+  line-height: 1.25;
+  color: #1a1206;
+  white-space: nowrap;
+  overflow: visible;
+  text-overflow: clip;
+  background: linear-gradient(
+    180deg,
+    #fff0bd 0%,
+    #e9bf62 45%,
+    #a8741f 55%,
+    #e9c372 100%
+  );
+  clip-path: polygon(
+    0 0, 100% 0,
+    calc(100% - 10px) 50%,
+    100% 100%, 0 100%,
+    10px 50%
+  );
+  text-shadow: 0 1px 0 #ffffff88;
+}
+
+.role {
+  margin: 6px 0 0;
+  text-align: center;
+  font-size: 8.5px;
+  line-height: 1.35;
+  letter-spacing: 1px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: #fde8a6;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.9);
+  min-height: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 4px;
+  white-space: normal;
+  overflow: visible;
+  position: relative;
+  z-index: 4;
+}
+
+/* ───────── Personality Traits ───────── */
+.personality-traits {
+  margin-top: auto;
+  margin-bottom: 4px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 6px 8px;
+  background: rgba(8, 6, 16, 0.8);
+  border: 1px solid rgba(226, 178, 79, 0.32);
+  border-radius: 8px;
+  box-shadow: inset 0 0 12px rgba(0, 0, 0, 0.7);
+  position: relative;
+  z-index: 4;
+  flex-shrink: 0;
+}
+
+.trait-row {
+  display: flex;
+  align-items: baseline;
+  gap: 5px;
+  line-height: 1.35;
+}
+
+.trait-label {
+  font-size: 8.5px;
+  font-weight: 900;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  color: #e2b24f;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.9);
+  white-space: nowrap;
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 3.5px;
+}
+
+.trait-label::before {
+  content: "✦";
+  font-size: 6px;
+  color: #fde8a6;
+  opacity: 0.95;
+}
+
+.trait-label::after {
+  content: ":";
+  margin-left: -1px;
+}
+
+.trait-val {
+  font-size: 9.5px;
+  font-weight: 600;
+  color: #f6e7c1;
+  letter-spacing: 0.2px;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.9);
+  white-space: normal;
+  word-break: normal;
+  overflow: visible;
+}
+
+.trait-val.trait-motto {
+  color: #fff4d2;
+  font-style: italic;
+  font-weight: 500;
+}
+
+/* ───────── Front Footer ───────── */
+.card-footer {
+  margin-top: 0;
+  padding: 5px 4px 2px;
+  border-top: 1px solid rgba(226, 178, 79, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 8px;
+  letter-spacing: 1.6px;
+  font-weight: 800;
+  color: #fde8a6;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.9);
+  position: relative;
+  z-index: 4;
+  flex-shrink: 0;
+}
+
+.card-footer-action {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 7.5px;
+  font-weight: 800;
+  color: #fde8a6;
+  opacity: 1;
+  transition: opacity 0.2s, text-shadow 0.2s;
+}
+
+.team-card:hover .card-footer-action {
+  opacity: 1;
+  text-shadow: 0 0 8px #fde8a6;
+}
+
+.seal {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  border: 1px solid var(--gold-1);
+  background: conic-gradient(
+    from calc(var(--px) * 360deg),
+    #fde8a6, #ff8ad8, #7ad7ff, #9affc1, #fde8a6
+  );
+  box-shadow: 0 0 8px #e2b24f88, inset 0 0 4px #000000aa;
+}
+
+/* ───────── Light layers ───────── */
+.card-holo {
+  position: absolute;
+  inset: 0;
+  z-index: 7;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.4s ease;
+  mix-blend-mode: color-dodge;
+  background:
+    repeating-linear-gradient(
+      115deg,
+      rgba(34, 211, 238, 0.45) 0%,
+      rgba(253, 232, 166, 0.4) 22%,
+      rgba(6, 182, 212, 0.45) 45%,
+      rgba(147, 197, 253, 0.4) 68%,
+      rgba(34, 211, 238, 0.45) 90%
+    ),
+    repeating-linear-gradient(
+      0deg,
+      rgba(255, 255, 255, 0.35) 0 1px,
+      transparent 1px 4px
+    );
+  background-size: 260% 260%, 100% 100%;
+  background-position: var(--mx) var(--my), 0 0;
+  filter: brightness(0.55) contrast(1.45) saturate(1.25);
+}
+
+.card-glare {
+  position: absolute;
+  inset: 0;
+  z-index: 8;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.4s ease;
+  mix-blend-mode: overlay;
+  background: radial-gradient(
+    circle at var(--mx) var(--my),
+    rgba(255, 255, 255, 0.45) 0%,
+    rgba(34, 211, 238, 0.2) 28%,
+    transparent 55%
+  );
+}
+
+.team-card.is-active .card-holo  { opacity: 0.26; }
+.team-card.is-active .card-glare { opacity: 0.38; }
+
+/* ───────── Ground Shadow ───────── */
+.card-shadow {
+  position: absolute;
+  left: 8%;
+  right: 8%;
+  bottom: -22px;
+  height: 26px;
+  border-radius: 50%;
+  background: radial-gradient(ellipse, #000000cc 0%, transparent 70%);
+  filter: blur(8px);
+  opacity: 0.55;
+  transition: transform 0.4s ease, opacity 0.4s ease;
+  pointer-events: none;
+}
+
+.team-card.is-active .card-shadow {
+  transform: translate(calc(var(--px) * -30px), 12px) scale(0.85);
+  opacity: 0.35;
+}
+
+/* ───────── Card Back (Dossier View) ───────── */
+.dossier-frame {
+  position: relative;
+  height: 100%;
+  width: 100%;
+  box-sizing: border-box;
+  overflow: hidden;
+  border-radius: 14px;
+  padding: 12px 14px 10px;
+  display: flex;
+  flex-direction: column;
+  color: #f6e7c1;
+  background:
+    radial-gradient(circle at 50% 15%, #082436 0%, #061522 50%, #030811 100%);
+  box-shadow: inset 0 0 24px #000000e6, inset 0 0 0 1px rgba(34, 211, 238, 0.4);
+}
+
+.dossier-frame::before {
+  content: "";
+  position: absolute;
+  inset: 5px;
+  border: 1px solid rgba(34, 211, 238, 0.4);
+  border-radius: 10px;
+  pointer-events: none;
+  z-index: 6;
+}
+
+.dossier-frame::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  background: repeating-linear-gradient(
+    0deg,
+    rgba(255, 255, 255, 0.025) 0 1px,
+    transparent 1px 3px
+  );
+}
+
+.dossier-top {
+  position: relative;
+  z-index: 5;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  margin-top: 4px;
+}
+
+.dossier-avatar-wrap {
+  position: relative;
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  padding: 2px;
+  background: linear-gradient(135deg, var(--gold-1), var(--gold-3));
+  box-shadow: 0 0 12px rgba(226, 178, 79, 0.4);
+  margin-bottom: 6px;
+  box-sizing: border-box;
+  flex-shrink: 0;
+}
+
+.dossier-avatar-wrap img {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+  object-position: center top;
+  display: block;
+}
+
+.dossier-name {
+  font-size: 15px;
+  font-weight: 900;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  margin: 0;
+  color: #ffffff;
+  background: linear-gradient(180deg, #ffffff 20%, #fde8a6 65%, #e2b24f 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  line-height: 1.2;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.9));
+}
+
+.dossier-work-badge {
+  display: inline-block;
+  margin-top: 5px;
+  padding: 4px 10px;
+  font-size: 8px;
+  line-height: 1.35;
+  font-weight: 800;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+  color: #120d04;
+  background: linear-gradient(135deg, #fde8a6, #e2b24f);
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+  max-width: 96%;
+  white-space: normal;
+  overflow: visible;
+  text-overflow: clip;
+  text-align: center;
+  word-break: normal;
+}
+
+.dossier-body {
+  position: relative;
+  z-index: 5;
+  flex: 1;
+  min-height: 0;
+  margin-top: 10px;
+  display: flex;
+  flex-direction: column;
+}
+
+.dossier-desc-container {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 9px 11px;
+  background: rgba(0, 0, 0, 0.7);
+  border: 1px solid rgba(226, 178, 79, 0.4);
+  border-radius: 8px;
+  box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.6);
+  scrollbar-width: thin;
+  scrollbar-color: #e2b24f rgba(0, 0, 0, 0.4);
+  -webkit-overflow-scrolling: touch;
+  touch-action: pan-y !important;
+  overscroll-behavior: contain;
+  overscroll-behavior-y: contain;
+  user-select: text;
+  -webkit-user-select: text;
+  pointer-events: auto !important;
+  position: relative;
+  z-index: 20;
+}
+
+.dossier-desc-container::-webkit-scrollbar {
+  width: 4px;
+  display: block;
+}
+.dossier-desc-container::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.4);
+  border-radius: 4px;
+}
+.dossier-desc-container::-webkit-scrollbar-thumb {
+  background: #e2b24f;
+  border-radius: 4px;
+}
+
+.dossier-desc-text {
+  font-size: 11px;
+  line-height: 1.6;
+  color: #ffffff;
+  font-weight: 500;
+  letter-spacing: 0.25px;
+  text-align: left;
+  margin: 0;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.9);
+}
+
+.dossier-contacts {
+  position: relative;
+  z-index: 5;
+  margin-top: 8px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+}
+
+.dossier-contact-btn {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #1a1206;
+  background: linear-gradient(135deg, var(--gold-1), var(--gold-2));
+  border: 1px solid var(--gold-1);
+  box-shadow: 0 0 8px rgba(226, 178, 79, 0.35);
+  transition: transform 0.2s, box-shadow 0.2s;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.dossier-contact-btn:hover {
+  transform: translateY(-2px) scale(1.1);
+  box-shadow: 0 0 12px rgba(253, 232, 166, 0.7);
+}
+
+.dossier-flip-action {
+  position: relative;
+  z-index: 5;
+  margin-top: 6px;
+  padding-top: 5px;
+  border-top: 1px solid rgba(226, 178, 79, 0.35);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 8px;
+  letter-spacing: 1.5px;
+  font-weight: 800;
+  color: #fde8a6;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.9);
+  cursor: pointer;
+  pointer-events: auto;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.dossier-flip-btn {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  color: #fde8a6;
+  font-weight: 800;
+  cursor: pointer;
+  transition: opacity 0.2s, text-shadow 0.2s;
+}
+
+.dossier-flip-btn:hover {
+  opacity: 1;
+  text-shadow: 0 0 8px #fde8a6;
+}
+
+/* ───────── Showcase Scroll-Pinned Section ───────── */
+.dev-showcase-section {
+  position: relative;
+  width: 100%;
+  min-height: 4400px;
+  background: linear-gradient(180deg, #040711 0%, #07101f 25%, #040711 50%, #07101f 75%, #03050a 100%);
+  color: #f6e7c1;
+  overflow-x: clip;
+  overflow-y: visible;
+}
+
+.showcase-sticky {
+  position: -webkit-sticky;
+  position: sticky;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100vh;
+  height: 100lvh;
+  min-height: 100vh;
+  min-height: 100lvh;
+  overflow: hidden;
+  isolation: isolate;
+  background:
+    radial-gradient(ellipse at 50% 18%, rgba(34, 211, 238, 0.12) 0%, transparent 60%),
+    linear-gradient(125deg, #040711 0%, #07101f 50%, #03050a 100%);
+}
+
+.showcase-sticky::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 10;
+  pointer-events: none;
+  opacity: 0.12;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.65'/%3E%3C/svg%3E");
+}
+
+.showcase-sticky::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 9;
+  pointer-events: none;
+  background: linear-gradient(
+    90deg,
+    rgba(4, 7, 17, 0.95) 0%,
+    transparent 14%,
+    transparent 86%,
+    rgba(4, 7, 17, 0.95) 100%
+  );
+}
+
+/* Background Drift Typography */
+.showcase-heading {
+  position: absolute;
+  top: 3%;
+  left: 4%;
+  width: max-content;
+  font-size: clamp(60px, 11vw, 170px);
+  line-height: 0.8;
+  font-weight: 900;
+  letter-spacing: -0.06em;
+  color: transparent;
+  background: linear-gradient(180deg, #e2b24f 0%, #22d3ee 45%, #0891b2 75%, #031424 100%);
+  background-clip: text;
+  -webkit-background-clip: text;
+  opacity: 0.35;
+  white-space: nowrap;
+  pointer-events: none;
+  will-change: transform;
+}
+
+/* Top Nav & Controls Bar */
+.showcase-nav-bar {
+  position: absolute;
+  z-index: 12;
+  top: 14px;
+  right: 4%;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+}
+
+.dev-hero-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 16px;
+  font-size: 10px;
+  letter-spacing: 2.5px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--gold-2);
+  background: rgba(226, 178, 79, 0.08);
+  border: 1px solid rgba(226, 178, 79, 0.3);
+  border-radius: 9999px;
+  box-shadow: 0 0 15px rgba(226, 178, 79, 0.15);
+  backdrop-filter: blur(8px);
+}
+
+.dev-view-switch {
+  display: inline-flex;
+  align-items: center;
+  background: rgba(20, 16, 32, 0.85);
+  padding: 3px;
+  border-radius: 9999px;
+  border: 1px solid rgba(226, 178, 79, 0.3);
+  box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(8px);
+}
+
+.dev-view-btn {
+  padding: 5px 16px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  border-radius: 9999px;
+  transition: all 0.3s ease;
+  border: none;
+  cursor: pointer;
+  background: transparent;
+  color: #8c8299;
+}
+
+.dev-view-btn.is-active {
+  background: linear-gradient(135deg, var(--gold-1), var(--gold-2));
+  color: #120d04;
+  box-shadow: 0 0 14px rgba(226, 178, 79, 0.4);
+}
+
+/* Timeline */
+.timeline {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  justify-content: space-around;
+  pointer-events: none;
+}
+
+.timeline-point {
+  position: relative;
+  height: 100%;
+  width: 1px;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.timeline-point span {
+  position: absolute;
+  bottom: 8%;
+  left: -25px;
+  color: rgba(226, 178, 79, 0.1);
+  font-size: clamp(36px, 5vw, 70px);
+  font-weight: 300;
+}
+
+.timeline-point div {
+  position: absolute;
+  bottom: 0;
+  width: 1px;
+  height: 18px;
+  background: rgba(226, 178, 79, 0.3);
+}
+
+/* Horizontal Track */
+.showcase-track {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  gap: clamp(50px, 8vw, 130px);
+  padding-left: calc(50vw - 135px);
+  padding-right: calc(50vw - 135px);
+  width: max-content;
+  will-change: transform;
+  z-index: 20;
+  pointer-events: auto;
+}
+
+/* ───────── Showcase Item Arc Motion ───────── */
+/* 
+   Requested Curve:
+   - Coming from right (d > 0): comes from a little below (+85px)
+   - Middle of screen (d = 0): center (0px), scale(1.06), crisp contrast
+   - Leaving on left (d < 0): goes a little up before exiting (-85px)
+*/
+.showcase-item {
+  --d: 0;   /* -1 … 1 : distance from viewport center (JS) */
+  --a: 0;   /*  0 … 1 : absolute distance (JS) */
+
+  position: relative;
+  flex-shrink: 0;
+  width: 270px;
+  z-index: 5;
+  cursor: pointer;
+  pointer-events: auto;
+  transform-style: preserve-3d;
+  -webkit-transform-style: preserve-3d;
+
+  transform:
+    perspective(1300px)
+    translateY(calc(var(--d) * 85px))
+    rotateY(calc(var(--d) * -20deg))
+    rotateZ(calc(var(--d) * -2.5deg))
+    scale(calc(1.06 - var(--a) * 0.16));
+  opacity: 1;
+  will-change: transform;
+}
+
+.showcase-item:hover,
+.showcase-item.is-center {
+  z-index: 25;
+  opacity: 1;
+}
+
+/* Elevate and face forward whenever ANY card in the viewport is flipped */
+.showcase-item.has-flipped-card,
+.showcase-item:has(.is-card-flipped),
+.showcase-item:has(.is-flipped) {
+  z-index: 50 !important;
+  opacity: 1 !important;
+  transform:
+    perspective(1300px)
+    translateY(0)
+    rotateY(0deg)
+    rotateZ(0deg)
+    scale(1.06) !important;
+  transition: transform 0.5s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.member-caption {
+  margin: 32px 0 0;
+  text-align: center;
+  color: #a39cb0;
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  white-space: normal;
+  overflow: visible;
+  transition: color 0.4s ease, text-shadow 0.4s ease;
+}
+
+.showcase-item.is-center .member-caption,
+.showcase-item:hover .member-caption,
+.showcase-item.has-flipped-card .member-caption,
+.showcase-item:has(.is-card-flipped) .member-caption {
+  color: #22d3ee;
+  text-shadow: 0 0 10px rgba(34, 211, 238, 0.5);
+}
+
+/* ───────── Showcase Footer ───────── */
+.showcase-footer {
+  position: absolute;
+  z-index: 12;
+  bottom: 22px;
+  left: 4%;
+  right: 4%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: #77717f;
+  font-size: 9px;
+  letter-spacing: 3px;
+}
+
+.progress {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  color: #22d3ee;
+  letter-spacing: 2px;
+}
+
+.progress-line {
+  position: relative;
+  width: clamp(80px, 16vw, 220px);
+  height: 2px;
+  background: rgba(34, 211, 238, 0.18);
+  overflow: hidden;
+}
+
+.progress-line i {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, #0891b2, #22d3ee);
+  box-shadow: 0 0 10px #22d3ee;
+  transform-origin: left center;
+  transform: scaleX(0);
+}
+
+/* ───────── Grid View Mode ───────── */
+.dev-grid-section {
+  position: relative;
+  padding: 60px 4% 90px;
+  max-width: 1360px;
+  margin: 0 auto;
+  background: #0d0b14;
+  border-radius: 24px;
+}
+
+.dev-grid-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(270px, 1fr));
+  justify-items: center;
+  gap: 50px 30px;
+  padding: 20px 0;
+}
+
+/* ───────── Responsive ───────── */
+@media (max-width: 768px) {
+  /* Disable shiny rainbow and glare on mobile to avoid blurry cards */
+  .card-holo,
+  .card-glare {
+    display: none !important;
+  }
+
+  .team-card {
+    width: 230px;
+  }
+
+  .ribbon {
+    font-size: 11px;
+    letter-spacing: 0.6px;
+    padding: 5px 8px;
+    overflow: visible;
+    text-overflow: clip;
+    white-space: nowrap;
+  }
+
+  .role {
+    font-size: 8px;
+    font-weight: 700;
+    letter-spacing: 0.8px;
+    min-height: 20px;
+    color: #fde8a6;
+  }
+
+  .portrait-window {
+    flex: 1;
+    min-height: 150px;
+    border-radius: 80px 80px 10px 10px;
+  }
+
+  .personality-traits {
+    margin-top: auto;
+    margin-bottom: 3px;
+    padding: 4px 6px;
+    gap: 3px;
+  }
+
+  .trait-row {
+    gap: 4px;
+    line-height: 1.25;
+  }
+
+  .trait-label {
+    font-size: 7.5px;
+    letter-spacing: 0.4px;
+  }
+
+  .trait-val {
+    font-size: 8.5px;
+  }
+
+  .showcase-heading {
+    top: 8%;
+    font-size: 14vw;
+    opacity: 0.22;
+  }
+
+  .timeline {
+    top: 0;
+    bottom: 0;
+  }
+
+  /* Centre-aligned track with exact card half-width margin */
+  .showcase-track {
+    padding-left: calc(50vw - 115px);
+    padding-right: calc(50vw - 115px);
+    gap: 36px;
+  }
+
+  /* Upright, balanced 3D card presentation on mobile - no right tilt & GPU-only motion */
+  .showcase-item {
+    width: 230px;
+    filter: none !important;
+    transition: none !important;
+    transform:
+      perspective(1300px)
+      translateY(calc(var(--d) * 30px))
+      rotateY(calc(var(--d) * -4deg))
+      scale(calc(1.03 - var(--a) * 0.08));
+    opacity: 1 !important;
+  }
+
+  .showcase-item.is-center {
+    filter: none !important;
+  }
+
+  .showcase-item.has-flipped-card,
+  .showcase-item:has(.is-card-flipped),
+  .showcase-item:has(.is-flipped) {
+    z-index: 50 !important;
+    opacity: 1 !important;
+    transform:
+      perspective(1300px)
+      translateY(0)
+      rotateY(0deg)
+      scale(1.04) !important;
+    transition: transform 0.4s ease !important;
+  }
+
+  /* Ensure the flipped card back face creates a flat 2D compositing plane so mobile touch scrollers work */
+  .card-flipper.is-flipped .card-face-back {
+    transform-style: flat !important;
+  }
+
+  /* Description container touch scrollability on mobile */
+  .dossier-desc-container {
+    max-height: 125px;
+    touch-action: pan-y !important;
+    -webkit-overflow-scrolling: touch !important;
+    overscroll-behavior: contain !important;
+    overscroll-behavior-y: contain !important;
+    pointer-events: auto !important;
+  }
+
+  .dossier-desc-text {
+    font-size: 10.5px;
+    line-height: 1.55;
+  }
+
+  .showcase-sticky {
+    height: 100vh;
+    height: 100lvh;
+    min-height: 100vh;
+    min-height: 100lvh;
+    background:
+      radial-gradient(ellipse at 50% 18%, rgba(34, 211, 238, 0.10) 0%, transparent 60%),
+      linear-gradient(125deg, #040711 0%, #07101f 50%, #03050a 100%);
+  }
+
+  .showcase-sticky::before {
+    inset: 0;
+  }
+
+  .showcase-sticky::after {
+    inset: 0;
+  }
+
+  .showcase-footer {
+    font-size: 7px;
+    letter-spacing: 1px;
+    bottom: 16px;
+    bottom: max(16px, env(safe-area-inset-bottom));
+  }
+
+  .showcase-footer > span {
+    display: none;
+  }
+
+  .progress {
+    margin: 0 auto;
+  }
+}
+
+/* Ensure background continues seamlessly below developer section */
+html:has(.dev-showcase-section),
+body:has(.dev-showcase-section) {
+  background-color: #03050a !important;
+}
+
+body:has(.dev-showcase-section) footer {
+  background: #03050a !important;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .team-card, .spark { animation: none; }
+  .card-3d,
+  .team-card.is-active .card-3d { transition: none; transform: none; }
+  .showcase-item { transform: none; filter: none; }
+}
