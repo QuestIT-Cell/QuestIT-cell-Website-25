@@ -14,7 +14,6 @@ import PhotoLightboxModal from "./PhotoLightboxModal";
 
 /* ─── Orbital Memories Exhibition Images ───────────────────────────────────── */
 const ORBITAL_IMAGES = [
-  "/images/gallery-images/Orbital/IMG_2522_1920x1080.webp",
   "/images/gallery-images/Orbital/diagonal_9.webp",
   "/images/gallery-images/Orbital/diagonal_12.webp",
   "/images/gallery-images/Orbital/Council_photos_genesis.webp",
@@ -25,6 +24,7 @@ const ORBITAL_IMAGES = [
   "/images/gallery-images/Orbital/IMG_3955_1920x1080.webp",
   "/images/gallery-images/Orbital/rshb-vwq_1920x1080.webp",
   "/images/gallery-images/Orbital/shivam-bw1_1920x1080.webp",
+  "/images/gallery-images/Orbital/IMG_2522_1920x1080.webp",
   "/images/gallery-images/Orbital/table-2_1920x1080.webp",
 ];
 

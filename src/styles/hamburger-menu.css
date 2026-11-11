@@ -14,6 +14,87 @@ html.qm-open {
   overflow: hidden;
 }
 
+/* ─── Cyan 400 Color Spreading Wave from Hamburger Icon ─── */
+.qm-cyan-wave {
+  position: fixed;
+  inset: 0;
+  z-index: 10003;
+  pointer-events: none;
+  opacity: 0;
+}
+
+.qm-cyan-wave.is-active {
+  animation: qmCyanWaveSpread 0.85s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes qmCyanWaveSpread {
+  0% {
+    opacity: 1;
+    clip-path: circle(0px at var(--wave-x, calc(100vw - 38px)) var(--wave-y, 38px));
+    background: radial-gradient(
+      circle at var(--wave-x, calc(100vw - 38px)) var(--wave-y, 38px),
+      rgba(34, 211, 238, 0.85) 0%,
+      rgba(34, 211, 238, 0.45) 25%,
+      rgba(6, 182, 212, 0.25) 55%,
+      rgba(4, 7, 17, 0) 80%
+    );
+  }
+  35% {
+    opacity: 0.9;
+  }
+  70% {
+    opacity: 0.55;
+  }
+  100% {
+    opacity: 0;
+    clip-path: circle(160vmax at var(--wave-x, calc(100vw - 38px)) var(--wave-y, 38px));
+    background: radial-gradient(
+      circle at var(--wave-x, calc(100vw - 38px)) var(--wave-y, 38px),
+      rgba(34, 211, 238, 0.35) 0%,
+      rgba(34, 211, 238, 0.18) 35%,
+      rgba(6, 182, 212, 0.08) 65%,
+      transparent 90%
+    );
+  }
+}
+
+.qm-cyan-wave::after {
+  content: "";
+  position: absolute;
+  left: var(--wave-x, calc(100vw - 38px));
+  top: var(--wave-y, 38px);
+  width: 10px;
+  height: 10px;
+  margin-left: -5px;
+  margin-top: -5px;
+  border-radius: 50%;
+  border: 2px solid rgba(34, 211, 238, 0.9);
+  box-shadow: 0 0 25px 8px rgba(34, 211, 238, 0.85), inset 0 0 15px rgba(34, 211, 238, 0.6);
+  opacity: 0;
+  pointer-events: none;
+}
+
+.qm-cyan-wave.is-active::after {
+  animation: qmPulseRing 0.85s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes qmPulseRing {
+  0% {
+    transform: scale(0);
+    opacity: 1;
+    border-width: 4px;
+  }
+  50% {
+    opacity: 0.8;
+    border-width: 2px;
+  }
+  100% {
+    transform: scale(250);
+    opacity: 0;
+    border-width: 1px;
+  }
+}
+
 /* ─── Hamburger -> Cross (Morphs in the exact same spot) ─── */
 .qm-burger {
   display: block;
@@ -107,6 +188,8 @@ html.qm-open .qm-menu {
 /* ─── Glass Pill Buttons (Cascading in from the right) ─── */
 .qm-menu a.qm-nav-link,
 .qm-menu .qm-social-pill {
+  position: relative;
+  overflow: hidden;
   display: flex;
   align-items: center;
   gap: 14px;
@@ -226,6 +309,8 @@ html.qm-open .qm-menu a.qm-nav-link:active {
 }
 
 .qm-social-btn {
+  position: relative;
+  overflow: hidden;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -269,3 +354,4 @@ html.qm-open .qm-menu a.qm-nav-link:active {
     animation: none;
   }
 }
+

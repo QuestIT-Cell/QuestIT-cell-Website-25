@@ -119,19 +119,29 @@ function useIndicator() {
   return { indRef, moveTo };
 }
 
-/* ─── Spark burst on click (desktop only) ────────────────────────────────── */
+/* ─── Spark burst on click (desktop & mobile) ────────────────────────────── */
 function spawnSparks(e, container) {
   if (!container) return;
   const r = container.getBoundingClientRect();
-  const x = e.clientX ? e.clientX - r.left : r.width / 2;
-  const y = e.clientY ? e.clientY - r.top : r.height / 2;
-  for (let i = 0; i < 10; i++) {
+  const clientX =
+    e?.clientX ||
+    (e?.touches && e.touches[0]?.clientX) ||
+    r.left + r.width / 2;
+  const clientY =
+    e?.clientY ||
+    (e?.touches && e.touches[0]?.clientY) ||
+    r.top + r.height / 2;
+  const x = clientX - r.left;
+  const y = clientY - r.top;
+
+  for (let i = 0; i < 12; i++) {
     const p = document.createElement("span");
-    const ang = (i / 10) * Math.PI * 2 + Math.random() * 0.5;
-    const dist = 28 + Math.random() * 24;
+    const ang = (i / 12) * Math.PI * 2 + Math.random() * 0.5;
+    const dist = 28 + Math.random() * 26;
     p.style.cssText = `
       position:absolute;width:5px;height:5px;margin:-2.5px;border-radius:50%;
-      background:#22d3ee;box-shadow:0 0 6px #22d3ee;pointer-events:none;z-index:3;
+      background:#22d3ee;box-shadow:0 0 8px #22d3ee, 0 0 16px rgba(34,211,238,0.85);
+      pointer-events:none;z-index:25;
       left:${x}px;top:${y}px;
       --dx:${Math.cos(ang) * dist}px;--dy:${Math.sin(ang) * dist}px;
       animation:questSparkAnim .65s cubic-bezier(.2,.8,.3,1) forwards;
@@ -149,6 +159,8 @@ const Header = () => {
   const [isHidden, setIsHidden] = useState(false);
   const [sheetOpen, setSheetOpen] = useState(false);
   const [activeId, setActiveId] = useState("home");
+  const [waveActive, setWaveActive] = useState(false);
+  const [waveOrigin, setWaveOrigin] = useState({ x: 0, y: 0 });
 
   const wrapRef = useRef(null);
   const listRef = useRef(null);
@@ -265,6 +277,28 @@ const Header = () => {
       window.removeEventListener("resize", handleResize);
     };
   }, [sheetOpen]);
+
+  /* ─── Hamburger click: burst sparks + cyan-400 spreading wave ─────────── */
+  const handleBurgerClick = (e) => {
+    const btn = e.currentTarget;
+    spawnSparks(e, btn);
+    const r = btn.getBoundingClientRect();
+    setWaveOrigin({
+      x: r.left + r.width / 2,
+      y: r.top + r.height / 2,
+    });
+    setWaveActive(true);
+    setTimeout(() => setWaveActive(false), 850);
+    setSheetOpen((prev) => !prev);
+  };
+
+  /* ─── Mobile menu link click: exact same spark burst as navbar ────────── */
+  const handleMobileNavClick = (e) => {
+    spawnSparks(e, e.currentTarget);
+    setTimeout(() => {
+      setSheetOpen(false);
+    }, 200);
+  };
 
   const desktopLinks = menu.filter((m) => m.name !== "Contact");
   const ctaItem = menu.find((m) => m.name === "Contact");
@@ -509,7 +543,7 @@ const Header = () => {
               aria-label={sheetOpen ? "Close menu" : "Open menu"}
               aria-expanded={sheetOpen}
               aria-controls="qmMenu"
-              onClick={() => setSheetOpen((o) => !o)}
+              onClick={handleBurgerClick}
             >
               <span></span>
               <span></span>
@@ -518,6 +552,16 @@ const Header = () => {
           </div>
         </div>
       </header>
+
+      {/* ── Full-Screen Cyan 400 Color Spreading Wave from Hamburger Icon ── */}
+      <div
+        className={`qm-cyan-wave ${waveActive ? "is-active" : ""}`}
+        aria-hidden="true"
+        style={{
+          "--wave-x": `${waveOrigin.x}px`,
+          "--wave-y": `${waveOrigin.y}px`,
+        }}
+      />
 
       {/* ── 4. Mobile Cascading Glass Pills Navigation Menu ────────────── */}
       <nav
@@ -544,7 +588,7 @@ const Header = () => {
                 "--i": i,
                 "--n": TOTAL_MOBILE_ITEMS,
               }}
-              onClick={() => setSheetOpen(false)}
+              onClick={(e) => handleMobileNavClick(e, item.path)}
             >
               <i>{item.iconSvg}</i>
               <span>{item.name}</span>
@@ -574,7 +618,10 @@ const Header = () => {
               rel="noopener noreferrer"
               aria-label="GitHub"
               className="qm-social-btn"
-              onClick={() => setSheetOpen(false)}
+              onClick={(e) => {
+                spawnSparks(e, e.currentTarget);
+                setTimeout(() => setSheetOpen(false), 200);
+              }}
             >
               <FaGithub className="w-4 h-4" />
             </a>
@@ -584,7 +631,10 @@ const Header = () => {
               rel="noopener noreferrer"
               aria-label="LinkedIn"
               className="qm-social-btn"
-              onClick={() => setSheetOpen(false)}
+              onClick={(e) => {
+                spawnSparks(e, e.currentTarget);
+                setTimeout(() => setSheetOpen(false), 200);
+              }}
             >
               <FaLinkedin className="w-4 h-4" />
             </a>
@@ -594,7 +644,10 @@ const Header = () => {
               rel="noopener noreferrer"
               aria-label="Instagram"
               className="qm-social-btn"
-              onClick={() => setSheetOpen(false)}
+              onClick={(e) => {
+                spawnSparks(e, e.currentTarget);
+                setTimeout(() => setSheetOpen(false), 200);
+              }}
             >
               <FaInstagram className="w-4 h-4" />
             </a>
