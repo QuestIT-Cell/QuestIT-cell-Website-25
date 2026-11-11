@@ -102,11 +102,12 @@ function CollectibleTeamCard({
   total,
   year = "2026",
   isCenter = false,
+  isFlipped = false,
+  onToggleFlip,
 }) {
   const cardRef = useRef(null);
   const frameId = useRef(0);
   const [imgFailed, setImgFailed] = useState(false);
-  const [isFlipped, setIsFlipped] = useState(false);
 
   const workTitle = DEVELOPER_WORK_TITLES[member.name] || member.role || "Developer";
   const designation = getCardDesignation(member.name);
@@ -116,7 +117,20 @@ function CollectibleTeamCard({
     { label: "TEAMWORK", value: 90 },
   ];
 
+  // When card is flipped, reset pointer tilt so the back face text is rock-steady and crisp
+  useEffect(() => {
+    const el = cardRef.current;
+    if (!el) return;
+    if (isFlipped) {
+      el.classList.remove("is-active");
+      ["--mx", "--my", "--px", "--py", "--rx", "--ry"].forEach((p) =>
+        el.style.removeProperty(p)
+      );
+    }
+  }, [isFlipped]);
+
   const handlePointerMove = (e) => {
+    if (isFlipped) return; // Keep back face steady for reading and clicking links
     const el = cardRef.current;
     if (!el) return;
 
@@ -136,6 +150,7 @@ function CollectibleTeamCard({
   };
 
   const handlePointerEnter = () => {
+    if (isFlipped) return;
     cardRef.current?.classList.add("is-active");
   };
 
@@ -155,14 +170,14 @@ function CollectibleTeamCard({
       return;
     }
     e.stopPropagation();
-    setIsFlipped((prev) => !prev);
+    onToggleFlip?.();
   };
 
   return (
     <div
       className={`team-card ${isCenter ? "is-center" : ""} ${isFlipped ? "is-card-flipped" : ""}`}
       style={{
-        zIndex: isFlipped ? 30 : undefined,
+        zIndex: isFlipped ? 50 : undefined,
       }}
       ref={cardRef}
       onPointerMove={handlePointerMove}
@@ -378,6 +393,20 @@ export default function NewDeveloperSection() {
   const barRef = useRef(null);
   const counterRef = useRef(null);
 
+  // Per-card flipped state so each and every card in viewport can flip independently
+  const [flippedCards, setFlippedCards] = useState({});
+
+  const toggleCardFlip = (index, e) => {
+    // Prevent flipping if clicking contact link
+    if (e && (e.target.closest("a") || e.target.closest("button.dossier-contact-btn"))) {
+      return;
+    }
+    setFlippedCards((prev) => ({
+      ...prev,
+      [index]: !prev[index],
+    }));
+  };
+
   const totalMembers = developers.length;
 
   // Ensure body and html never have overflow-x: hidden which disables position: sticky
@@ -567,17 +596,21 @@ export default function NewDeveloperSection() {
         <div className="showcase-track" ref={trackRef}>
           {developers.map((member, index) => {
             const workTitle = DEVELOPER_WORK_TITLES[member.name] || member.role;
+            const isFlipped = !!flippedCards[index];
 
             return (
               <article
-                className="showcase-item"
+                className={`showcase-item ${isFlipped ? "has-flipped-card" : ""}`}
                 key={member.name}
                 style={{ "--i": index }}
+                onClick={(e) => toggleCardFlip(index, e)}
               >
                 <CollectibleTeamCard
                   member={member}
                   number={index + 1}
                   total={totalMembers}
+                  isFlipped={isFlipped}
+                  onToggleFlip={() => toggleCardFlip(index)}
                 />
                 <p className="member-caption">{workTitle}</p>
               </article>

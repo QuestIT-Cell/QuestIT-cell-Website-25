@@ -18,6 +18,7 @@
   aspect-ratio: 0.61;
   perspective: 1400px;
   transform-style: preserve-3d;
+  -webkit-transform-style: preserve-3d;
   animation: card-float 6s ease-in-out infinite;
   will-change: transform;
   cursor: pointer;
@@ -28,7 +29,8 @@
 }
 
 .team-card.is-card-flipped {
-  z-index: 30 !important;
+  z-index: 50 !important;
+  animation-play-state: paused !important;
 }
 
 .team-card:nth-child(2) { animation-delay: -1.2s; }
@@ -55,6 +57,7 @@
   width: 100%;
   height: 100%;
   transform-style: preserve-3d;
+  -webkit-transform-style: preserve-3d;
   transform: rotateX(var(--rx)) rotateY(var(--ry));
   transition: transform 0.12s linear;
   will-change: transform;
@@ -71,6 +74,7 @@
   width: 100%;
   height: 100%;
   transform-style: preserve-3d;
+  -webkit-transform-style: preserve-3d;
   transition: transform 0.6s cubic-bezier(0.2, 0.8, 0.2, 1);
   transform: rotateY(0deg);
   will-change: transform;
@@ -942,6 +946,8 @@
   padding-right: calc(50vw - 135px);
   width: max-content;
   will-change: transform;
+  z-index: 20;
+  pointer-events: auto;
 }
 
 /* ───────── Showcase Item Arc Motion ───────── */
@@ -958,10 +964,11 @@
   position: relative;
   flex-shrink: 0;
   width: 270px;
-  z-index: 2;
+  z-index: 5;
   cursor: pointer;
   pointer-events: auto;
   transform-style: preserve-3d;
+  -webkit-transform-style: preserve-3d;
 
   transform:
     perspective(1300px)
@@ -969,16 +976,29 @@
     rotateY(calc(var(--d) * -20deg))
     rotateZ(calc(var(--d) * -2.5deg))
     scale(calc(1.06 - var(--a) * 0.16));
-  opacity: calc(1.02 - var(--a) * 0.16);
-  will-change: transform, opacity;
+  opacity: 1;
+  will-change: transform;
 }
 
 .showcase-item:hover,
-.showcase-item.is-center,
-.showcase-item:has(.is-card-flipped),
-.showcase-item:has(.is-flipped) {
+.showcase-item.is-center {
   z-index: 25;
   opacity: 1;
+}
+
+/* Elevate and face forward whenever ANY card in the viewport is flipped */
+.showcase-item.has-flipped-card,
+.showcase-item:has(.is-card-flipped),
+.showcase-item:has(.is-flipped) {
+  z-index: 50 !important;
+  opacity: 1 !important;
+  transform:
+    perspective(1300px)
+    translateY(0)
+    rotateY(0deg)
+    rotateZ(0deg)
+    scale(1.06) !important;
+  transition: transform 0.5s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
 .member-caption {
@@ -996,6 +1016,7 @@
 
 .showcase-item.is-center .member-caption,
 .showcase-item:hover .member-caption,
+.showcase-item.has-flipped-card .member-caption,
 .showcase-item:has(.is-card-flipped) .member-caption {
   color: #22d3ee;
   text-shadow: 0 0 10px rgba(34, 211, 238, 0.5);
@@ -1111,10 +1132,24 @@
       translateY(calc(var(--d) * 30px))
       rotateY(calc(var(--d) * -4deg))
       scale(calc(1.03 - var(--a) * 0.08));
+    opacity: 1 !important;
   }
 
   .showcase-item.is-center {
     filter: none !important;
+  }
+
+  .showcase-item.has-flipped-card,
+  .showcase-item:has(.is-card-flipped),
+  .showcase-item:has(.is-flipped) {
+    z-index: 50 !important;
+    opacity: 1 !important;
+    transform:
+      perspective(1300px)
+      translateY(0)
+      rotateY(0deg)
+      scale(1.04) !important;
+    transition: transform 0.4s ease !important;
   }
 
   .showcase-footer {
