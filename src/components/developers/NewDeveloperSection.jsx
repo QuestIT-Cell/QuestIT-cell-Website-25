@@ -635,8 +635,9 @@ export default function NewDeveloperSection() {
       // Balanced scroll ratio: on mobile, 1 natural thumb flick moves exactly 1 card
       const scrollMultiplier = cachedIsMobile ? 1.55 : 1.35;
       const scrollTrackDistance = maxTravel * scrollMultiplier;
-      section.style.height = `${window.innerHeight + scrollTrackDistance}px`;
-      cachedDistance = section.offsetHeight - window.innerHeight;
+      const vh = window.innerHeight || document.documentElement.clientHeight || 800;
+      section.style.height = `${vh + scrollTrackDistance}px`;
+      cachedDistance = section.offsetHeight - vh;
 
       centers = items.map((el) => el.offsetLeft + el.offsetWidth / 2);
       readTarget();
@@ -648,6 +649,9 @@ export default function NewDeveloperSection() {
 
     window.addEventListener("scroll", onScroll, { passive: true });
     window.addEventListener("resize", measure);
+    if (window.visualViewport) {
+      window.visualViewport.addEventListener("resize", measure);
+    }
 
     const observer = new ResizeObserver(measure);
     observer.observe(track);
@@ -657,6 +661,9 @@ export default function NewDeveloperSection() {
       section.classList.remove("is-scrolling");
       window.removeEventListener("scroll", onScroll);
       window.removeEventListener("resize", measure);
+      if (window.visualViewport) {
+        window.visualViewport.removeEventListener("resize", measure);
+      }
       observer.disconnect();
     };
   }, []);
