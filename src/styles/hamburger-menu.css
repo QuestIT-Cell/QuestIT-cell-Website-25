@@ -181,6 +181,27 @@ html.qm-open .qm-menu .qm-social-pill {
               opacity .6s ease calc(.1s + var(--i) * .07s);
 }
 
+/* ─── Button Click Exit Sequence (First clicked button moves outside, then rest follow) ─── */
+html.qm-open .qm-menu.qm-exit-mode a.qm-nav-link.qm-first-exit,
+html.qm-open .qm-menu.qm-exit-mode .qm-social-pill.qm-first-exit,
+.qm-open .qm-menu.qm-exit-mode a.qm-nav-link.qm-first-exit,
+.qm-open .qm-menu.qm-exit-mode .qm-social-pill.qm-first-exit {
+  transform: translate3d(145%, 0, 0) scale(0.96) !important;
+  opacity: 0 !important;
+  transition: transform 0.32s cubic-bezier(0.4, 0, 0.2, 1) 0s,
+              opacity 0.24s ease 0.04s !important;
+}
+
+html.qm-open .qm-menu.qm-exit-mode a.qm-nav-link.qm-rest-exit,
+html.qm-open .qm-menu.qm-exit-mode .qm-social-pill.qm-rest-exit,
+.qm-open .qm-menu.qm-exit-mode a.qm-nav-link.qm-rest-exit,
+.qm-open .qm-menu.qm-exit-mode .qm-social-pill.qm-rest-exit {
+  transform: translate3d(145%, 0, 0) !important;
+  opacity: 0 !important;
+  transition: transform 0.34s cubic-bezier(0.4, 0, 0.2, 1) calc(0.14s + var(--dist, 0) * 0.035s),
+              opacity 0.28s ease calc(0.14s + var(--dist, 0) * 0.035s) !important;
+}
+
 .qm-open .qm-menu a.qm-nav-link:active,
 html.qm-open .qm-menu a.qm-nav-link:active {
   transform: scale(.97);

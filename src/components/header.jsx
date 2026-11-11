@@ -3,11 +3,49 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { ChevronDown, ExternalLink } from "lucide-react";
 import { FaGithub, FaLinkedin, FaInstagram } from "react-icons/fa";
 import menu from "@/constants/menu";
 import "@/styles/hamburger-menu.css";
+
+/* ─── Generate Single Continuous Beam Path (Navbar Perimeter + Active Button) ─── */
+function generateNavbarBeamPath(w, h, btn) {
+  if (w <= 0 || h <= 0) return "";
+  const R = h / 2;
+
+  // If no active button is detected, trace the outer navbar capsule
+  if (!btn || btn.w <= 0 || btn.h <= 0) {
+    return `M ${R},0 L ${w - R},0 A ${R} ${R} 0 0 1 ${w - R},${h} L ${R},${h} A ${R} ${R} 0 0 1 ${R},0 Z`;
+  }
+
+  const bx = btn.x;
+  const by = btn.y;
+  const bw = btn.w;
+  const bh = btn.h;
+  const br = bh / 2;
+
+  const leftX = bx + br;
+  const rightX = Math.max(leftX + 4, bx + bw - br);
+  const entryX = Math.max(R + 8, Math.min(w - R - 8, leftX));
+
+  return [
+    `M ${R},0`,
+    `L ${entryX - 6},0`,
+    `Q ${entryX},0 ${entryX},${by}`,
+    `L ${rightX},${by}`,
+    `A ${br} ${br} 0 0 1 ${rightX},${by + bh}`,
+    `L ${leftX},${by + bh}`,
+    `A ${br} ${br} 0 0 1 ${leftX},${by}`,
+    `L ${entryX},${by}`,
+    `Q ${entryX},0 ${entryX + 6},0`,
+    `L ${w - R},0`,
+    `A ${R} ${R} 0 0 1 ${w - R},${h}`,
+    `L ${R},${h}`,
+    `A ${R} ${R} 0 0 1 ${R},0`,
+    `Z`,
+  ].join(" ");
+}
 
 /* ─── Mobile Navigation Items with Uniform Theme & Lucide SVG Icons ───────── */
 const MOBILE_NAV_ITEMS = [
@@ -154,15 +192,82 @@ function spawnSparks(e, container) {
 /* ─── Header Component ───────────────────────────────────────────────────── */
 const Header = () => {
   const pathname = usePathname();
+  const router = useRouter();
 
   const [isScrolled, setIsScrolled] = useState(false);
   const [isHidden, setIsHidden] = useState(false);
   const [sheetOpen, setSheetOpen] = useState(false);
   const [activeId, setActiveId] = useState("home");
 
+  // Mobile menu exit animation state
+  const [clickedIndex, setClickedIndex] = useState(null);
+  const [isItemExiting, setIsItemExiting] = useState(false);
+
+  // Desktop single moving line geometry state
   const wrapRef = useRef(null);
   const listRef = useRef(null);
+  const navRef = useRef(null);
+  const pathRef = useRef(null);
+  const [navGeometry, setNavGeometry] = useState({ w: 0, h: 0, btn: null });
+  const [pathLen, setPathLen] = useState(1600);
+
   const { indRef, moveTo } = useIndicator();
+
+  /* ─── Calculate exact geometry for the single continuous moving line ────── */
+  const updateGeometry = useCallback(() => {
+    const nav = navRef.current;
+    if (!nav) return;
+    const navR = nav.getBoundingClientRect();
+    if (navR.width <= 0 || navR.height <= 0) return;
+
+    const activeEl =
+      listRef.current?.querySelector(".quest-active") ||
+      nav.querySelector(".quest-active");
+
+    let btn = null;
+    if (activeEl) {
+      const btnR = activeEl.getBoundingClientRect();
+      if (btnR.width > 0 && btnR.height > 0) {
+        btn = {
+          x: btnR.left - navR.left,
+          y: btnR.top - navR.top,
+          w: btnR.width,
+          h: btnR.height,
+        };
+      }
+    }
+
+    setNavGeometry({
+      w: Math.round(navR.width),
+      h: Math.round(navR.height),
+      btn,
+    });
+  }, []);
+
+  useEffect(() => {
+    updateGeometry();
+    const t1 = setTimeout(updateGeometry, 60);
+    const t2 = setTimeout(updateGeometry, 250);
+    window.addEventListener("resize", updateGeometry);
+    return () => {
+      clearTimeout(t1);
+      clearTimeout(t2);
+      window.removeEventListener("resize", updateGeometry);
+    };
+  }, [pathname, activeId, updateGeometry]);
+
+  useEffect(() => {
+    if (pathRef.current) {
+      try {
+        const len = pathRef.current.getTotalLength();
+        if (len > 50) {
+          setPathLen(Math.round(len));
+        }
+      } catch {
+        // ignore
+      }
+    }
+  }, [navGeometry]);
 
   /* ─── Check which navigation item is active ───────────────────────────── */
   const isItemActive = useCallback(
@@ -278,19 +383,71 @@ const Header = () => {
 
   /* ─── Hamburger click: toggle mobile menu ──────────────────────────────── */
   const handleBurgerClick = () => {
+    if (isItemExiting) return;
+    setClickedIndex(null);
+    setIsItemExiting(false);
     setSheetOpen((prev) => !prev);
   };
 
-  /* ─── Mobile menu link click: exact same spark burst as navbar ────────── */
-  const handleMobileNavClick = (e) => {
+  /* ─── Mobile menu link click: first clicked button moves outside, then all others follow ─ */
+  const handleMobileNavClick = (e, item, index) => {
+    e.preventDefault();
+    if (isItemExiting) return;
+
     spawnSparks(e, e.currentTarget);
+    setClickedIndex(index);
+    setIsItemExiting(true);
+
     setTimeout(() => {
       setSheetOpen(false);
-    }, 200);
+      setIsItemExiting(false);
+      setClickedIndex(null);
+
+      if (item.path.startsWith("/#")) {
+        const hash = item.path.split("#")[1];
+        if (pathname === "/" || pathname === "") {
+          const el = document.getElementById(hash);
+          if (el) {
+            el.scrollIntoView({ behavior: "smooth" });
+          } else {
+            window.location.hash = hash;
+          }
+        } else {
+          router.push(item.path);
+        }
+      } else {
+        router.push(item.path);
+      }
+    }, 460);
+  };
+
+  /* ─── Mobile social link click: first social pill moves outside, then rest follow ─ */
+  const handleSocialClick = (e, href) => {
+    e.preventDefault();
+    if (isItemExiting) return;
+
+    spawnSparks(e, e.currentTarget);
+    setClickedIndex(MOBILE_NAV_ITEMS.length);
+    setIsItemExiting(true);
+
+    setTimeout(() => {
+      setSheetOpen(false);
+      setIsItemExiting(false);
+      setClickedIndex(null);
+      window.open(href, "_blank", "noopener,noreferrer");
+    }, 460);
   };
 
   const desktopLinks = menu.filter((m) => m.name !== "Contact");
   const ctaItem = menu.find((m) => m.name === "Contact");
+
+  // Path string and beam length for the single moving line
+  const pathString = generateNavbarBeamPath(
+    navGeometry.w,
+    navGeometry.h,
+    navGeometry.btn
+  );
+  const beamLength = Math.max(80, Math.min(140, Math.round(pathLen * 0.09)));
 
   return (
     <>
@@ -299,6 +456,9 @@ const Header = () => {
         @keyframes questSparkAnim{
           0%{transform:translate(0,0) scale(1);opacity:1}
           100%{transform:translate(var(--dx),var(--dy)) scale(0);opacity:0}
+        }
+        @keyframes questSingleLineAnim{
+          to{stroke-dashoffset:var(--quest-len,-1600px)}
         }
         @keyframes questNavSpin{to{--quest-a:360deg}}
         @property --quest-a{syntax:'<angle>';inherits:false;initial-value:0deg}
@@ -342,6 +502,7 @@ const Header = () => {
           {/* 2. Center: Desktop Floating Pill Navbar (Perfect horizontal alignment & concentric capsule curvature) */}
           <div className="hidden md:flex absolute inset-x-0 justify-center items-center pointer-events-none z-10">
             <nav
+              ref={navRef}
               className="pointer-events-auto relative flex items-center gap-1.5 md:gap-2 lg:gap-2.5 max-w-[96vw]"
               style={{
                 width: "fit-content",
@@ -357,27 +518,39 @@ const Header = () => {
                 transition: "padding .3s",
               }}
             >
-              {/* Conic luminous glowing border - sleek, refined blue line moving on boundary */}
-              <span
-                aria-hidden
-                style={{
-                  position: "absolute",
-                  inset: "-1.5px",
-                  borderRadius: "inherit",
-                  pointerEvents: "none",
-                  background:
-                    "conic-gradient(from var(--quest-a,0deg), transparent 0 52%, rgba(34,211,238,0.2) 68%, #22d3ee 85%, #67e8f9 92%, #38bdf8 97%, transparent 100%)",
-                  WebkitMask:
-                    "linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0)",
-                  WebkitMaskComposite: "xor",
-                  maskComposite: "exclude",
-                  padding: "1.5px",
-                  opacity: 1,
-                  filter:
-                    "drop-shadow(0 0 4px rgba(34,211,238,0.95)) drop-shadow(0 0 8px rgba(34,211,238,0.5))",
-                  animation: "questNavSpin 5.5s linear infinite",
-                }}
-              />
+              {/* Single continuous moving blue line tracing navbar perimeter AND present section button */}
+              {navGeometry.w > 0 && pathString && (
+                <svg
+                  aria-hidden
+                  className="absolute inset-0 pointer-events-none overflow-visible"
+                  style={{
+                    width: `${navGeometry.w}px`,
+                    height: `${navGeometry.h}px`,
+                    zIndex: 20,
+                  }}
+                >
+                  <defs>
+                    <filter id="questBeamGlow" x="-30%" y="-30%" width="160%" height="160%">
+                      <feDropShadow dx="0" dy="0" stdDeviation="2" floodColor="#22d3ee" floodOpacity="0.95" />
+                      <feDropShadow dx="0" dy="0" stdDeviation="5" floodColor="#06b6d4" floodOpacity="0.75" />
+                    </filter>
+                  </defs>
+                  <path
+                    ref={pathRef}
+                    d={pathString}
+                    fill="none"
+                    stroke="#22d3ee"
+                    strokeWidth="1.6"
+                    strokeLinecap="round"
+                    strokeDasharray={`${beamLength} ${Math.max(10, pathLen - beamLength)}`}
+                    filter="url(#questBeamGlow)"
+                    style={{
+                      "--quest-len": `-${pathLen}px`,
+                      animation: "questSingleLineAnim 5.5s linear infinite",
+                    }}
+                  />
+                </svg>
+              )}
 
               {/* Inner top sheen */}
               <span
@@ -398,11 +571,11 @@ const Header = () => {
                 ref={listRef}
                 className="relative flex items-center list-none p-0 gap-1 md:gap-1.5 lg:gap-2"
                 onMouseLeave={() => {
-                  const activeEl = listRef.current?.querySelector("a.quest-active");
+                  const activeEl = listRef.current?.querySelector(".quest-active");
                   moveTo(activeEl || null);
                 }}
               >
-                {/* Sliding pill indicator with synchronized moving blue boundary line */}
+                {/* Sliding pill indicator */}
                 <span
                   ref={indRef}
                   style={{
@@ -419,28 +592,7 @@ const Header = () => {
                     transition:
                       "transform .35s cubic-bezier(.2,.9,.3,1.1), width .35s cubic-bezier(.2,.9,.3,1.1), opacity .2s",
                   }}
-                >
-                  <span
-                    aria-hidden
-                    style={{
-                      position: "absolute",
-                      inset: "-1px",
-                      borderRadius: "inherit",
-                      pointerEvents: "none",
-                      background:
-                        "conic-gradient(from var(--quest-a,0deg), transparent 0 52%, rgba(34,211,238,0.2) 68%, #22d3ee 85%, #67e8f9 92%, #38bdf8 97%, transparent 100%)",
-                      WebkitMask:
-                        "linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0)",
-                      WebkitMaskComposite: "xor",
-                      maskComposite: "exclude",
-                      padding: "1.5px",
-                      opacity: 1,
-                      filter:
-                        "drop-shadow(0 0 4px rgba(34,211,238,0.95)) drop-shadow(0 0 8px rgba(34,211,238,0.5))",
-                      animation: "questNavSpin 5.5s linear infinite",
-                    }}
-                  />
-                </span>
+                />
 
                 {desktopLinks.map((item, i) => {
                   const active = isItemActive(item);
@@ -451,7 +603,9 @@ const Header = () => {
                       {hasDropdown ? (
                         <>
                           <button
-                            className={`relative z-10 flex items-center gap-1.5 px-4 md:px-5 lg:px-6 py-2 md:py-2.5 rounded-full text-sm lg:text-[0.94rem] font-medium transition-colors whitespace-nowrap overflow-hidden ${
+                            className={`${
+                              active ? "quest-active " : ""
+                            }relative z-10 flex items-center gap-1.5 px-4 md:px-5 lg:px-6 py-2 md:py-2.5 rounded-full text-sm lg:text-[0.94rem] font-medium transition-colors whitespace-nowrap overflow-hidden ${
                               active
                                 ? "text-white font-semibold"
                                 : "text-[#9aa6b5] hover:text-white"
@@ -459,28 +613,6 @@ const Header = () => {
                             onMouseEnter={(e) => moveTo(e.currentTarget)}
                             onFocus={(e) => moveTo(e.currentTarget)}
                           >
-                            {active && (
-                              <span
-                                aria-hidden
-                                style={{
-                                  position: "absolute",
-                                  inset: "-1px",
-                                  borderRadius: "inherit",
-                                  pointerEvents: "none",
-                                  background:
-                                    "conic-gradient(from var(--quest-a,0deg), transparent 0 52%, rgba(34,211,238,0.2) 68%, #22d3ee 85%, #67e8f9 92%, #38bdf8 97%, transparent 100%)",
-                                  WebkitMask:
-                                    "linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0)",
-                                  WebkitMaskComposite: "xor",
-                                  maskComposite: "exclude",
-                                  padding: "1.5px",
-                                  opacity: 1,
-                                  filter:
-                                    "drop-shadow(0 0 4px rgba(34,211,238,0.95)) drop-shadow(0 0 8px rgba(34,211,238,0.5))",
-                                  animation: "questNavSpin 5.5s linear infinite",
-                                }}
-                              />
-                            )}
                             {item.name}
                             <ChevronDown className="w-3.5 h-3.5 transition-transform duration-300 group-hover:rotate-180" />
                             {active && (
@@ -524,28 +656,6 @@ const Header = () => {
                             moveTo(e.currentTarget);
                           }}
                         >
-                          {active && (
-                            <span
-                              aria-hidden
-                              style={{
-                                position: "absolute",
-                                inset: "-1px",
-                                borderRadius: "inherit",
-                                pointerEvents: "none",
-                                background:
-                                  "conic-gradient(from var(--quest-a,0deg), transparent 0 52%, rgba(34,211,238,0.2) 68%, #22d3ee 85%, #67e8f9 92%, #38bdf8 97%, transparent 100%)",
-                                WebkitMask:
-                                  "linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0)",
-                                WebkitMaskComposite: "xor",
-                                maskComposite: "exclude",
-                                padding: "1.5px",
-                                opacity: 1,
-                                filter:
-                                  "drop-shadow(0 0 4px rgba(34,211,238,0.95)) drop-shadow(0 0 8px rgba(34,211,238,0.5))",
-                                animation: "questNavSpin 5.5s linear infinite",
-                              }}
-                            />
-                          )}
                           {item.name}
                           {active && (
                             <span className="absolute left-1/2 bottom-[3px] w-1.5 h-1.5 -ml-[3px] rounded-full bg-cyan-400 shadow-[0_0_8px_#22d3ee]" />
@@ -564,35 +674,15 @@ const Header = () => {
               {ctaItem && (
                 <Link
                   href={ctaItem.path}
-                  className={`relative inline-flex items-center gap-2 px-5 lg:px-6 py-2 md:py-2.5 rounded-full text-sm lg:text-[0.94rem] font-semibold whitespace-nowrap ml-2 transition-all duration-200 overflow-hidden ${
+                  className={`${
+                    isItemActive(ctaItem) ? "quest-active " : ""
+                  }relative inline-flex items-center gap-2 px-5 lg:px-6 py-2 md:py-2.5 rounded-full text-sm lg:text-[0.94rem] font-semibold whitespace-nowrap ml-2 transition-all duration-200 overflow-hidden ${
                     isItemActive(ctaItem)
                       ? "bg-cyan-400/10 text-white border border-cyan-400/25 shadow-none"
                       : "bg-cyan-400 text-[#021018] shadow-[0_4px_14px_-6px_rgba(34,211,238,.4)] hover:-translate-y-px hover:shadow-[0_6px_18px_-6px_rgba(34,211,238,.5)] active:scale-[.94]"
                   }`}
                   onClick={(e) => spawnSparks(e, e.currentTarget)}
                 >
-                  {isItemActive(ctaItem) && (
-                    <span
-                      aria-hidden
-                      style={{
-                        position: "absolute",
-                        inset: "-1px",
-                        borderRadius: "inherit",
-                        pointerEvents: "none",
-                        background:
-                          "conic-gradient(from var(--quest-a,0deg), transparent 0 52%, rgba(34,211,238,0.2) 68%, #22d3ee 85%, #67e8f9 92%, #38bdf8 97%, transparent 100%)",
-                        WebkitMask:
-                          "linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0)",
-                        WebkitMaskComposite: "xor",
-                        maskComposite: "exclude",
-                        padding: "1.5px",
-                        opacity: 1,
-                        filter:
-                          "drop-shadow(0 0 4px rgba(34,211,238,0.95)) drop-shadow(0 0 8px rgba(34,211,238,0.5))",
-                        animation: "questNavSpin 5.5s linear infinite",
-                      }}
-                    />
-                  )}
                   Contact Us
                   <svg
                     viewBox="0 0 24 24"
@@ -639,10 +729,10 @@ const Header = () => {
       {/* ── 4. Mobile Cascading Glass Pills Navigation Menu ────────────── */}
       <nav
         id="qmMenu"
-        className="qm-menu"
+        className={`qm-menu ${isItemExiting ? "qm-exit-mode" : ""}`}
         aria-label="Mobile menu"
         onClick={(e) => {
-          if (e.target.id === "qmMenu") {
+          if (e.target.id === "qmMenu" && !isItemExiting) {
             setSheetOpen(false);
           }
         }}
@@ -650,18 +740,24 @@ const Header = () => {
         {MOBILE_NAV_ITEMS.map((item, i) => {
           const active = isItemActive(item);
           const isGlow = item.isGlow;
+          const isClicked = isItemExiting && clickedIndex === i;
+          const isRest = isItemExiting && clickedIndex !== i;
+          const dist = clickedIndex !== null ? Math.abs(i - clickedIndex) : i;
 
           return (
             <Link
               key={item.name}
               href={item.path}
               aria-current={active ? "true" : undefined}
-              className={`qm-nav-link ${isGlow ? "qm-glow" : ""}`}
+              className={`qm-nav-link ${isGlow ? "qm-glow" : ""} ${
+                isClicked ? "qm-first-exit" : isRest ? "qm-rest-exit" : ""
+              }`}
               style={{
                 "--i": i,
                 "--n": TOTAL_MOBILE_ITEMS,
+                "--dist": dist,
               }}
-              onClick={(e) => handleMobileNavClick(e, item.path)}
+              onClick={(e) => handleMobileNavClick(e, item, i)}
             >
               <i>{item.iconSvg}</i>
               <span>{item.name}</span>
@@ -671,10 +767,20 @@ const Header = () => {
 
         {/* Social media glass pill */}
         <div
-          className="qm-social-pill"
+          className={`qm-social-pill ${
+            isItemExiting && clickedIndex === MOBILE_NAV_ITEMS.length
+              ? "qm-first-exit"
+              : isItemExiting && clickedIndex !== MOBILE_NAV_ITEMS.length
+              ? "qm-rest-exit"
+              : ""
+          }`}
           style={{
             "--i": MOBILE_NAV_ITEMS.length,
             "--n": TOTAL_MOBILE_ITEMS,
+            "--dist":
+              clickedIndex !== null
+                ? Math.abs(MOBILE_NAV_ITEMS.length - clickedIndex)
+                : MOBILE_NAV_ITEMS.length,
           }}
         >
           <i>
@@ -691,10 +797,7 @@ const Header = () => {
               rel="noopener noreferrer"
               aria-label="GitHub"
               className="qm-social-btn"
-              onClick={(e) => {
-                spawnSparks(e, e.currentTarget);
-                setTimeout(() => setSheetOpen(false), 200);
-              }}
+              onClick={(e) => handleSocialClick(e, "https://github.com/QuestIT-Cell")}
             >
               <FaGithub className="w-4 h-4" />
             </a>
@@ -704,10 +807,12 @@ const Header = () => {
               rel="noopener noreferrer"
               aria-label="LinkedIn"
               className="qm-social-btn"
-              onClick={(e) => {
-                spawnSparks(e, e.currentTarget);
-                setTimeout(() => setSheetOpen(false), 200);
-              }}
+              onClick={(e) =>
+                handleSocialClick(
+                  e,
+                  "https://www.linkedin.com/company/questit-vesit"
+                )
+              }
             >
               <FaLinkedin className="w-4 h-4" />
             </a>
@@ -717,10 +822,12 @@ const Header = () => {
               rel="noopener noreferrer"
               aria-label="Instagram"
               className="qm-social-btn"
-              onClick={(e) => {
-                spawnSparks(e, e.currentTarget);
-                setTimeout(() => setSheetOpen(false), 200);
-              }}
+              onClick={(e) =>
+                handleSocialClick(
+                  e,
+                  "https://www.instagram.com/questit_cell?igsh=MWgzNGdzYnUxanF5Yg=="
+                )
+              }
             >
               <FaInstagram className="w-4 h-4" />
             </a>
