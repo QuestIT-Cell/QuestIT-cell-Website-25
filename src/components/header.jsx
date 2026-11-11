@@ -9,44 +9,6 @@ import { FaGithub, FaLinkedin, FaInstagram } from "react-icons/fa";
 import menu from "@/constants/menu";
 import "@/styles/hamburger-menu.css";
 
-/* ─── Generate Single Continuous Beam Path (Navbar Perimeter + Active Button) ─── */
-function generateNavbarBeamPath(w, h, btn) {
-  if (w <= 0 || h <= 0) return "";
-  const R = h / 2;
-
-  // If no active button is detected, trace the outer navbar capsule
-  if (!btn || btn.w <= 0 || btn.h <= 0) {
-    return `M ${R},0 L ${w - R},0 A ${R} ${R} 0 0 1 ${w - R},${h} L ${R},${h} A ${R} ${R} 0 0 1 ${R},0 Z`;
-  }
-
-  const bx = btn.x;
-  const by = btn.y;
-  const bw = btn.w;
-  const bh = btn.h;
-  const br = bh / 2;
-
-  const leftX = bx + br;
-  const rightX = Math.max(leftX + 4, bx + bw - br);
-  const entryX = Math.max(R + 8, Math.min(w - R - 8, leftX));
-
-  return [
-    `M ${R},0`,
-    `L ${entryX - 6},0`,
-    `Q ${entryX},0 ${entryX},${by}`,
-    `L ${rightX},${by}`,
-    `A ${br} ${br} 0 0 1 ${rightX},${by + bh}`,
-    `L ${leftX},${by + bh}`,
-    `A ${br} ${br} 0 0 1 ${leftX},${by}`,
-    `L ${entryX},${by}`,
-    `Q ${entryX},0 ${entryX + 6},0`,
-    `L ${w - R},0`,
-    `A ${R} ${R} 0 0 1 ${w - R},${h}`,
-    `L ${R},${h}`,
-    `A ${R} ${R} 0 0 1 ${R},0`,
-    `Z`,
-  ].join(" ");
-}
-
 /* ─── Mobile Navigation Items with Uniform Theme & Lucide SVG Icons ───────── */
 const MOBILE_NAV_ITEMS = [
   {
@@ -203,71 +165,9 @@ const Header = () => {
   const [clickedIndex, setClickedIndex] = useState(null);
   const [isItemExiting, setIsItemExiting] = useState(false);
 
-  // Desktop single moving line geometry state
   const wrapRef = useRef(null);
   const listRef = useRef(null);
-  const navRef = useRef(null);
-  const pathRef = useRef(null);
-  const [navGeometry, setNavGeometry] = useState({ w: 0, h: 0, btn: null });
-  const [pathLen, setPathLen] = useState(1600);
-
   const { indRef, moveTo } = useIndicator();
-
-  /* ─── Calculate exact geometry for the single continuous moving line ────── */
-  const updateGeometry = useCallback(() => {
-    const nav = navRef.current;
-    if (!nav) return;
-    const navR = nav.getBoundingClientRect();
-    if (navR.width <= 0 || navR.height <= 0) return;
-
-    const activeEl =
-      listRef.current?.querySelector(".quest-active") ||
-      nav.querySelector(".quest-active");
-
-    let btn = null;
-    if (activeEl) {
-      const btnR = activeEl.getBoundingClientRect();
-      if (btnR.width > 0 && btnR.height > 0) {
-        btn = {
-          x: btnR.left - navR.left,
-          y: btnR.top - navR.top,
-          w: btnR.width,
-          h: btnR.height,
-        };
-      }
-    }
-
-    setNavGeometry({
-      w: Math.round(navR.width),
-      h: Math.round(navR.height),
-      btn,
-    });
-  }, []);
-
-  useEffect(() => {
-    updateGeometry();
-    const t1 = setTimeout(updateGeometry, 60);
-    const t2 = setTimeout(updateGeometry, 250);
-    window.addEventListener("resize", updateGeometry);
-    return () => {
-      clearTimeout(t1);
-      clearTimeout(t2);
-      window.removeEventListener("resize", updateGeometry);
-    };
-  }, [pathname, activeId, updateGeometry]);
-
-  useEffect(() => {
-    if (pathRef.current) {
-      try {
-        const len = pathRef.current.getTotalLength();
-        if (len > 50) {
-          setPathLen(Math.round(len));
-        }
-      } catch {
-        // ignore
-      }
-    }
-  }, [navGeometry]);
 
   /* ─── Check which navigation item is active ───────────────────────────── */
   const isItemActive = useCallback(
@@ -441,14 +341,6 @@ const Header = () => {
   const desktopLinks = menu.filter((m) => m.name !== "Contact");
   const ctaItem = menu.find((m) => m.name === "Contact");
 
-  // Path string and beam length for the single moving line
-  const pathString = generateNavbarBeamPath(
-    navGeometry.w,
-    navGeometry.h,
-    navGeometry.btn
-  );
-  const beamLength = Math.max(80, Math.min(140, Math.round(pathLen * 0.09)));
-
   return (
     <>
       {/* Dynamic keyframe styles */}
@@ -456,9 +348,6 @@ const Header = () => {
         @keyframes questSparkAnim{
           0%{transform:translate(0,0) scale(1);opacity:1}
           100%{transform:translate(var(--dx),var(--dy)) scale(0);opacity:0}
-        }
-        @keyframes questSingleLineAnim{
-          to{stroke-dashoffset:var(--quest-len,-1600px)}
         }
         @keyframes questNavSpin{to{--quest-a:360deg}}
         @property --quest-a{syntax:'<angle>';inherits:false;initial-value:0deg}
@@ -502,7 +391,6 @@ const Header = () => {
           {/* 2. Center: Desktop Floating Pill Navbar (Perfect horizontal alignment & concentric capsule curvature) */}
           <div className="hidden md:flex absolute inset-x-0 justify-center items-center pointer-events-none z-10">
             <nav
-              ref={navRef}
               className="pointer-events-auto relative flex items-center gap-1.5 md:gap-2 lg:gap-2.5 max-w-[96vw]"
               style={{
                 width: "fit-content",
@@ -518,39 +406,27 @@ const Header = () => {
                 transition: "padding .3s",
               }}
             >
-              {/* Single continuous moving blue line tracing navbar perimeter AND present section button */}
-              {navGeometry.w > 0 && pathString && (
-                <svg
-                  aria-hidden
-                  className="absolute inset-0 pointer-events-none overflow-visible"
-                  style={{
-                    width: `${navGeometry.w}px`,
-                    height: `${navGeometry.h}px`,
-                    zIndex: 20,
-                  }}
-                >
-                  <defs>
-                    <filter id="questBeamGlow" x="-30%" y="-30%" width="160%" height="160%">
-                      <feDropShadow dx="0" dy="0" stdDeviation="2" floodColor="#22d3ee" floodOpacity="0.95" />
-                      <feDropShadow dx="0" dy="0" stdDeviation="5" floodColor="#06b6d4" floodOpacity="0.75" />
-                    </filter>
-                  </defs>
-                  <path
-                    ref={pathRef}
-                    d={pathString}
-                    fill="none"
-                    stroke="#22d3ee"
-                    strokeWidth="1.6"
-                    strokeLinecap="round"
-                    strokeDasharray={`${beamLength} ${Math.max(10, pathLen - beamLength)}`}
-                    filter="url(#questBeamGlow)"
-                    style={{
-                      "--quest-len": `-${pathLen}px`,
-                      animation: "questSingleLineAnim 5.5s linear infinite",
-                    }}
-                  />
-                </svg>
-              )}
+              {/* Very thin, sleek luminous glowing line moving on navbar boundary */}
+              <span
+                aria-hidden
+                style={{
+                  position: "absolute",
+                  inset: "-1px",
+                  borderRadius: "inherit",
+                  pointerEvents: "none",
+                  background:
+                    "conic-gradient(from var(--quest-a,0deg), transparent 0 55%, rgba(34,211,238,0.25) 70%, #22d3ee 85%, #67e8f9 92%, #38bdf8 97%, transparent 100%)",
+                  WebkitMask:
+                    "linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0)",
+                  WebkitMaskComposite: "xor",
+                  maskComposite: "exclude",
+                  padding: "1px",
+                  opacity: 0.9,
+                  filter:
+                    "drop-shadow(0 0 4px rgba(34,211,238,0.95)) drop-shadow(0 0 8px rgba(34,211,238,0.5))",
+                  animation: "questNavSpin 5.5s linear infinite",
+                }}
+              />
 
               {/* Inner top sheen */}
               <span
