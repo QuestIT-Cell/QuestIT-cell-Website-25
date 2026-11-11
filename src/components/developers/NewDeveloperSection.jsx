@@ -154,12 +154,16 @@ function CollectibleTeamCard({
     if (e.target.closest("a") || e.target.closest("button.dossier-contact-btn")) {
       return;
     }
+    e.stopPropagation();
     setIsFlipped((prev) => !prev);
   };
 
   return (
     <div
-      className={`team-card ${isCenter ? "is-center" : ""}`}
+      className={`team-card ${isCenter ? "is-center" : ""} ${isFlipped ? "is-card-flipped" : ""}`}
+      style={{
+        zIndex: isFlipped ? 30 : undefined,
+      }}
       ref={cardRef}
       onPointerMove={handlePointerMove}
       onPointerEnter={handlePointerEnter}
