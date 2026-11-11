@@ -361,24 +361,24 @@ const Header = () => {
                 transition: "padding .3s",
               }}
             >
-              {/* Conic luminous glowing border - thicker blue line moving on boundary */}
+              {/* Conic luminous glowing border - sleek, refined blue line moving on boundary */}
               <span
                 aria-hidden
                 style={{
                   position: "absolute",
-                  inset: "-2.5px",
+                  inset: "-1.5px",
                   borderRadius: "inherit",
                   pointerEvents: "none",
                   background:
-                    "conic-gradient(from var(--quest-a,0deg), transparent 0 52%, rgba(34,211,238,0.18) 66%, rgba(56,189,248,0.7) 78%, #22d3ee 86%, #67e8f9 92%, #38bdf8 97%, transparent 100%)",
+                    "conic-gradient(from var(--quest-a,0deg), transparent 0 52%, rgba(34,211,238,0.2) 68%, #22d3ee 85%, #67e8f9 92%, #38bdf8 97%, transparent 100%)",
                   WebkitMask:
                     "linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0)",
                   WebkitMaskComposite: "xor",
                   maskComposite: "exclude",
-                  padding: "3.5px",
+                  padding: "1.5px",
                   opacity: 1,
                   filter:
-                    "drop-shadow(0 0 8px rgba(34,211,238,1)) drop-shadow(0 0 16px rgba(34,211,238,0.75)) drop-shadow(0 0 24px rgba(56,189,248,0.4))",
+                    "drop-shadow(0 0 4px rgba(34,211,238,0.95)) drop-shadow(0 0 8px rgba(34,211,238,0.5))",
                   animation: "questNavSpin 5.5s linear infinite",
                 }}
               />
@@ -406,7 +406,7 @@ const Header = () => {
                   moveTo(activeEl || null);
                 }}
               >
-                {/* Sliding pill indicator */}
+                {/* Sliding pill indicator with synchronized moving blue boundary line */}
                 <span
                   ref={indRef}
                   style={{
@@ -416,14 +416,35 @@ const Header = () => {
                     left: 0,
                     height: "100%",
                     borderRadius: "999px",
-                    background: "rgba(34,211,238,.12)",
-                    border: "1px solid rgba(34,211,238,.25)",
+                    background: "rgba(34,211,238,.08)",
+                    border: "1px solid rgba(34,211,238,.20)",
                     opacity: 0,
                     pointerEvents: "none",
                     transition:
                       "transform .35s cubic-bezier(.2,.9,.3,1.1), width .35s cubic-bezier(.2,.9,.3,1.1), opacity .2s",
                   }}
-                />
+                >
+                  <span
+                    aria-hidden
+                    style={{
+                      position: "absolute",
+                      inset: "-1px",
+                      borderRadius: "inherit",
+                      pointerEvents: "none",
+                      background:
+                        "conic-gradient(from var(--quest-a,0deg), transparent 0 52%, rgba(34,211,238,0.2) 68%, #22d3ee 85%, #67e8f9 92%, #38bdf8 97%, transparent 100%)",
+                      WebkitMask:
+                        "linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0)",
+                      WebkitMaskComposite: "xor",
+                      maskComposite: "exclude",
+                      padding: "1.5px",
+                      opacity: 1,
+                      filter:
+                        "drop-shadow(0 0 4px rgba(34,211,238,0.95)) drop-shadow(0 0 8px rgba(34,211,238,0.5))",
+                      animation: "questNavSpin 5.5s linear infinite",
+                    }}
+                  />
+                </span>
 
                 {desktopLinks.map((item, i) => {
                   const active = isItemActive(item);
@@ -434,7 +455,7 @@ const Header = () => {
                       {hasDropdown ? (
                         <>
                           <button
-                            className={`relative z-10 flex items-center gap-1.5 px-4 md:px-5 lg:px-6 py-2 md:py-2.5 rounded-full text-sm lg:text-[0.94rem] font-medium transition-colors whitespace-nowrap ${
+                            className={`relative z-10 flex items-center gap-1.5 px-4 md:px-5 lg:px-6 py-2 md:py-2.5 rounded-full text-sm lg:text-[0.94rem] font-medium transition-colors whitespace-nowrap overflow-hidden ${
                               active
                                 ? "text-white font-semibold"
                                 : "text-[#9aa6b5] hover:text-white"
@@ -442,6 +463,28 @@ const Header = () => {
                             onMouseEnter={(e) => moveTo(e.currentTarget)}
                             onFocus={(e) => moveTo(e.currentTarget)}
                           >
+                            {active && (
+                              <span
+                                aria-hidden
+                                style={{
+                                  position: "absolute",
+                                  inset: "-1px",
+                                  borderRadius: "inherit",
+                                  pointerEvents: "none",
+                                  background:
+                                    "conic-gradient(from var(--quest-a,0deg), transparent 0 52%, rgba(34,211,238,0.2) 68%, #22d3ee 85%, #67e8f9 92%, #38bdf8 97%, transparent 100%)",
+                                  WebkitMask:
+                                    "linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0)",
+                                  WebkitMaskComposite: "xor",
+                                  maskComposite: "exclude",
+                                  padding: "1.5px",
+                                  opacity: 1,
+                                  filter:
+                                    "drop-shadow(0 0 4px rgba(34,211,238,0.95)) drop-shadow(0 0 8px rgba(34,211,238,0.5))",
+                                  animation: "questNavSpin 5.5s linear infinite",
+                                }}
+                              />
+                            )}
                             {item.name}
                             <ChevronDown className="w-3.5 h-3.5 transition-transform duration-300 group-hover:rotate-180" />
                             {active && (
@@ -473,7 +516,7 @@ const Header = () => {
                           rel={item.external ? "noopener noreferrer" : undefined}
                           className={`${
                             active ? "quest-active " : ""
-                          }relative z-10 flex items-center gap-1.5 px-4 md:px-5 lg:px-6 py-2 md:py-2.5 rounded-full text-sm lg:text-[0.94rem] font-medium transition-colors whitespace-nowrap ${
+                          }relative z-10 flex items-center gap-1.5 px-4 md:px-5 lg:px-6 py-2 md:py-2.5 rounded-full text-sm lg:text-[0.94rem] font-medium transition-colors whitespace-nowrap overflow-hidden ${
                             active
                               ? "text-white font-semibold"
                               : "text-[#9aa6b5] hover:text-white"
@@ -485,6 +528,28 @@ const Header = () => {
                             moveTo(e.currentTarget);
                           }}
                         >
+                          {active && (
+                            <span
+                              aria-hidden
+                              style={{
+                                position: "absolute",
+                                inset: "-1px",
+                                borderRadius: "inherit",
+                                pointerEvents: "none",
+                                background:
+                                  "conic-gradient(from var(--quest-a,0deg), transparent 0 52%, rgba(34,211,238,0.2) 68%, #22d3ee 85%, #67e8f9 92%, #38bdf8 97%, transparent 100%)",
+                                WebkitMask:
+                                  "linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0)",
+                                WebkitMaskComposite: "xor",
+                                maskComposite: "exclude",
+                                padding: "1.5px",
+                                opacity: 1,
+                                filter:
+                                  "drop-shadow(0 0 4px rgba(34,211,238,0.95)) drop-shadow(0 0 8px rgba(34,211,238,0.5))",
+                                animation: "questNavSpin 5.5s linear infinite",
+                              }}
+                            />
+                          )}
                           {item.name}
                           {active && (
                             <span className="absolute left-1/2 bottom-[3px] w-1.5 h-1.5 -ml-[3px] rounded-full bg-cyan-400 shadow-[0_0_8px_#22d3ee]" />
@@ -510,6 +575,28 @@ const Header = () => {
                   }`}
                   onClick={(e) => spawnSparks(e, e.currentTarget)}
                 >
+                  {isItemActive(ctaItem) && (
+                    <span
+                      aria-hidden
+                      style={{
+                        position: "absolute",
+                        inset: "-1px",
+                        borderRadius: "inherit",
+                        pointerEvents: "none",
+                        background:
+                          "conic-gradient(from var(--quest-a,0deg), transparent 0 52%, rgba(34,211,238,0.2) 68%, #22d3ee 85%, #67e8f9 92%, #38bdf8 97%, transparent 100%)",
+                        WebkitMask:
+                          "linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0)",
+                        WebkitMaskComposite: "xor",
+                        maskComposite: "exclude",
+                        padding: "1.5px",
+                        opacity: 1,
+                        filter:
+                          "drop-shadow(0 0 4px rgba(34,211,238,0.95)) drop-shadow(0 0 8px rgba(34,211,238,0.5))",
+                        animation: "questNavSpin 5.5s linear infinite",
+                      }}
+                    />
+                  )}
                   Contact Us
                   <svg
                     viewBox="0 0 24 24"
