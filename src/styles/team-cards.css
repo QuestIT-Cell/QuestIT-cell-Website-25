@@ -318,6 +318,21 @@
   -webkit-mask-image: linear-gradient(to bottom, black 80%, transparent 100%);
 }
 
+/* ───────── Centered Developer Portraits & Dossier Avatars ───────── */
+/* Atharva Lotankar: Centered horizontally and balanced in portrait window & dossier */
+.dev-card-atharva .portrait img,
+.dev-card-atharva .dossier-avatar-wrap img {
+  transform: scale(1.15) translate(-6.5%, 1.5%);
+  transform-origin: center top;
+}
+
+/* Karthik Kotian: Centered horizontally with balanced headroom under arched window & dossier */
+.dev-card-karthik .portrait img,
+.dev-card-karthik .dossier-avatar-wrap img {
+  transform: scale(1.12) translate(5.5%, 4%);
+  transform-origin: center top;
+}
+
 .portrait svg {
   fill: #22d3ee;
   filter: drop-shadow(0 0 10px rgba(34, 211, 238, 0.6));

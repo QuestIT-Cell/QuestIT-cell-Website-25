@@ -20,7 +20,7 @@ const DEVELOPER_WORK_TITLES = {
   "Jay Kerkar": "Frontend Architecture & PWA",
   "Pranav Titambe": "Backend Optimization & Dynamic Workflows",
   "Shivam Mishra": "Genesis Microsite & Subpath Routing",
-  "Karthik Kotian": "Gallery & Developer Section Redesign",
+  "Karthik Kotian": "Gallery, Navbar & Developer Section Redesign",
   "Avani Killekar": "Council 2026–27 Team Section Architecture",
   "Chaitali Rane": "Council 2026–27 Media Standardisation",
   "Manish Awari": "Event Campaign Integration & Metrics UI",
@@ -36,6 +36,13 @@ const getCardDesignation = (name) => {
     return "EX TECH MEMBER";
   }
   return "TECH MEMBER";
+};
+
+// Developer-specific card classes for custom centering of portraits & avatars
+const getDeveloperCardClass = (name) => {
+  if (name === "Atharva Lotankar") return "dev-card-atharva";
+  if (name === "Karthik Kotian") return "dev-card-karthik";
+  return "";
 };
 
 const UNIFORM_STATS = {
@@ -217,7 +224,7 @@ function CollectibleTeamCard({
 
   return (
     <div
-      className={`team-card ${isCenter ? "is-center" : ""} ${isFlipped ? "is-card-flipped" : ""}`}
+      className={`team-card ${isCenter ? "is-center" : ""} ${isFlipped ? "is-card-flipped" : ""} ${getDeveloperCardClass(member.name)}`}
       style={{
         zIndex: isFlipped ? 50 : undefined,
       }}

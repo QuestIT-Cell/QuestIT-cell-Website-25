@@ -21,6 +21,17 @@ const DEVELOPER_WORK_TITLES = {
   "Sankalp Mane": "Cross-Device Layout Optimization & Event Modules",
 };
 
+// Developer-specific custom image alignment for centered portraits
+const getDevImageStyle = (name) => {
+  if (name === "Atharva Lotankar") {
+    return { transform: "scale(1.15) translate(-6.5%, 1.5%)", transformOrigin: "center top" };
+  }
+  if (name === "Karthik Kotian") {
+    return { transform: "scale(1.12) translate(5.5%, 4%)", transformOrigin: "center top" };
+  }
+  return undefined;
+};
+
 // Compute physical card stack transformation based on offset relative to active card
 // offset = index - activeIndex
 // offset === 0: Front active card
@@ -574,6 +585,7 @@ const DeveloperEditorialSection = () => {
                         priority={idx === 0}
                         sizes="(max-width: 1024px) 260px, (max-width: 1440px) 360px, 400px"
                         className="object-cover object-top rounded-[14px] md:rounded-[22px] select-none"
+                        style={getDevImageStyle(dev.name)}
                       />
 
                       {/* Glass Dimming Tint when in stack */}
@@ -825,6 +837,7 @@ const DeveloperEditorialSection = () => {
                         priority={idx === 0}
                         sizes="(max-width: 480px) 210px, 250px"
                         className="object-cover object-top rounded-[14px] select-none"
+                        style={getDevImageStyle(dev.name)}
                       />
 
                       {/* Tint */}
