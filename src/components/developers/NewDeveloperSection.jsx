@@ -164,9 +164,51 @@ function CollectibleTeamCard({
     );
   };
 
+  const descRef = useRef(null);
+
+  // Isolate touch scrolling inside description on mobile so card track does not move
+  useEffect(() => {
+    const el = descRef.current;
+    if (!el) return;
+
+    let startY = 0;
+
+    const onTouchStart = (e) => {
+      startY = e.touches[0].clientY;
+      e.stopPropagation();
+    };
+
+    const onTouchMove = (e) => {
+      const currentY = e.touches[0].clientY;
+      const deltaY = startY - currentY;
+      const maxScroll = el.scrollHeight - el.clientHeight;
+
+      if (maxScroll > 0) {
+        if (
+          (deltaY > 0 && el.scrollTop < maxScroll) ||
+          (deltaY < 0 && el.scrollTop > 0)
+        ) {
+          e.stopPropagation();
+        }
+      }
+    };
+
+    el.addEventListener("touchstart", onTouchStart, { passive: true });
+    el.addEventListener("touchmove", onTouchMove, { passive: true });
+
+    return () => {
+      el.removeEventListener("touchstart", onTouchStart);
+      el.removeEventListener("touchmove", onTouchMove);
+    };
+  }, []);
+
   const handleCardClick = (e) => {
-    // Prevent flipping if clicking contact link
-    if (e.target.closest("a") || e.target.closest("button.dossier-contact-btn")) {
+    // Prevent flipping if clicking contact link or interacting with description container
+    if (
+      e.target.closest("a") ||
+      e.target.closest("button.dossier-contact-btn") ||
+      e.target.closest(".dossier-desc-container")
+    ) {
       return;
     }
     e.stopPropagation();
@@ -317,7 +359,11 @@ function CollectibleTeamCard({
 
                 {/* In-Card Description */}
                 <div className="dossier-body">
-                  <div className="dossier-desc-container">
+                  <div
+                    ref={descRef}
+                    className="dossier-desc-container"
+                    onClick={(e) => e.stopPropagation()}
+                  >
                     <p className="dossier-desc-text">{member.description}</p>
                   </div>
                 </div>
@@ -364,7 +410,16 @@ function CollectibleTeamCard({
                 </div>
 
                 {/* Flip Return Action */}
-                <div className="dossier-flip-action">
+                <div
+                  className="dossier-flip-action"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onToggleFlip?.();
+                  }}
+                  role="button"
+                  tabIndex={0}
+                  title="Flip back to front"
+                >
                   <span>AUTHENTICATED</span>
                   <div className="dossier-flip-btn">
                     <RotateCcw size={10} />

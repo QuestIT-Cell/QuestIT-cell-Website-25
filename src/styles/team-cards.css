@@ -677,6 +677,7 @@
   flex: 1;
   min-height: 0;
   overflow-y: auto;
+  overflow-x: hidden;
   padding: 9px 11px;
   background: rgba(0, 0, 0, 0.7);
   border: 1px solid rgba(226, 178, 79, 0.4);
@@ -684,10 +685,20 @@
   box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.6);
   scrollbar-width: thin;
   scrollbar-color: #e2b24f rgba(0, 0, 0, 0.4);
+  -webkit-overflow-scrolling: touch;
+  touch-action: pan-y !important;
+  overscroll-behavior: contain;
+  overscroll-behavior-y: contain;
+  user-select: text;
+  -webkit-user-select: text;
+  pointer-events: auto !important;
+  position: relative;
+  z-index: 20;
 }
 
 .dossier-desc-container::-webkit-scrollbar {
   width: 4px;
+  display: block;
 }
 .dossier-desc-container::-webkit-scrollbar-track {
   background: rgba(0, 0, 0, 0.4);
@@ -754,6 +765,10 @@
   font-weight: 800;
   color: #fde8a6;
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.9);
+  cursor: pointer;
+  pointer-events: auto;
+  user-select: none;
+  -webkit-user-select: none;
 }
 
 .dossier-flip-btn {
@@ -1150,6 +1165,26 @@
       rotateY(0deg)
       scale(1.04) !important;
     transition: transform 0.4s ease !important;
+  }
+
+  /* Ensure the flipped card back face creates a flat 2D compositing plane so mobile touch scrollers work */
+  .card-flipper.is-flipped .card-face-back {
+    transform-style: flat !important;
+  }
+
+  /* Description container touch scrollability on mobile */
+  .dossier-desc-container {
+    max-height: 125px;
+    touch-action: pan-y !important;
+    -webkit-overflow-scrolling: touch !important;
+    overscroll-behavior: contain !important;
+    overscroll-behavior-y: contain !important;
+    pointer-events: auto !important;
+  }
+
+  .dossier-desc-text {
+    font-size: 10.5px;
+    line-height: 1.55;
   }
 
   .showcase-footer {

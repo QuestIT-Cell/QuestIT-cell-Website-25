@@ -13,7 +13,7 @@ const DEVELOPER_WORK_TITLES = {
   "Jay Kerkar": "Frontend Architecture & PWA",
   "Pranav Titambe": "Backend Optimization & Dynamic Workflows",
   "Shivam Mishra": "Genesis Microsite & Subpath Routing",
-  "Karthik Kotian": "Gallery & Developer Section Redesign",
+  "Karthik Kotian": "Gallery, Navbar & Developer Section Redesign",
   "Avani Killekar": "Council 2026–27 Team Section Architecture",
   "Chaitali Rane": "Council 2026–27 Media Standardisation",
   "Manish Awari": "Event Campaign Integration & Metrics UI",
@@ -710,11 +710,10 @@ const DeveloperEditorialSection = () => {
               onClick={goToPrev}
               disabled={activeIndex === 0}
               aria-label="Previous Developer"
-              className={`absolute left-0.5 sm:left-1 z-50 p-2 sm:p-2.5 rounded-full border border-[#22d3ee]/30 bg-black/70 backdrop-blur-md text-[#22d3ee] shadow-[0_0_15px_rgba(34,211,238,0.2)] transition-all active:scale-90 ${
-                activeIndex === 0
+              className={`absolute left-0.5 sm:left-1 z-50 p-2 sm:p-2.5 rounded-full border border-[#22d3ee]/30 bg-black/70 backdrop-blur-md text-[#22d3ee] shadow-[0_0_15px_rgba(34,211,238,0.2)] transition-all active:scale-90 ${activeIndex === 0
                   ? "opacity-20 cursor-not-allowed pointer-events-none"
                   : "opacity-90 hover:opacity-100 hover:bg-[#22d3ee]/15 hover:border-[#22d3ee]"
-              }`}
+                }`}
             >
               <ChevronLeft className="w-4 h-4 sm:w-5 sm:h-5" />
             </button>
@@ -846,11 +845,10 @@ const DeveloperEditorialSection = () => {
               onClick={goToNext}
               disabled={activeIndex === developers.length - 1}
               aria-label="Next Developer"
-              className={`absolute right-0.5 sm:right-1 z-50 p-2 sm:p-2.5 rounded-full border border-[#22d3ee]/30 bg-black/70 backdrop-blur-md text-[#22d3ee] shadow-[0_0_15px_rgba(34,211,238,0.2)] transition-all active:scale-90 ${
-                activeIndex === developers.length - 1
+              className={`absolute right-0.5 sm:right-1 z-50 p-2 sm:p-2.5 rounded-full border border-[#22d3ee]/30 bg-black/70 backdrop-blur-md text-[#22d3ee] shadow-[0_0_15px_rgba(34,211,238,0.2)] transition-all active:scale-90 ${activeIndex === developers.length - 1
                   ? "opacity-20 cursor-not-allowed pointer-events-none"
                   : "opacity-90 hover:opacity-100 hover:bg-[#22d3ee]/15 hover:border-[#22d3ee]"
-              }`}
+                }`}
             >
               <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5" />
             </button>
