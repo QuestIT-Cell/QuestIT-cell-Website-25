@@ -46,6 +46,11 @@
 
 .team-card.is-active { animation-play-state: paused; }
 
+/* While track is actively scrolling, pause float bobbing so cards glide in a solid, jitter-free arc */
+.dev-showcase-section.is-scrolling .team-card {
+  animation-play-state: paused !important;
+}
+
 @keyframes card-float {
   0%, 100% { transform: translateY(0); }
   50%      { transform: translateY(-8px); }

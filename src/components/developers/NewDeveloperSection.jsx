@@ -521,20 +521,20 @@ export default function NewDeveloperSection() {
         const dt = lastTime > 0 ? Math.min(0.05, (now - lastTime) / 1000) : 0.016;
         lastTime = now;
 
-        // Critical damping decay: 12 on mobile for immediate finger response, 8.5 on desktop for buttery glide
-        const decay = cachedIsMobile ? 12 : 8.5;
+        // Responsive critical damping: 16 on mobile, 14 on desktop for effortless gliding with zero drag
+        const decay = cachedIsMobile ? 16 : 14;
         const factor = 1 - Math.exp(-decay * dt);
         current += (target - current) * factor;
 
-        if (Math.abs(target - current) < 0.00008) current = target;
+        if (Math.abs(target - current) < 0.00005) current = target;
       }
 
       const x = -current * maxTravel;
 
-      track.style.transform = `translate3d(${x.toFixed(2)}px, 0, 0)`;
+      track.style.transform = `translate3d(${x.toFixed(3)}px, 0, 0)`;
 
       if (heading) {
-        heading.style.transform = `translate3d(${(x * 0.16).toFixed(2)}px, 0, 0)`;
+        heading.style.transform = `translate3d(${(x * 0.16).toFixed(3)}px, 0, 0)`;
       }
 
       let nearest = 0;
@@ -547,8 +547,23 @@ export default function NewDeveloperSection() {
         const clampedD = Math.max(-1.8, Math.min(1.8, d));
         const a = Math.min(1, Math.abs(clampedD));
 
-        item.style.setProperty("--d", clampedD.toFixed(3));
-        item.style.setProperty("--a", a.toFixed(3));
+        const isFlipped = item.classList.contains("has-flipped-card") || item.querySelector(".is-card-flipped");
+        if (!isFlipped) {
+          if (cachedIsMobile) {
+            const ty = (clampedD * 30).toFixed(1);
+            const ry = (clampedD * -4).toFixed(1);
+            const sc = (1.03 - a * 0.08).toFixed(3);
+            item.style.transform = `perspective(1300px) translate3d(0, ${ty}px, 0) rotateY(${ry}deg) scale(${sc})`;
+          } else {
+            const ty = (clampedD * 85).toFixed(1);
+            const ry = (clampedD * -20).toFixed(1);
+            const rz = (clampedD * -2.5).toFixed(1);
+            const sc = (1.06 - a * 0.16).toFixed(3);
+            item.style.transform = `perspective(1300px) translate3d(0, ${ty}px, 0) rotateY(${ry}deg) rotateZ(${rz}deg) scale(${sc})`;
+          }
+        } else {
+          item.style.transform = "";
+        }
 
         const absDist = Math.abs(d);
         if (absDist < nearestDist) {
@@ -570,19 +585,23 @@ export default function NewDeveloperSection() {
 
     const tick = (now) => {
       render(now);
-      if (Math.abs(current - target) > 0.00008) {
+      if (Math.abs(current - target) > 0.00005) {
         raf = requestAnimationFrame(tick);
       } else {
         running = false;
         lastTime = 0;
+        section.classList.remove("is-scrolling");
       }
     };
 
     const kick = () => {
-      if (running) return;
-      running = true;
-      lastTime = performance.now();
-      raf = requestAnimationFrame(tick);
+      readTarget();
+      if (!running) {
+        running = true;
+        lastTime = 0;
+        section.classList.add("is-scrolling");
+        raf = requestAnimationFrame(tick);
+      }
     };
 
     const onScroll = () => {
@@ -623,6 +642,7 @@ export default function NewDeveloperSection() {
 
     return () => {
       cancelAnimationFrame(raf);
+      section.classList.remove("is-scrolling");
       window.removeEventListener("scroll", onScroll);
       window.removeEventListener("resize", measure);
       observer.disconnect();
