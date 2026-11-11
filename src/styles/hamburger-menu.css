@@ -1,0 +1,271 @@
+/* ===== Quest IT – Mobile Hamburger Menu & Cascading Glass Pills ===== */
+:root {
+  --qm-accent: #22d3ee;            /* cyan-400 */
+  --qm-top: 78px;                  /* where the first button starts (header height + gap) */
+  --qm-z: 10005;                   /* header has z-[10010] so the cross stays visible and clickable */
+  --qm-text: #eef3f8;
+  --qm-base: rgba(12, 16, 24, 0.88);   /* glass base: dark obsidian matching Quest IT theme */
+  --qm-glass: rgba(255, 255, 255, 0.10);
+  --qm-line: rgba(255, 255, 255, 0.18);
+  --qm-chip: rgba(34, 211, 238, 0.12);
+}
+
+html.qm-open {
+  overflow: hidden;
+}
+
+/* ─── Hamburger -> Cross (Morphs in the exact same spot) ─── */
+.qm-burger {
+  display: block;
+  position: relative;
+  flex: none;
+  width: 44px;
+  height: 44px;
+  border: 1px solid var(--qm-line);
+  border-radius: 50%;
+  background: rgba(12, 16, 24, 0.82);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  color: var(--qm-text);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: transform .35s cubic-bezier(.16, 1, .3, 1), background .3s, border-color .3s;
+}
+
+.qm-burger:hover {
+  border-color: rgba(34, 211, 238, 0.4);
+}
+
+.qm-burger:active {
+  transform: scale(.92);
+}
+
+.qm-burger span {
+  position: absolute;
+  left: 13px;
+  right: 13px;
+  top: 50%;
+  height: 2px;
+  margin-top: -1px;
+  border-radius: 2px;
+  background: currentColor;
+  transition: transform .55s cubic-bezier(.16, 1, .3, 1), opacity .25s;
+}
+
+.qm-burger span:nth-child(1) {
+  transform: translateY(-6px);
+}
+
+.qm-burger span:nth-child(3) {
+  transform: translateY(6px);
+}
+
+.qm-burger[aria-expanded="true"] {
+  background: var(--qm-chip);
+  border-color: rgba(34, 211, 238, 0.5);
+  box-shadow: 0 0 16px rgba(34, 211, 238, 0.25);
+}
+
+.qm-burger[aria-expanded="true"] span:nth-child(1) {
+  transform: rotate(45deg);
+}
+
+.qm-burger[aria-expanded="true"] span:nth-child(2) {
+  opacity: 0;
+  transform: scaleX(.2);
+}
+
+.qm-burger[aria-expanded="true"] span:nth-child(3) {
+  transform: rotate(-45deg);
+}
+
+/* ─── Transparent overlay holding right-aligned glass buttons ─── */
+.qm-menu {
+  position: fixed;
+  inset: 0;
+  z-index: var(--qm-z);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 12px;
+  padding: calc(env(safe-area-inset-top, 0px) + var(--qm-top)) 16px calc(env(safe-area-inset-bottom, 0px) + 32px);
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  visibility: hidden;
+  pointer-events: none;
+  transition: visibility 0s .7s;
+}
+
+.qm-open .qm-menu,
+html.qm-open .qm-menu {
+  visibility: visible;
+  pointer-events: auto;
+  transition: visibility 0s;
+}
+
+/* ─── Glass Pill Buttons (Cascading in from the right) ─── */
+.qm-menu a.qm-nav-link,
+.qm-menu .qm-social-pill {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  width: min(284px, 100%);
+  padding: 10px 22px 10px 10px;
+  border-radius: 999px;
+  color: var(--qm-text);
+  text-decoration: none;
+  font: 500 1rem/1 'Poppins', system-ui, sans-serif;
+  border: 1px solid var(--qm-line);
+  background: linear-gradient(135deg, var(--qm-glass), transparent), var(--qm-base);
+  -webkit-backdrop-filter: blur(18px) saturate(140%);
+  backdrop-filter: blur(18px) saturate(140%);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .28), 0 12px 30px -14px rgba(0, 0, 0, .6);
+  opacity: 0;
+  transform: translate3d(110%, 0, 0);
+  will-change: transform, opacity;
+  /* closing: quick, reverse order */
+  transition: transform .45s cubic-bezier(.5, 0, .75, 0) calc((var(--n) - 1 - var(--i)) * .035s),
+              opacity .3s ease calc((var(--n) - 1 - var(--i)) * .035s);
+}
+
+/* opening: slow, smooth cascade from the right */
+.qm-open .qm-menu a.qm-nav-link,
+.qm-open .qm-menu .qm-social-pill,
+html.qm-open .qm-menu a.qm-nav-link,
+html.qm-open .qm-menu .qm-social-pill {
+  opacity: 1;
+  transform: none;
+  transition: transform 1s cubic-bezier(.16, 1, .3, 1) calc(.1s + var(--i) * .07s),
+              opacity .6s ease calc(.1s + var(--i) * .07s);
+}
+
+.qm-open .qm-menu a.qm-nav-link:active,
+html.qm-open .qm-menu a.qm-nav-link:active {
+  transform: scale(.97);
+  transition-duration: .15s;
+  transition-delay: 0s;
+}
+
+.qm-menu a.qm-nav-link[aria-current="true"] {
+  color: var(--qm-accent);
+  border-color: rgba(34, 211, 238, .5);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .35), 0 0 18px rgba(34, 211, 238, 0.25);
+}
+
+.qm-menu i {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--qm-chip);
+  border: 1px solid rgba(34, 211, 238, .28);
+  color: var(--qm-accent);
+  transition: background .3s, border-color .3s, color .3s;
+}
+
+.qm-menu a.qm-nav-link[aria-current="true"] i {
+  background: rgba(34, 211, 238, 0.22);
+  border-color: rgba(34, 211, 238, 0.6);
+  color: #22d3ee;
+  box-shadow: 0 0 10px rgba(34, 211, 238, 0.4);
+}
+
+.qm-menu i svg {
+  width: 20px;
+  height: 20px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.75;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* ─── Contact Us Glow Accent ─── */
+.qm-menu a.qm-glow {
+  position: relative;
+  border-color: rgba(34, 211, 238, .7);
+  background: linear-gradient(135deg, rgba(34, 211, 238, .35), rgba(34, 211, 238, .12)), var(--qm-base);
+}
+
+.qm-glow::after {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  pointer-events: none;
+  box-shadow: 0 0 34px 2px rgba(34, 211, 238, .8);
+  opacity: .35;
+  animation: qmGlow 2.4s ease-in-out infinite;
+}
+
+.qm-menu a.qm-glow i {
+  background: var(--qm-accent);
+  color: #031219;
+  border-color: transparent;
+  box-shadow: 0 0 12px rgba(34, 211, 238, 0.8);
+}
+
+@keyframes qmGlow {
+  50% { opacity: 1; }
+}
+
+/* ─── Social Media Pill (GitHub, LinkedIn, Instagram) ─── */
+.qm-menu .qm-social-pill {
+  padding: 8px 18px 8px 10px;
+  justify-content: space-between;
+}
+
+.qm-social-items {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-left: auto;
+}
+
+.qm-social-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  color: #cbd5e1;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  transition: all 0.25s ease;
+  text-decoration: none;
+}
+
+.qm-social-btn:hover,
+.qm-social-btn:active {
+  color: #ffffff;
+  background: rgba(34, 211, 238, 0.2);
+  border-color: rgba(34, 211, 238, 0.5);
+  box-shadow: 0 0 10px rgba(34, 211, 238, 0.4);
+  transform: translateY(-2px);
+}
+
+/* ─── Breakpoints & Reduced Motion ─── */
+@media (min-width: 769px) {
+  .qm-burger {
+    display: none !important;
+  }
+  .qm-menu {
+    display: none !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .qm-menu a.qm-nav-link,
+  .qm-menu .qm-social-pill,
+  .qm-burger span {
+    transition-duration: .01s !important;
+    transition-delay: 0s !important;
+  }
+  .qm-glow::after {
+    animation: none;
+  }
+}

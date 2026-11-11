@@ -4,10 +4,99 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
-import { motion, AnimatePresence } from "framer-motion";
-import { ChevronDown, ExternalLink, Mail, ArrowRight } from "lucide-react";
+import { ChevronDown, ExternalLink } from "lucide-react";
 import { FaGithub, FaLinkedin, FaInstagram } from "react-icons/fa";
 import menu from "@/constants/menu";
+import "@/styles/hamburger-menu.css";
+
+/* ─── Mobile Navigation Items with Uniform Theme & Lucide SVG Icons ───────── */
+const MOBILE_NAV_ITEMS = [
+  {
+    name: "Home",
+    path: "/#home",
+    iconSvg: (
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8" />
+        <path d="M3 10a2 2 0 0 1 .709-1.528l7-5.999a2 2 0 0 1 2.582 0l7 5.999A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+      </svg>
+    ),
+  },
+  {
+    name: "About",
+    path: "/#about",
+    iconSvg: (
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <circle cx="12" cy="12" r="10" />
+        <path d="M12 16v-4" />
+        <path d="M12 8h.01" />
+      </svg>
+    ),
+  },
+  {
+    name: "Events",
+    path: "/events",
+    iconSvg: (
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M8 2v4" />
+        <path d="M16 2v4" />
+        <rect width="18" height="18" x="3" y="4" rx="2" />
+        <path d="M3 10h18" />
+        <path d="M8 14h.01" />
+        <path d="M12 14h.01" />
+        <path d="M16 14h.01" />
+        <path d="M8 18h.01" />
+        <path d="M12 18h.01" />
+      </svg>
+    ),
+  },
+  {
+    name: "Gallery",
+    path: "/gallery",
+    iconSvg: (
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <rect width="18" height="18" x="3" y="3" rx="2" />
+        <circle cx="9" cy="9" r="2" />
+        <path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21" />
+      </svg>
+    ),
+  },
+  {
+    name: "Team",
+    path: "/team",
+    iconSvg: (
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+        <circle cx="9" cy="7" r="4" />
+        <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
+        <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+      </svg>
+    ),
+  },
+  {
+    name: "Developers",
+    path: "/developers",
+    iconSvg: (
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path d="m18 16 4-4-4-4" />
+        <path d="m6 8-4 4 4 4" />
+        <path d="m14.5 4-5 16" />
+      </svg>
+    ),
+  },
+  {
+    name: "Contact Us",
+    path: "/contact",
+    isGlow: true,
+    iconSvg: (
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path d="m22 7-8.991 5.727a2 2 0 0 1-2.009 0L2 7" />
+        <rect x="2" y="4" width="20" height="16" rx="2" />
+      </svg>
+    ),
+  },
+];
+
+const TOTAL_MOBILE_ITEMS = MOBILE_NAV_ITEMS.length + 1;
 
 /* ─── Sliding-pill indicator helper for desktop ──────────────────────────── */
 function useIndicator() {
@@ -150,31 +239,30 @@ const Header = () => {
     };
   }, [pathname, moveTo]);
 
-  /* ─── Lock scroll & listen for ESC key when mobile sheet is open ──────── */
+  /* ─── Sync html.qm-open class, Esc key, and resize listener ──────────── */
   useEffect(() => {
-    if (sheetOpen) {
-      const y = window.scrollY;
-      document.documentElement.style.overflow = "hidden";
-      document.body.style.cssText = `overflow:hidden;position:fixed;top:-${y}px;width:100%;touch-action:none`;
-      document.body.dataset.scrollY = String(y);
+    const root = document.documentElement;
+    root.classList.toggle("qm-open", sheetOpen);
 
-      const handleKeyDown = (e) => {
-        if (e.key === "Escape") setSheetOpen(false);
-      };
-      window.addEventListener("keydown", handleKeyDown);
-      return () => window.removeEventListener("keydown", handleKeyDown);
-    } else {
-      const saved = document.body.dataset.scrollY;
-      document.documentElement.style.overflow = "";
-      document.body.style.cssText = "";
-      if (saved) {
-        window.scrollTo(0, +saved);
-        delete document.body.dataset.scrollY;
+    const handleKeyDown = (e) => {
+      if (e.key === "Escape" && sheetOpen) {
+        setSheetOpen(false);
       }
-    }
+    };
+
+    const handleResize = () => {
+      if (window.innerWidth >= 769 && sheetOpen) {
+        setSheetOpen(false);
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    window.addEventListener("resize", handleResize);
+
     return () => {
-      document.documentElement.style.overflow = "";
-      document.body.style.cssText = "";
+      root.classList.remove("qm-open");
+      window.removeEventListener("keydown", handleKeyDown);
+      window.removeEventListener("resize", handleResize);
     };
   }, [sheetOpen]);
 
@@ -412,188 +500,107 @@ const Header = () => {
             </nav>
           </div>
 
-          {/* ── 3. Right Corner: Human-Made Minimal 2-Line Morphing Button ───── */}
-          {/* It stays in place as the ONE AND ONLY button (morphs cleanly into an 'X') */}
+          {/* ── 3. Right Corner: Human-Made Minimal 3-Line Morphing Button ───── */}
           <div className="md:hidden flex items-center flex-shrink-0 z-30">
             <button
-              className="pointer-events-auto relative w-11 h-11 rounded-full border border-white/15 bg-[#0a0c12]/90 backdrop-blur-xl cursor-pointer text-white flex items-center justify-center transition-all duration-200 hover:border-white/30 active:scale-95"
-              aria-label={sheetOpen ? "Close navigation menu" : "Open navigation menu"}
+              id="qmBurger"
+              type="button"
+              className="qm-burger pointer-events-auto"
+              aria-label={sheetOpen ? "Close menu" : "Open menu"}
               aria-expanded={sheetOpen}
+              aria-controls="qmMenu"
               onClick={() => setSheetOpen((o) => !o)}
             >
-              <div className="relative w-5 h-5 flex items-center justify-center">
-                {/* Line 1 */}
-                <span
-                  className="absolute w-[18px] h-[1.5px] bg-white rounded-full transition-transform duration-300 ease-out origin-center"
-                  style={{
-                    transform: sheetOpen
-                      ? "rotate(45deg) translateY(0)"
-                      : "translateY(-3.5px)",
-                  }}
-                />
-                {/* Line 2 */}
-                <span
-                  className="absolute w-[18px] h-[1.5px] bg-white rounded-full transition-transform duration-300 ease-out origin-center"
-                  style={{
-                    transform: sheetOpen
-                      ? "rotate(-45deg) translateY(0)"
-                      : "translateY(3.5px)",
-                  }}
-                />
-              </div>
+              <span></span>
+              <span></span>
+              <span></span>
             </button>
           </div>
         </div>
       </header>
 
-      {/* ── 4. Editorial Human-Crafted Mobile Navigation Menu ────────────── */}
-      <AnimatePresence>
-        {sheetOpen && (
-          <motion.div
-            initial={{ opacity: 0, y: -8 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -8 }}
-            transition={{ duration: 0.28, ease: [0.16, 1, 0.3, 1] }}
-            className="fixed inset-0 z-[10005] md:hidden flex flex-col justify-between bg-[#08090d]/98 backdrop-blur-2xl text-white select-none px-6 pt-[calc(env(safe-area-inset-top,0px)+82px)] pb-[calc(env(safe-area-inset-bottom,0px)+24px)]"
-          >
-            {/* Top divider & section badge */}
-            <div className="flex items-center justify-between pb-3 border-b border-white/[0.08]">
-              <span className="text-[11px] font-mono tracking-widest uppercase text-neutral-400">
-                Menu
-              </span>
-              <span className="text-[10px] font-mono tracking-wider text-neutral-500">
-                {menu.length} Options
-              </span>
-            </div>
+      {/* ── 4. Mobile Cascading Glass Pills Navigation Menu ────────────── */}
+      <nav
+        id="qmMenu"
+        className="qm-menu"
+        aria-label="Mobile menu"
+        onClick={(e) => {
+          if (e.target.id === "qmMenu") {
+            setSheetOpen(false);
+          }
+        }}
+      >
+        {MOBILE_NAV_ITEMS.map((item, i) => {
+          const active = isItemActive(item);
+          const isGlow = item.isGlow;
 
-            {/* Navigation links: Large typography with numbered markers */}
-            <nav className="my-auto py-4">
-              <motion.ul
-                initial="hidden"
-                animate="visible"
-                variants={{
-                  visible: {
-                    transition: { staggerChildren: 0.04, delayChildren: 0.05 },
-                  },
-                }}
-                className="space-y-4 max-w-sm"
-              >
-                {menu.map((item, i) => {
-                  const active = isItemActive(item);
+          return (
+            <Link
+              key={item.name}
+              href={item.path}
+              aria-current={active ? "true" : undefined}
+              className={`qm-nav-link ${isGlow ? "qm-glow" : ""}`}
+              style={{
+                "--i": i,
+                "--n": TOTAL_MOBILE_ITEMS,
+              }}
+              onClick={() => setSheetOpen(false)}
+            >
+              <i>{item.iconSvg}</i>
+              <span>{item.name}</span>
+            </Link>
+          );
+        })}
 
-                  return (
-                    <motion.li
-                      key={item.name}
-                      variants={{
-                        hidden: { opacity: 0, y: 14 },
-                        visible: {
-                          opacity: 1,
-                          y: 0,
-                          transition: { duration: 0.35, ease: [0.16, 1, 0.3, 1] },
-                        },
-                      }}
-                    >
-                      <Link
-                        href={item.path}
-                        onClick={() => setSheetOpen(false)}
-                        target={item.external ? "_blank" : undefined}
-                        rel={item.external ? "noopener noreferrer" : undefined}
-                        className="group flex items-baseline justify-between py-1 transition-colors"
-                      >
-                        <div className="flex items-baseline gap-4">
-                          <span className="font-mono text-sm text-neutral-500 group-hover:text-cyan-400 transition-colors">
-                            {String(i + 1).padStart(2, "0")}
-                          </span>
-                          <span
-                            className={`text-4xl sm:text-5xl font-light tracking-tight transition-colors duration-200 ${
-                              active
-                                ? "text-white font-normal"
-                                : "text-neutral-400 group-hover:text-white"
-                            }`}
-                          >
-                            {item.name}
-                          </span>
-                          {active && (
-                            <span className="w-2 h-2 rounded-full bg-cyan-400 inline-block mb-1.5" />
-                          )}
-                        </div>
-
-                        <span className="text-sm font-mono text-neutral-500 group-hover:text-cyan-400 group-hover:translate-x-1.5 transition-all">
-                          &rarr;
-                        </span>
-                      </Link>
-                    </motion.li>
-                  );
-                })}
-              </motion.ul>
-
-              {/* ── Prominent High-Visibility Contact Us CTA Button ── */}
-              <div className="pt-5">
-                <Link
-                  href="/contact"
-                  onClick={() => setSheetOpen(false)}
-                  className="group flex items-center justify-between w-full px-5 py-3.5 rounded-2xl bg-cyan-400 text-black font-semibold text-sm tracking-wide shadow-[0_4px_20px_rgba(34,211,238,0.25)] hover:bg-cyan-300 active:scale-[0.98] transition-all"
-                >
-                  <div className="flex items-center gap-2.5">
-                    <Mail className="w-4 h-4 text-black" />
-                    <span>Contact Us</span>
-                  </div>
-                  <ArrowRight className="w-4 h-4 text-black transition-transform duration-200 group-hover:translate-x-1" />
-                </Link>
-              </div>
-            </nav>
-
-            {/* Bottom editorial footer: social icons & human details */}
-            <div className="pt-4 border-t border-white/[0.08] flex flex-col gap-3">
-              <div className="flex items-center justify-between">
-                {/* Social Media Icons */}
-                <div className="flex items-center gap-2.5">
-                  <a
-                    href="https://github.com/QuestIT-Cell"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    aria-label="GitHub"
-                    className="w-10 h-10 rounded-full border border-white/15 bg-white/5 flex items-center justify-center text-neutral-300 hover:text-white hover:border-cyan-400/60 hover:bg-white/10 active:scale-95 transition-all"
-                  >
-                    <FaGithub className="w-4 h-4" />
-                  </a>
-                  <a
-                    href="https://www.linkedin.com/company/questit-vesit"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    aria-label="LinkedIn"
-                    className="w-10 h-10 rounded-full border border-white/15 bg-white/5 flex items-center justify-center text-neutral-300 hover:text-cyan-400 hover:border-cyan-400/60 hover:bg-white/10 active:scale-95 transition-all"
-                  >
-                    <FaLinkedin className="w-4 h-4" />
-                  </a>
-                  <a
-                    href="https://www.instagram.com/questit_cell?igsh=MWgzNGdzYnUxanF5Yg=="
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    aria-label="Instagram"
-                    className="w-10 h-10 rounded-full border border-white/15 bg-white/5 flex items-center justify-center text-neutral-300 hover:text-pink-400 hover:border-pink-400/60 hover:bg-white/10 active:scale-95 transition-all"
-                  >
-                    <FaInstagram className="w-4 h-4" />
-                  </a>
-                </div>
-
-                <span className="text-[11px] font-mono text-neutral-500">
-                  © {new Date().getFullYear()} QUEST IT
-                </span>
-              </div>
-
-              <div className="flex items-center justify-between text-xs text-neutral-500">
-                <span className="italic font-serif text-neutral-400 text-xs">
-                  Curiosity. Code. Community.
-                </span>
-                <span className="font-mono text-[10px] tracking-wider text-neutral-500">
-                  QUEST IT CELL
-                </span>
-              </div>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+        {/* Social media glass pill */}
+        <div
+          className="qm-social-pill"
+          style={{
+            "--i": MOBILE_NAV_ITEMS.length,
+            "--n": TOTAL_MOBILE_ITEMS,
+          }}
+        >
+          <i>
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <circle cx="12" cy="12" r="10" />
+              <path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20" />
+              <path d="M2 12h20" />
+            </svg>
+          </i>
+          <div className="qm-social-items">
+            <a
+              href="https://github.com/QuestIT-Cell"
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="GitHub"
+              className="qm-social-btn"
+              onClick={() => setSheetOpen(false)}
+            >
+              <FaGithub className="w-4 h-4" />
+            </a>
+            <a
+              href="https://www.linkedin.com/company/questit-vesit"
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="LinkedIn"
+              className="qm-social-btn"
+              onClick={() => setSheetOpen(false)}
+            >
+              <FaLinkedin className="w-4 h-4" />
+            </a>
+            <a
+              href="https://www.instagram.com/questit_cell?igsh=MWgzNGdzYnUxanF5Yg=="
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="Instagram"
+              className="qm-social-btn"
+              onClick={() => setSheetOpen(false)}
+            >
+              <FaInstagram className="w-4 h-4" />
+            </a>
+          </div>
+        </div>
+      </nav>
     </>
   );
 };
