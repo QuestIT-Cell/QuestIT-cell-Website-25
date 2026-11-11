@@ -159,8 +159,6 @@ const Header = () => {
   const [isHidden, setIsHidden] = useState(false);
   const [sheetOpen, setSheetOpen] = useState(false);
   const [activeId, setActiveId] = useState("home");
-  const [waveActive, setWaveActive] = useState(false);
-  const [waveOrigin, setWaveOrigin] = useState({ x: 0, y: 0 });
 
   const wrapRef = useRef(null);
   const listRef = useRef(null);
@@ -278,17 +276,12 @@ const Header = () => {
     };
   }, [sheetOpen]);
 
-  /* ─── Hamburger click: burst sparks + cyan-400 spreading wave ─────────── */
+  /* ─── Hamburger click: toggle menu + smooth cyan backdrop reveal ──────── */
   const handleBurgerClick = (e) => {
-    const btn = e.currentTarget;
-    spawnSparks(e, btn);
-    const r = btn.getBoundingClientRect();
-    setWaveOrigin({
-      x: r.left + r.width / 2,
-      y: r.top + r.height / 2,
-    });
-    setWaveActive(true);
-    setTimeout(() => setWaveActive(false), 850);
+    if (e?.clientX && e?.clientY) {
+      document.documentElement.style.setProperty("--wave-x", `${e.clientX}px`);
+      document.documentElement.style.setProperty("--wave-y", `${e.clientY}px`);
+    }
     setSheetOpen((prev) => !prev);
   };
 
@@ -553,14 +546,11 @@ const Header = () => {
         </div>
       </header>
 
-      {/* ── Full-Screen Cyan 400 Color Spreading Wave from Hamburger Icon ── */}
+      {/* ── Full-Screen Cyan 400 Color Spreading Backdrop from Hamburger Icon ── */}
       <div
-        className={`qm-cyan-wave ${waveActive ? "is-active" : ""}`}
+        className="qm-cyan-backdrop"
         aria-hidden="true"
-        style={{
-          "--wave-x": `${waveOrigin.x}px`,
-          "--wave-y": `${waveOrigin.y}px`,
-        }}
+        onClick={() => setSheetOpen(false)}
       />
 
       {/* ── 4. Mobile Cascading Glass Pills Navigation Menu ────────────── */}
