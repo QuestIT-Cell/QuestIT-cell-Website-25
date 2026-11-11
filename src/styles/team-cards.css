@@ -830,12 +830,11 @@
   position: relative;
   width: 100%;
   min-height: 100vh;
+  min-height: 100lvh;
   min-height: 100dvh;
   background:
-    radial-gradient(ellipse at 50% 25%, rgba(34, 211, 238, 0.16) 0%, transparent 60%),
-    radial-gradient(ellipse at 80% 75%, rgba(6, 182, 212, 0.12) 0%, transparent 50%),
-    radial-gradient(ellipse at 20% 75%, rgba(14, 116, 144, 0.1) 0%, transparent 50%),
-    linear-gradient(125deg, #040711 0%, #07101f 50%, #03050a 100%);
+    radial-gradient(ellipse at 50% 18%, rgba(34, 211, 238, 0.12) 0%, transparent 60%),
+    linear-gradient(180deg, #040711 0%, #07101f 25%, #040711 50%, #07101f 75%, #03050a 100%);
   color: #f6e7c1;
   overflow: clip;
 }
@@ -847,14 +846,18 @@
   left: 0;
   width: 100%;
   height: 100vh;
+  height: 100lvh;
   height: 100dvh;
   min-height: 100vh;
+  min-height: 100lvh;
   min-height: 100dvh;
   overflow: hidden;
+  -webkit-transform: translateZ(0);
+  transform: translateZ(0);
+  will-change: transform;
+  backface-visibility: hidden;
   background:
-    radial-gradient(ellipse at 50% 25%, rgba(34, 211, 238, 0.16) 0%, transparent 60%),
-    radial-gradient(ellipse at 80% 75%, rgba(6, 182, 212, 0.12) 0%, transparent 50%),
-    radial-gradient(ellipse at 20% 75%, rgba(14, 116, 144, 0.1) 0%, transparent 50%),
+    radial-gradient(ellipse at 50% 18%, rgba(34, 211, 238, 0.12) 0%, transparent 60%),
     linear-gradient(125deg, #040711 0%, #07101f 50%, #03050a 100%);
 }
 
@@ -1263,9 +1266,14 @@
 
   .showcase-sticky {
     height: 100vh;
+    height: 100lvh;
     height: 100dvh;
     min-height: 100vh;
+    min-height: 100lvh;
     min-height: 100dvh;
+    background:
+      radial-gradient(ellipse at 50% 18%, rgba(34, 211, 238, 0.10) 0%, transparent 60%),
+      linear-gradient(125deg, #040711 0%, #07101f 50%, #03050a 100%);
   }
 
   .showcase-footer {
@@ -1282,6 +1290,16 @@
   .progress {
     margin: 0 auto;
   }
+}
+
+/* Ensure background continues seamlessly below developer section */
+body:has(.dev-showcase-section) {
+  background-color: #03050a !important;
+}
+
+body:has(.dev-showcase-section) footer {
+  background: #03050a !important;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
 }
 
 @media (prefers-reduced-motion: reduce) {

@@ -635,7 +635,7 @@ export default function NewDeveloperSection() {
       // Balanced scroll ratio: on mobile, 1 natural thumb flick moves exactly 1 card
       const scrollMultiplier = cachedIsMobile ? 1.55 : 1.35;
       const scrollTrackDistance = maxTravel * scrollMultiplier;
-      const vh = window.innerHeight || document.documentElement.clientHeight || 800;
+      const vh = Math.max(window.innerHeight || 0, document.documentElement.clientHeight || 0, 800);
       section.style.height = `${vh + scrollTrackDistance}px`;
       cachedDistance = section.offsetHeight - vh;
 
